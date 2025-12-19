@@ -62,11 +62,11 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm text-secondary/70">
                 <Phone className="w-4 h-4 text-accent" />
-                +225 00 00 00 00
+                +229 01 52 40 14 70
               </li>
               <li className="flex items-start gap-3 text-sm text-secondary/70">
                 <MapPin className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
-                Abidjan, Côte d'Ivoire
+                Abomey-Calavi, Benin
               </li>
             </ul>
             <div className="flex gap-3 mt-4">
