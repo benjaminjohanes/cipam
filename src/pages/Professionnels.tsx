@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Search, Star, MapPin, Calendar, Filter, User } from "lucide-react";
+import { Search, Star, MapPin, Calendar, Filter, User, Banknote } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,14 @@ const specialties = [
   "Psychiatrie",
 ];
 
-// Demo data for testing filters when no real professionals exist
+const priceRanges = [
+  { label: "Tous les tarifs", value: "all", min: 0, max: Infinity },
+  { label: "Moins de 20 000 FCFA", value: "0-20000", min: 0, max: 20000 },
+  { label: "20 000 - 30 000 FCFA", value: "20000-30000", min: 20000, max: 30000 },
+  { label: "30 000 - 40 000 FCFA", value: "30000-40000", min: 30000, max: 40000 },
+  { label: "Plus de 40 000 FCFA", value: "40000+", min: 40000, max: Infinity },
+];
+
 const demoProfessionals: Professional[] = [
   {
     id: "demo-1",
@@ -113,6 +120,7 @@ const Professionnels = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("Tous");
   const [selectedLocation, setSelectedLocation] = useState("Toutes");
+  const [selectedPriceRange, setSelectedPriceRange] = useState("all");
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -168,7 +176,12 @@ const Professionnels = () => {
       (pro.location?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
     const matchesSpecialty = selectedSpecialty === "Tous" || pro.specialty === selectedSpecialty;
     const matchesLocation = selectedLocation === "Toutes" || pro.location === selectedLocation;
-    return matchesSearch && matchesSpecialty && matchesLocation;
+    
+    const selectedRange = priceRanges.find(r => r.value === selectedPriceRange);
+    const matchesPrice = !selectedRange || selectedPriceRange === "all" || 
+      (pro.consultation_rate && pro.consultation_rate >= selectedRange.min && pro.consultation_rate < selectedRange.max);
+    
+    return matchesSearch && matchesSpecialty && matchesLocation && matchesPrice;
   });
 
   return (
@@ -218,6 +231,19 @@ const Professionnels = () => {
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={selectedPriceRange} onValueChange={setSelectedPriceRange}>
+                  <SelectTrigger className="w-full md:w-[220px] h-12 bg-card">
+                    <Banknote className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <SelectValue placeholder="Tarif" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {priceRanges.map((range) => (
+                      <SelectItem key={range.value} value={range.value}>
+                        {range.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

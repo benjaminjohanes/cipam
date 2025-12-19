@@ -6,35 +6,35 @@ import { Link } from "react-router-dom";
 const professionals = [
   {
     id: 1,
-    name: "Dr. Marie Konan",
+    name: "Dr. Aminata Diallo",
     specialty: "Psychologie Clinique",
     experience: "15 ans",
     rating: 4.9,
-    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=face",
+    image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=400&fit=crop&crop=face",
   },
   {
     id: 2,
-    name: "Dr. Jean-Baptiste Kouassi",
+    name: "Dr. Emmanuel Kouassi",
     specialty: "Neuropsychologie",
     experience: "12 ans",
     rating: 4.8,
-    image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop&crop=face",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
   },
   {
     id: 3,
-    name: "Dr. Aminata Diallo",
+    name: "Dr. Fatou Mbaye",
     specialty: "Psychothérapie",
     experience: "10 ans",
     rating: 4.9,
-    image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&h=400&fit=crop&crop=face",
+    image: "https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=400&h=400&fit=crop&crop=face",
   },
   {
     id: 4,
-    name: "Dr. Paul Mensah",
+    name: "Dr. Ousmane Traoré",
     specialty: "Psychologie du Travail",
     experience: "8 ans",
     rating: 4.7,
-    image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&h=400&fit=crop&crop=face",
+    image: "https://images.unsplash.com/photo-1506634572416-48cdfe530110?w=400&h=400&fit=crop&crop=face",
   },
 ];
 
