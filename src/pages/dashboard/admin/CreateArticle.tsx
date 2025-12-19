@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
+import { ImageUpload } from "@/components/upload/ImageUpload";
 import { FileText, Save, Send, ArrowLeft } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -134,12 +135,11 @@ const CreateArticle = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image">Image de couverture (URL)</Label>
-              <Input
-                id="image"
+              <Label>Image de couverture</Label>
+              <ImageUpload
                 value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://exemple.com/image.jpg"
+                onChange={setImageUrl}
+                bucket="article-images"
               />
             </div>
 
