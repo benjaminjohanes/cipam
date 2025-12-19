@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Search, Star, MapPin, Calendar, Filter, User } from "lucide-react";
 import { Header } from "@/components/layout/Header";
@@ -9,6 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Professional {
   id: string;
@@ -35,6 +42,7 @@ const specialties = [
 const Professionnels = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("Tous");
+  const [selectedLocation, setSelectedLocation] = useState("Toutes");
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,12 +75,24 @@ const Professionnels = () => {
     fetchProfessionals();
   }, []);
 
+  // Extract unique locations from professionals
+  const locations = useMemo(() => {
+    const uniqueLocations = [...new Set(
+      professionals
+        .map(p => p.location)
+        .filter((loc): loc is string => !!loc)
+    )].sort();
+    return ["Toutes", ...uniqueLocations];
+  }, [professionals]);
+
   const filteredProfessionals = professionals.filter((pro) => {
     const matchesSearch = 
       (pro.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
-      (pro.specialty?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
+      (pro.specialty?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
+      (pro.location?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
     const matchesSpecialty = selectedSpecialty === "Tous" || pro.specialty === selectedSpecialty;
-    return matchesSearch && matchesSpecialty;
+    const matchesLocation = selectedLocation === "Toutes" || pro.location === selectedLocation;
+    return matchesSearch && matchesSpecialty && matchesLocation;
   });
 
   return (
@@ -102,32 +122,42 @@ const Professionnels = () => {
             transition={{ delay: 0.1 }}
             className="mt-10 max-w-4xl mx-auto"
           >
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  placeholder="Rechercher par nom ou spécialité..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12 bg-card"
-                />
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    placeholder="Rechercher par nom, spécialité ou localisation..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-12 h-12 bg-card"
+                  />
+                </div>
+                <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                  <SelectTrigger className="w-full md:w-[200px] h-12 bg-card">
+                    <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <SelectValue placeholder="Localisation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((location) => (
+                      <SelectItem key={location} value={location}>
+                        {location}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex gap-2 flex-wrap">
-                {specialties.slice(0, 4).map((specialty) => (
+                {specialties.map((specialty) => (
                   <Button
                     key={specialty}
                     variant={selectedSpecialty === specialty ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedSpecialty(specialty)}
-                    className="h-12"
                   >
                     {specialty}
                   </Button>
                 ))}
-                <Button variant="outline" size="sm" className="h-12">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Plus de filtres
-                </Button>
               </div>
             </div>
           </motion.div>
@@ -169,7 +199,7 @@ const Professionnels = () => {
                 Aucun professionnel trouvé
               </h3>
               <p className="text-muted-foreground">
-                {searchQuery || selectedSpecialty !== "Tous" 
+                {searchQuery || selectedSpecialty !== "Tous" || selectedLocation !== "Toutes"
                   ? "Essayez de modifier vos critères de recherche"
                   : "Aucun professionnel n'est encore inscrit sur la plateforme"}
               </p>
