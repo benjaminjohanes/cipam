@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Video, MapPin, Clock, Users, MessageCircle, Brain, Heart, ArrowRight } from "lucide-react";
+import { Calendar, Video, MapPin, Clock, Users, MessageCircle, Brain, Heart, ArrowRight, Search } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
+import { useCategories } from "@/hooks/useCategories";
 
 const services = [
   {
@@ -70,9 +73,21 @@ const services = [
 ];
 
 const Services = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Tous");
+  const { categories, loading: categoriesLoading } = useCategories('service');
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
   };
+
+  const categoryNames = ["Tous", ...categories.filter(c => c.is_active).map(c => c.name)];
+
+  const filteredServices = services.filter((service) => {
+    const matchesSearch = service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,14 +108,56 @@ const Services = () => {
               Des solutions adaptées à chaque besoin pour votre bien-être mental
             </p>
           </motion.div>
+
+          {/* Search & Filters */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mt-10 max-w-4xl mx-auto"
+          >
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher un service..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 h-12 bg-card"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 flex-wrap mt-4">
+              {categoriesLoading ? (
+                <div className="text-muted-foreground text-sm">Chargement des catégories...</div>
+              ) : (
+                categoryNames.map((category) => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category)}
+                  >
+                    {category}
+                  </Button>
+                ))
+              )}
+            </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Services Grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <p className="text-muted-foreground">
+              <span className="font-semibold text-foreground">{filteredServices.length}</span> services disponibles
+            </p>
+          </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
+            {filteredServices.map((service, index) => (
               <motion.div
                 key={service.id}
                 initial={{ opacity: 0, y: 30 }}
