@@ -39,6 +39,76 @@ const specialties = [
   "Psychiatrie",
 ];
 
+// Demo data for testing filters when no real professionals exist
+const demoProfessionals: Professional[] = [
+  {
+    id: "demo-1",
+    full_name: "Dr. Aminata Diallo",
+    specialty: "Psychologie Clinique",
+    experience_years: 12,
+    bio: "Spécialisée dans l'accompagnement des troubles anxieux et dépressifs. Approche intégrative combinant TCC et thérapie humaniste.",
+    avatar_url: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=face",
+    is_verified: true,
+    location: "Douala",
+    consultation_rate: 25000,
+  },
+  {
+    id: "demo-2",
+    full_name: "Dr. Emmanuel Kouassi",
+    specialty: "Neuropsychologie",
+    experience_years: 8,
+    bio: "Expert en évaluation neuropsychologique et rééducation cognitive. Travaille avec les patients souffrant de troubles neurologiques.",
+    avatar_url: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop&crop=face",
+    is_verified: true,
+    location: "Yaoundé",
+    consultation_rate: 30000,
+  },
+  {
+    id: "demo-3",
+    full_name: "Dr. Fatou Mbaye",
+    specialty: "Psychothérapie",
+    experience_years: 15,
+    bio: "Psychothérapeute certifiée en EMDR et thérapie systémique. Accompagnement des traumatismes et des difficultés relationnelles.",
+    avatar_url: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&h=400&fit=crop&crop=face",
+    is_verified: true,
+    location: "Douala",
+    consultation_rate: 35000,
+  },
+  {
+    id: "demo-4",
+    full_name: "Dr. Ousmane Traoré",
+    specialty: "Psychologie du Travail",
+    experience_years: 10,
+    bio: "Consultant en psychologie du travail. Spécialiste du burn-out, de la gestion du stress professionnel et du coaching de carrière.",
+    avatar_url: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&h=400&fit=crop&crop=face",
+    is_verified: false,
+    location: "Bafoussam",
+    consultation_rate: 20000,
+  },
+  {
+    id: "demo-5",
+    full_name: "Dr. Marie-Claire Ndiaye",
+    specialty: "Psychologie de l'Enfant",
+    experience_years: 7,
+    bio: "Spécialisée dans le développement de l'enfant et de l'adolescent. Prise en charge des troubles du comportement et des difficultés scolaires.",
+    avatar_url: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=400&fit=crop&crop=face",
+    is_verified: true,
+    location: "Yaoundé",
+    consultation_rate: 22000,
+  },
+  {
+    id: "demo-6",
+    full_name: "Dr. Jean-Baptiste Kamga",
+    specialty: "Psychiatrie",
+    experience_years: 20,
+    bio: "Psychiatre avec une longue expérience dans le traitement des troubles psychiatriques majeurs. Approche médicamenteuse et psychothérapeutique.",
+    avatar_url: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop&crop=face",
+    is_verified: true,
+    location: "Douala",
+    consultation_rate: 40000,
+  },
+];
+
 const Professionnels = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("Tous");
@@ -64,9 +134,15 @@ const Professionnels = () => {
           .select('*')
           .in('id', professionalIds);
 
-        if (profiles) {
+        if (profiles && profiles.length > 0) {
           setProfessionals(profiles);
+        } else {
+          // Use demo data if no real professionals
+          setProfessionals(demoProfessionals);
         }
+      } else {
+        // Use demo data if no professional roles exist
+        setProfessionals(demoProfessionals);
       }
       
       setLoading(false);
