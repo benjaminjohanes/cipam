@@ -1,93 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Star, MapPin, Calendar, Filter, ChevronDown } from "lucide-react";
+import { Search, Star, MapPin, Calendar, Filter, User } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const professionals = [
-  {
-    id: 1,
-    name: "Dr. Marie Konan",
-    specialty: "Psychologie Clinique",
-    subspecialties: ["Thérapie cognitive", "Gestion du stress"],
-    experience: "15 ans",
-    rating: 4.9,
-    reviews: 127,
-    location: "Abidjan, Cocody",
-    availability: "Disponible",
-    price: 25000,
-    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=face",
-  },
-  {
-    id: 2,
-    name: "Dr. Jean-Baptiste Kouassi",
-    specialty: "Neuropsychologie",
-    subspecialties: ["Bilans neuropsychologiques", "Réhabilitation cognitive"],
-    experience: "12 ans",
-    rating: 4.8,
-    reviews: 89,
-    location: "Abidjan, Plateau",
-    availability: "Disponible",
-    price: 30000,
-    image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop&crop=face",
-  },
-  {
-    id: 3,
-    name: "Dr. Aminata Diallo",
-    specialty: "Psychothérapie",
-    subspecialties: ["Thérapie de couple", "TCC"],
-    experience: "10 ans",
-    rating: 4.9,
-    reviews: 156,
-    location: "Abidjan, Marcory",
-    availability: "Disponible demain",
-    price: 20000,
-    image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&h=400&fit=crop&crop=face",
-  },
-  {
-    id: 4,
-    name: "Dr. Paul Mensah",
-    specialty: "Psychologie du Travail",
-    subspecialties: ["Burnout", "Coaching professionnel"],
-    experience: "8 ans",
-    rating: 4.7,
-    reviews: 72,
-    location: "Abidjan, Treichville",
-    availability: "Disponible",
-    price: 22000,
-    image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&h=400&fit=crop&crop=face",
-  },
-  {
-    id: 5,
-    name: "Dr. Fatou Traoré",
-    specialty: "Psychologie de l'Enfant",
-    subspecialties: ["Troubles de l'apprentissage", "TDAH"],
-    experience: "14 ans",
-    rating: 4.9,
-    reviews: 203,
-    location: "Abidjan, Riviera",
-    availability: "Disponible",
-    price: 25000,
-    image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=400&fit=crop&crop=face",
-  },
-  {
-    id: 6,
-    name: "Dr. Kouamé Yao",
-    specialty: "Psychiatrie",
-    subspecialties: ["Troubles anxieux", "Dépression"],
-    experience: "20 ans",
-    rating: 4.8,
-    reviews: 312,
-    location: "Abidjan, Plateau",
-    availability: "Disponible la semaine prochaine",
-    price: 35000,
-    image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&h=400&fit=crop&crop=face",
-  },
-];
+interface Professional {
+  id: string;
+  full_name: string | null;
+  specialty: string | null;
+  experience_years: number | null;
+  bio: string | null;
+  avatar_url: string | null;
+  is_verified: boolean | null;
+}
 
 const specialties = [
   "Tous",
@@ -102,17 +33,45 @@ const specialties = [
 const Professionnels = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("Tous");
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfessionals = async () => {
+      setLoading(true);
+      
+      // Fetch users with professional role
+      const { data: professionalRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'professional');
+
+      if (professionalRoles && professionalRoles.length > 0) {
+        const professionalIds = professionalRoles.map(r => r.user_id);
+        
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('id', professionalIds);
+
+        if (profiles) {
+          setProfessionals(profiles);
+        }
+      }
+      
+      setLoading(false);
+    };
+
+    fetchProfessionals();
+  }, []);
 
   const filteredProfessionals = professionals.filter((pro) => {
-    const matchesSearch = pro.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pro.specialty.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = 
+      (pro.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
+      (pro.specialty?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
     const matchesSpecialty = selectedSpecialty === "Tous" || pro.specialty === selectedSpecialty;
     return matchesSearch && matchesSpecialty;
   });
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -182,71 +141,104 @@ const Professionnels = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProfessionals.map((pro, index) => (
-              <motion.div
-                key={pro.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Link
-                  to={`/professionnels/${pro.id}`}
-                  className="block group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-medium transition-all duration-300"
-                >
-                  <div className="p-6">
-                    <div className="flex gap-4">
-                      <img
-                        src={pro.image}
-                        alt={pro.name}
-                        className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Star className="w-4 h-4 fill-cipam-gold text-cipam-gold" />
-                          <span className="text-sm font-medium">{pro.rating}</span>
-                          <span className="text-sm text-muted-foreground">({pro.reviews} avis)</span>
-                        </div>
-                        <h3 className="text-lg font-display font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                          {pro.name}
-                        </h3>
-                        <p className="text-primary text-sm font-medium">{pro.specialty}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {pro.subspecialties.map((sub) => (
-                        <Badge key={sub} variant="secondary" className="text-xs">
-                          {sub}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    <div className="mt-4 space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        {pro.location}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="w-4 h-4 text-green-500" />
-                        <span className="text-green-600">{pro.availability}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
-                      <div>
-                        <span className="text-lg font-bold text-primary">{formatPrice(pro.price)}</span>
-                        <span className="text-sm text-muted-foreground">/consultation</span>
-                      </div>
-                      <Button size="sm">
-                        Prendre RDV
-                      </Button>
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="bg-card rounded-2xl p-6">
+                  <div className="flex gap-4">
+                    <Skeleton className="w-20 h-20 rounded-xl" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-4 w-24" />
                     </div>
                   </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+                  <div className="mt-4 space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredProfessionals.length === 0 ? (
+            <div className="text-center py-16">
+              <User className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                Aucun professionnel trouvé
+              </h3>
+              <p className="text-muted-foreground">
+                {searchQuery || selectedSpecialty !== "Tous" 
+                  ? "Essayez de modifier vos critères de recherche"
+                  : "Aucun professionnel n'est encore inscrit sur la plateforme"}
+              </p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProfessionals.map((pro, index) => (
+                <motion.div
+                  key={pro.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Link
+                    to={`/professionnels/${pro.id}`}
+                    className="block group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-medium transition-all duration-300"
+                  >
+                    <div className="p-6">
+                      <div className="flex gap-4">
+                        {pro.avatar_url ? (
+                          <img
+                            src={pro.avatar_url}
+                            alt={pro.full_name || "Professionnel"}
+                            className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
+                            <User className="w-10 h-10 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          {pro.is_verified && (
+                            <Badge variant="secondary" className="mb-1 text-xs">
+                              Vérifié
+                            </Badge>
+                          )}
+                          <h3 className="text-lg font-display font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                            {pro.full_name || "Professionnel"}
+                          </h3>
+                          {pro.specialty && (
+                            <p className="text-primary text-sm font-medium">{pro.specialty}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {pro.bio && (
+                        <p className="mt-4 text-sm text-muted-foreground line-clamp-2">
+                          {pro.bio}
+                        </p>
+                      )}
+
+                      <div className="mt-4 space-y-2">
+                        {pro.experience_years && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Calendar className="w-4 h-4" />
+                            {pro.experience_years} ans d'expérience
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-end mt-6 pt-4 border-t border-border">
+                        <Button size="sm">
+                          Voir le profil
+                        </Button>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
