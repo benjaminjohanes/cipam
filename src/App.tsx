@@ -25,6 +25,7 @@ import AdminUpgradeRequests from "./pages/dashboard/admin/UpgradeRequests";
 import AllServices from "./pages/dashboard/admin/AllServices";
 import AllFormations from "./pages/dashboard/admin/AllFormations";
 import Reports from "./pages/dashboard/admin/Reports";
+import Categories from "./pages/dashboard/admin/Categories";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/dashboard/all-services" element={<AllServices />} />
             <Route path="/dashboard/all-formations" element={<AllFormations />} />
             <Route path="/dashboard/reports" element={<Reports />} />
+            <Route path="/dashboard/categories" element={<Categories />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
