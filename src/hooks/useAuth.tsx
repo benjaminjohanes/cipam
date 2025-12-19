@@ -15,6 +15,8 @@ interface Profile {
   specialty: string | null;
   experience_years: number | null;
   is_verified: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface AuthContextType {
