@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Search, Filter, Check, X, Eye, MoreVertical } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,101 +10,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-
-interface Service {
-  id: string;
-  title: string;
-  provider: string;
-  providerType: "student" | "professional";
-  category: string;
-  price: number;
-  status: "pending" | "approved" | "rejected";
-  submittedAt: string;
-  description: string;
-}
-
-const mockServices: Service[] = [
-  {
-    id: "1",
-    title: "Accompagnement scolaire en maths",
-    provider: "Lucas Martin",
-    providerType: "student",
-    category: "Soutien scolaire",
-    price: 25,
-    status: "pending",
-    submittedAt: "2024-01-15",
-    description: "Aide aux devoirs et préparation aux examens pour collégiens et lycéens.",
-  },
-  {
-    id: "2",
-    title: "Coaching en développement personnel",
-    provider: "Dr. Sophie Bernard",
-    providerType: "professional",
-    category: "Coaching",
-    price: 80,
-    status: "pending",
-    submittedAt: "2024-01-14",
-    description: "Accompagnement personnalisé pour atteindre vos objectifs de vie.",
-  },
-  {
-    id: "3",
-    title: "Cours de méditation",
-    provider: "Emma Petit",
-    providerType: "student",
-    category: "Bien-être",
-    price: 30,
-    status: "approved",
-    submittedAt: "2024-01-10",
-    description: "Initiation à la méditation pleine conscience.",
-  },
-];
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAdminServices } from "@/hooks/useAdminData";
 
 export default function AllServices() {
-  const [services, setServices] = useState<Service[]>(mockServices);
+  const { services, loading, updateServiceStatus } = useAdminServices();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedService, setSelectedService] = useState<any | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
 
   const filteredServices = services.filter(service => {
-    const matchesSearch = service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          service.provider.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = 
+      service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.provider?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || service.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const handleApprove = (id: string) => {
-    setServices(prev => prev.map(s => s.id === id ? { ...s, status: "approved" } : s));
-    toast.success("Service approuvé");
+  const handleApprove = async (id: string) => {
+    await updateServiceStatus(id, "approved");
     setIsDetailOpen(false);
   };
 
-  const handleReject = (id: string) => {
-    setServices(prev => prev.map(s => s.id === id ? { ...s, status: "rejected" } : s));
-    toast.success("Service refusé");
+  const handleReject = async (id: string) => {
+    await updateServiceStatus(id, "rejected");
     setIsDetailOpen(false);
     setRejectionReason("");
   };
 
-  const openDetail = (service: Service) => {
+  const openDetail = (service: any) => {
     setSelectedService(service);
     setIsDetailOpen(true);
   };
 
-  const getStatusBadge = (status: Service["status"]) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
-        return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Approuvé</Badge>;
+        return <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300">Approuvé</Badge>;
       case "rejected":
         return <Badge variant="destructive">Refusé</Badge>;
       case "pending":
-        return <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100">En attente</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-300">En attente</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
   const pendingCount = services.filter(s => s.status === "pending").length;
+  const approvedCount = services.filter(s => s.status === "approved").length;
+  const rejectedCount = services.filter(s => s.status === "rejected").length;
 
   return (
     <DashboardLayout title="Gestion des services" description="Validez les services proposés">
@@ -121,17 +76,13 @@ export default function AllServices() {
           <Card>
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">Approuvés</p>
-              <p className="text-2xl font-bold text-green-600">
-                {services.filter(s => s.status === "approved").length}
-              </p>
+              <p className="text-2xl font-bold text-green-600">{approvedCount}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">Refusés</p>
-              <p className="text-2xl font-bold text-red-600">
-                {services.filter(s => s.status === "rejected").length}
-              </p>
+              <p className="text-2xl font-bold text-red-600">{rejectedCount}</p>
             </CardContent>
           </Card>
         </div>
@@ -139,7 +90,7 @@ export default function AllServices() {
         {/* Filters */}
         <Card>
           <CardHeader>
-            <CardTitle>Tous les services</CardTitle>
+            <CardTitle>Tous les services ({filteredServices.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -166,68 +117,78 @@ export default function AllServices() {
               </Select>
             </div>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Prestataire</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Prix</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredServices.map((service) => (
-                  <TableRow key={service.id}>
-                    <TableCell className="font-medium">{service.title}</TableCell>
-                    <TableCell>
-                      <div>
-                        <p>{service.provider}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {service.providerType === "student" ? "Étudiant" : "Professionnel"}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>{service.category}</TableCell>
-                    <TableCell>{service.price}€</TableCell>
-                    <TableCell>{getStatusBadge(service.status)}</TableCell>
-                    <TableCell>{new Date(service.submittedAt).toLocaleDateString("fr-FR")}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openDetail(service)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Voir détails
-                          </DropdownMenuItem>
-                          {service.status === "pending" && (
-                            <>
-                              <DropdownMenuItem onClick={() => handleApprove(service.id)}>
-                                <Check className="h-4 w-4 mr-2" />
-                                Approuver
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-destructive"
-                                onClick={() => openDetail(service)}
-                              >
-                                <X className="h-4 w-4 mr-2" />
-                                Refuser
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
+            {loading ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            ) : filteredServices.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Aucun service trouvé
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Prestataire</TableHead>
+                    <TableHead>Catégorie</TableHead>
+                    <TableHead>Prix</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredServices.map((service) => (
+                    <TableRow key={service.id}>
+                      <TableCell className="font-medium">{service.title}</TableCell>
+                      <TableCell>
+                        <div>
+                          <p>{service.provider?.full_name || 'Inconnu'}</p>
+                          <p className="text-xs text-muted-foreground">{service.provider?.email}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{service.category?.name || '-'}</TableCell>
+                      <TableCell>{service.price}€</TableCell>
+                      <TableCell>{getStatusBadge(service.status)}</TableCell>
+                      <TableCell>{new Date(service.created_at).toLocaleDateString("fr-FR")}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openDetail(service)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              Voir détails
+                            </DropdownMenuItem>
+                            {service.status === "pending" && (
+                              <>
+                                <DropdownMenuItem onClick={() => handleApprove(service.id)}>
+                                  <Check className="h-4 w-4 mr-2" />
+                                  Approuver
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={() => openDetail(service)}
+                                >
+                                  <X className="h-4 w-4 mr-2" />
+                                  Refuser
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
 
@@ -239,18 +200,18 @@ export default function AllServices() {
                 <DialogHeader>
                   <DialogTitle>{selectedService.title}</DialogTitle>
                   <DialogDescription>
-                    Proposé par {selectedService.provider}
+                    Proposé par {selectedService.provider?.full_name || 'Inconnu'}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div>
                     <p className="text-sm font-medium mb-1">Description</p>
-                    <p className="text-sm text-muted-foreground">{selectedService.description}</p>
+                    <p className="text-sm text-muted-foreground">{selectedService.description || 'Aucune description'}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium mb-1">Catégorie</p>
-                      <p className="text-sm text-muted-foreground">{selectedService.category}</p>
+                      <p className="text-sm text-muted-foreground">{selectedService.category?.name || '-'}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium mb-1">Prix</p>

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Search, Filter, Check, X, Eye, MoreVertical, BookOpen } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,105 +10,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-
-interface Formation {
-  id: string;
-  title: string;
-  author: string;
-  category: string;
-  level: string;
-  price: number;
-  modules: number;
-  status: "pending" | "approved" | "rejected";
-  submittedAt: string;
-  description: string;
-}
-
-const mockFormations: Formation[] = [
-  {
-    id: "1",
-    title: "Gestion du stress au quotidien",
-    author: "Dr. Marie Dupont",
-    category: "Bien-être",
-    level: "Débutant",
-    price: 49,
-    modules: 6,
-    status: "pending",
-    submittedAt: "2024-01-15",
-    description: "Apprenez à gérer votre stress avec des techniques pratiques et scientifiquement prouvées.",
-  },
-  {
-    id: "2",
-    title: "Introduction à la TCC",
-    author: "Dr. Jean Martin",
-    category: "Thérapie",
-    level: "Intermédiaire",
-    price: 89,
-    modules: 8,
-    status: "pending",
-    submittedAt: "2024-01-14",
-    description: "Découvrez les fondamentaux de la thérapie cognitivo-comportementale.",
-  },
-  {
-    id: "3",
-    title: "Méditation pour débutants",
-    author: "Sophie Bernard",
-    category: "Méditation",
-    level: "Débutant",
-    price: 0,
-    modules: 4,
-    status: "approved",
-    submittedAt: "2024-01-10",
-    description: "Un guide complet pour commencer la méditation.",
-  },
-];
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAdminFormations } from "@/hooks/useAdminData";
 
 export default function AllFormations() {
-  const [formations, setFormations] = useState<Formation[]>(mockFormations);
+  const { formations, loading, updateFormationStatus } = useAdminFormations();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedFormation, setSelectedFormation] = useState<Formation | null>(null);
+  const [selectedFormation, setSelectedFormation] = useState<any | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
 
   const filteredFormations = formations.filter(formation => {
-    const matchesSearch = formation.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          formation.author.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = 
+      formation.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      formation.author?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || formation.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const handleApprove = (id: string) => {
-    setFormations(prev => prev.map(f => f.id === id ? { ...f, status: "approved" } : f));
-    toast.success("Formation approuvée et publiée");
+  const handleApprove = async (id: string) => {
+    await updateFormationStatus(id, "approved");
     setIsDetailOpen(false);
   };
 
-  const handleReject = (id: string) => {
-    setFormations(prev => prev.map(f => f.id === id ? { ...f, status: "rejected" } : f));
-    toast.success("Formation refusée");
+  const handleReject = async (id: string) => {
+    await updateFormationStatus(id, "rejected");
     setIsDetailOpen(false);
     setRejectionReason("");
   };
 
-  const openDetail = (formation: Formation) => {
+  const openDetail = (formation: any) => {
     setSelectedFormation(formation);
     setIsDetailOpen(true);
   };
 
-  const getStatusBadge = (status: Formation["status"]) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
-        return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Publiée</Badge>;
+        return <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300">Publiée</Badge>;
       case "rejected":
         return <Badge variant="destructive">Refusée</Badge>;
       case "pending":
-        return <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100">En attente</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-300">En attente</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
   const pendingCount = formations.filter(f => f.status === "pending").length;
+  const approvedCount = formations.filter(f => f.status === "approved").length;
+  const rejectedCount = formations.filter(f => f.status === "rejected").length;
 
   return (
     <DashboardLayout title="Gestion des formations" description="Validez les formations soumises">
@@ -125,17 +76,13 @@ export default function AllFormations() {
           <Card>
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">Publiées</p>
-              <p className="text-2xl font-bold text-green-600">
-                {formations.filter(f => f.status === "approved").length}
-              </p>
+              <p className="text-2xl font-bold text-green-600">{approvedCount}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">Refusées</p>
-              <p className="text-2xl font-bold text-red-600">
-                {formations.filter(f => f.status === "rejected").length}
-              </p>
+              <p className="text-2xl font-bold text-red-600">{rejectedCount}</p>
             </CardContent>
           </Card>
         </div>
@@ -143,7 +90,7 @@ export default function AllFormations() {
         {/* Filters */}
         <Card>
           <CardHeader>
-            <CardTitle>Toutes les formations</CardTitle>
+            <CardTitle>Toutes les formations ({filteredFormations.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -170,63 +117,78 @@ export default function AllFormations() {
               </Select>
             </div>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Formation</TableHead>
-                  <TableHead>Auteur</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Niveau</TableHead>
-                  <TableHead>Prix</TableHead>
-                  <TableHead>Modules</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredFormations.map((formation) => (
-                  <TableRow key={formation.id}>
-                    <TableCell className="font-medium">{formation.title}</TableCell>
-                    <TableCell>{formation.author}</TableCell>
-                    <TableCell>{formation.category}</TableCell>
-                    <TableCell>{formation.level}</TableCell>
-                    <TableCell>{formation.price === 0 ? "Gratuit" : `${formation.price}€`}</TableCell>
-                    <TableCell>{formation.modules}</TableCell>
-                    <TableCell>{getStatusBadge(formation.status)}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openDetail(formation)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Voir détails
-                          </DropdownMenuItem>
-                          {formation.status === "pending" && (
-                            <>
-                              <DropdownMenuItem onClick={() => handleApprove(formation.id)}>
-                                <Check className="h-4 w-4 mr-2" />
-                                Approuver
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-destructive"
-                                onClick={() => openDetail(formation)}
-                              >
-                                <X className="h-4 w-4 mr-2" />
-                                Refuser
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
+            {loading ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            ) : filteredFormations.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Aucune formation trouvée
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Formation</TableHead>
+                    <TableHead>Auteur</TableHead>
+                    <TableHead>Catégorie</TableHead>
+                    <TableHead>Niveau</TableHead>
+                    <TableHead>Prix</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredFormations.map((formation) => (
+                    <TableRow key={formation.id}>
+                      <TableCell className="font-medium">{formation.title}</TableCell>
+                      <TableCell>
+                        <div>
+                          <p>{formation.author?.full_name || 'Inconnu'}</p>
+                          <p className="text-xs text-muted-foreground">{formation.author?.email}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{formation.category?.name || '-'}</TableCell>
+                      <TableCell>{formation.level}</TableCell>
+                      <TableCell>{formation.price === 0 ? "Gratuit" : `${formation.price}€`}</TableCell>
+                      <TableCell>{getStatusBadge(formation.status)}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openDetail(formation)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              Voir détails
+                            </DropdownMenuItem>
+                            {formation.status === "pending" && (
+                              <>
+                                <DropdownMenuItem onClick={() => handleApprove(formation.id)}>
+                                  <Check className="h-4 w-4 mr-2" />
+                                  Approuver
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={() => openDetail(formation)}
+                                >
+                                  <X className="h-4 w-4 mr-2" />
+                                  Refuser
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
 
@@ -241,18 +203,18 @@ export default function AllFormations() {
                     {selectedFormation.title}
                   </DialogTitle>
                   <DialogDescription>
-                    Par {selectedFormation.author}
+                    Par {selectedFormation.author?.full_name || 'Inconnu'}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div>
                     <p className="text-sm font-medium mb-1">Description</p>
-                    <p className="text-sm text-muted-foreground">{selectedFormation.description}</p>
+                    <p className="text-sm text-muted-foreground">{selectedFormation.description || 'Aucune description'}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium mb-1">Catégorie</p>
-                      <p className="text-sm text-muted-foreground">{selectedFormation.category}</p>
+                      <p className="text-sm text-muted-foreground">{selectedFormation.category?.name || '-'}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium mb-1">Niveau</p>
@@ -266,7 +228,7 @@ export default function AllFormations() {
                     </div>
                     <div>
                       <p className="text-sm font-medium mb-1">Modules</p>
-                      <p className="text-sm text-muted-foreground">{selectedFormation.modules} modules</p>
+                      <p className="text-sm text-muted-foreground">{selectedFormation.modules_count || 0} modules</p>
                     </div>
                   </div>
                   
