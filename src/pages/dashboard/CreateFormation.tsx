@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookOpen, Plus, Trash2, GripVertical, Upload, Save, Eye } from "lucide-react";
+import { BookOpen, Plus, Trash2, GripVertical, Upload, Save, Eye, Loader2 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useCategories } from "@/hooks/useCategories";
+import { useFormations } from "@/hooks/useFormations";
 
 interface Module {
   id: string;
@@ -21,11 +24,16 @@ interface Module {
 }
 
 export default function CreateFormation() {
+  const navigate = useNavigate();
+  const { categories, loading: categoriesLoading } = useCategories('formation');
+  const { addFormation } = useFormations(true);
+  const [submitting, setSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "",
-    level: "",
+    category_id: "",
+    level: "débutant",
     price: "",
     isFree: false,
     thumbnail: "",
@@ -54,12 +62,61 @@ export default function CreateFormation() {
     ));
   };
 
-  const handleSaveDraft = () => {
-    toast.success("Brouillon enregistré");
+  const calculateTotalDuration = () => {
+    const totalMinutes = modules.reduce((acc, m) => acc + m.duration, 0);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return hours > 0 ? `${hours}h${minutes > 0 ? minutes : ''}` : `${minutes}min`;
   };
 
-  const handlePublish = () => {
-    toast.success("Formation soumise pour validation");
+  const handleSaveDraft = async () => {
+    if (!formData.title.trim()) {
+      toast.error("Le titre est requis");
+      return;
+    }
+
+    setSubmitting(true);
+    const result = await addFormation({
+      title: formData.title,
+      description: formData.description || undefined,
+      category_id: formData.category_id || undefined,
+      level: formData.level,
+      price: formData.isFree ? 0 : Number(formData.price) || 0,
+      duration: calculateTotalDuration(),
+      modules_count: modules.filter(m => m.title.trim()).length,
+      image_url: formData.thumbnail || undefined,
+    });
+    setSubmitting(false);
+
+    if (result) {
+      toast.success("Formation créée avec succès");
+      navigate("/dashboard/my-formations");
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!formData.title.trim()) {
+      toast.error("Le titre est requis");
+      return;
+    }
+
+    setSubmitting(true);
+    const result = await addFormation({
+      title: formData.title,
+      description: formData.description || undefined,
+      category_id: formData.category_id || undefined,
+      level: formData.level,
+      price: formData.isFree ? 0 : Number(formData.price) || 0,
+      duration: calculateTotalDuration(),
+      modules_count: modules.filter(m => m.title.trim()).length,
+      image_url: formData.thumbnail || undefined,
+    });
+    setSubmitting(false);
+
+    if (result) {
+      toast.success("Formation soumise pour validation");
+      navigate("/dashboard/my-formations");
+    }
   };
 
   return (
@@ -79,7 +136,7 @@ export default function CreateFormation() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Titre de la formation</Label>
+                <Label htmlFor="title">Titre de la formation *</Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -102,16 +159,20 @@ export default function CreateFormation() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="category">Catégorie</Label>
-                  <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}>
+                  <Select 
+                    value={formData.category_id} 
+                    onValueChange={(v) => setFormData(prev => ({ ...prev, category_id: v }))}
+                    disabled={categoriesLoading}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionnez" />
+                      <SelectValue placeholder={categoriesLoading ? "Chargement..." : "Sélectionnez"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="stress">Gestion du stress</SelectItem>
-                      <SelectItem value="meditation">Méditation</SelectItem>
-                      <SelectItem value="relationships">Relations</SelectItem>
-                      <SelectItem value="personal-dev">Développement personnel</SelectItem>
-                      <SelectItem value="therapy">Techniques thérapeutiques</SelectItem>
+                      {categories.filter(c => c.is_active).map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -123,9 +184,9 @@ export default function CreateFormation() {
                       <SelectValue placeholder="Sélectionnez" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="beginner">Débutant</SelectItem>
-                      <SelectItem value="intermediate">Intermédiaire</SelectItem>
-                      <SelectItem value="advanced">Avancé</SelectItem>
+                      <SelectItem value="débutant">Débutant</SelectItem>
+                      <SelectItem value="intermédiaire">Intermédiaire</SelectItem>
+                      <SelectItem value="avancé">Avancé</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -289,7 +350,9 @@ export default function CreateFormation() {
                     {formData.isFree ? "Gratuit" : `${formData.price || "0"}€`}
                   </span>
                   <span className="text-muted-foreground">•</span>
-                  <span className="text-muted-foreground">{modules.length} module(s)</span>
+                  <span className="text-muted-foreground">{modules.filter(m => m.title.trim()).length} module(s)</span>
+                  <span className="text-muted-foreground">•</span>
+                  <span className="text-muted-foreground">{calculateTotalDuration()}</span>
                 </div>
 
                 <div className="space-y-2">
@@ -311,11 +374,12 @@ export default function CreateFormation() {
       </Tabs>
 
       <div className="flex justify-end gap-3 mt-6">
-        <Button variant="outline" onClick={handleSaveDraft}>
-          <Save className="h-4 w-4 mr-2" />
+        <Button variant="outline" onClick={handleSaveDraft} disabled={submitting}>
+          {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
           Enregistrer le brouillon
         </Button>
-        <Button onClick={handlePublish}>
+        <Button onClick={handlePublish} disabled={submitting}>
+          {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Soumettre pour validation
         </Button>
       </div>
