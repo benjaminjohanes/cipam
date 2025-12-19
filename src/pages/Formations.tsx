@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { useCategories } from "@/hooks/useCategories";
 
 const formations = [
   {
@@ -101,11 +102,10 @@ const formations = [
   },
 ];
 
-const categories = ["Tous", "Développement Personnel", "Formation Professionnelle", "Relations", "Spécialisation", "Bien-être au Travail"];
-
 const Formations = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
+  const { categories, loading: categoriesLoading } = useCategories('formation');
 
   const filteredFormations = formations.filter((formation) => {
     const matchesSearch = formation.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -117,6 +117,8 @@ const Formations = () => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
   };
+
+  const categoryNames = ["Tous", ...categories.filter(c => c.is_active).map(c => c.name)];
 
   return (
     <div className="min-h-screen bg-background">
@@ -157,16 +159,20 @@ const Formations = () => {
               </div>
             </div>
             <div className="flex gap-2 flex-wrap mt-4">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category}
-                </Button>
-              ))}
+              {categoriesLoading ? (
+                <div className="text-muted-foreground text-sm">Chargement des catégories...</div>
+              ) : (
+                categoryNames.map((category) => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category)}
+                  >
+                    {category}
+                  </Button>
+                ))
+              )}
             </div>
           </motion.div>
         </div>
