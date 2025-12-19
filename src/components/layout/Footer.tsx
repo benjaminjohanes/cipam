@@ -17,7 +17,8 @@ export function Footer() {
               </div>
             </div>
             <p className="text-secondary/80 text-sm leading-relaxed">
-              Centre International de Psychologie Appliquée Multidisciplinaire - Votre partenaire pour le bien-être mental.
+              Centre International de Psychologie Appliquée Multidisciplinaire - Votre partenaire pour le bien-être
+              mental.
             </p>
           </div>
 
@@ -32,10 +33,7 @@ export function Footer() {
                 { label: "Articles", href: "/articles" },
               ].map((link) => (
                 <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-secondary/70 hover:text-secondary transition-colors text-sm"
-                  >
+                  <Link to={link.href} className="text-secondary/70 hover:text-secondary transition-colors text-sm">
                     {link.label}
                   </Link>
                 </li>
@@ -64,11 +62,11 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm text-secondary/70">
                 <Phone className="w-4 h-4 text-accent" />
-                +225 00 00 00 00
+                +225 01 52 40 14 70
               </li>
               <li className="flex items-start gap-3 text-sm text-secondary/70">
                 <MapPin className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
-                Abidjan, Côte d'Ivoire
+                Abomey-Calavi, Benin
               </li>
             </ul>
             <div className="flex gap-3 mt-4">
@@ -86,7 +84,10 @@ export function Footer() {
         </div>
 
         <div className="border-t border-secondary/10 mt-12 pt-8 text-center text-sm text-secondary/60">
-          <p>© {new Date().getFullYear()} CIPAM - Centre International de Psychologie Appliquée Multidisciplinaire. Tous droits réservés.</p>
+          <p>
+            © {new Date().getFullYear()} CIPAM - Centre International de Psychologie Appliquée Multidisciplinaire. Tous
+            droits réservés.
+          </p>
         </div>
       </div>
     </footer>
