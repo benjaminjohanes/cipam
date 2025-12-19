@@ -1,0 +1,324 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { BookOpen, Plus, Trash2, GripVertical, Upload, Save, Eye } from "lucide-react";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+
+interface Module {
+  id: string;
+  title: string;
+  description: string;
+  duration: number;
+  content: string;
+}
+
+export default function CreateFormation() {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    category: "",
+    level: "",
+    price: "",
+    isFree: false,
+    thumbnail: "",
+  });
+
+  const [modules, setModules] = useState<Module[]>([
+    { id: "1", title: "", description: "", duration: 30, content: "" },
+  ]);
+
+  const addModule = () => {
+    setModules(prev => [
+      ...prev,
+      { id: Date.now().toString(), title: "", description: "", duration: 30, content: "" },
+    ]);
+  };
+
+  const removeModule = (id: string) => {
+    if (modules.length > 1) {
+      setModules(prev => prev.filter(m => m.id !== id));
+    }
+  };
+
+  const updateModule = (id: string, field: keyof Module, value: string | number) => {
+    setModules(prev => prev.map(m => 
+      m.id === id ? { ...m, [field]: value } : m
+    ));
+  };
+
+  const handleSaveDraft = () => {
+    toast.success("Brouillon enregistré");
+  };
+
+  const handlePublish = () => {
+    toast.success("Formation soumise pour validation");
+  };
+
+  return (
+    <DashboardLayout title="Créer une formation" description="Partagez vos connaissances avec la communauté">
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="general">Informations générales</TabsTrigger>
+          <TabsTrigger value="modules">Modules</TabsTrigger>
+          <TabsTrigger value="preview">Aperçu</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Informations de base</CardTitle>
+              <CardDescription>Décrivez votre formation</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Titre de la formation</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Ex: Gestion du stress au quotidien"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Décrivez le contenu et les objectifs de votre formation..."
+                  rows={4}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category">Catégorie</Label>
+                  <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="stress">Gestion du stress</SelectItem>
+                      <SelectItem value="meditation">Méditation</SelectItem>
+                      <SelectItem value="relationships">Relations</SelectItem>
+                      <SelectItem value="personal-dev">Développement personnel</SelectItem>
+                      <SelectItem value="therapy">Techniques thérapeutiques</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="level">Niveau</Label>
+                  <Select value={formData.level} onValueChange={(v) => setFormData(prev => ({ ...prev, level: v }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Débutant</SelectItem>
+                      <SelectItem value="intermediate">Intermédiaire</SelectItem>
+                      <SelectItem value="advanced">Avancé</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Image de couverture</Label>
+                <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                  <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">Cliquez pour télécharger une image</p>
+                  <p className="text-xs text-muted-foreground mt-1">PNG, JPG jusqu'à 5MB</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Tarification</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="free"
+                  checked={formData.isFree}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFree: checked }))}
+                />
+                <Label htmlFor="free">Formation gratuite</Label>
+              </div>
+
+              {!formData.isFree && (
+                <div className="space-y-2">
+                  <Label htmlFor="price">Prix (€)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                    placeholder="49"
+                    className="w-32"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="modules" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Modules de la formation</CardTitle>
+                  <CardDescription>Organisez le contenu en modules</CardDescription>
+                </div>
+                <Button onClick={addModule}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter un module
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {modules.map((module, index) => (
+                <motion.div
+                  key={module.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="border rounded-lg p-4"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="cursor-move text-muted-foreground">
+                      <GripVertical className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium">Module {index + 1}</h4>
+                        {modules.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => removeModule(module.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="grid gap-4">
+                        <div className="space-y-2">
+                          <Label>Titre du module</Label>
+                          <Input
+                            value={module.title}
+                            onChange={(e) => updateModule(module.id, "title", e.target.value)}
+                            placeholder="Ex: Introduction à la gestion du stress"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Description</Label>
+                          <Textarea
+                            value={module.description}
+                            onChange={(e) => updateModule(module.id, "description", e.target.value)}
+                            placeholder="Décrivez ce que les participants apprendront..."
+                            rows={2}
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Durée estimée (min)</Label>
+                            <Input
+                              type="number"
+                              value={module.duration}
+                              onChange={(e) => updateModule(module.id, "duration", Number(e.target.value))}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Contenu du module</Label>
+                          <Textarea
+                            value={module.content}
+                            onChange={(e) => updateModule(module.id, "content", e.target.value)}
+                            placeholder="Rédigez le contenu détaillé du module..."
+                            rows={6}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="preview">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Aperçu de la formation
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+                  <BookOpen className="h-12 w-12 text-muted-foreground" />
+                </div>
+
+                <div>
+                  <h2 className="text-2xl font-bold">{formData.title || "Titre de la formation"}</h2>
+                  <p className="text-muted-foreground mt-2">
+                    {formData.description || "Description de la formation..."}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <span className="text-2xl font-bold text-primary">
+                    {formData.isFree ? "Gratuit" : `${formData.price || "0"}€`}
+                  </span>
+                  <span className="text-muted-foreground">•</span>
+                  <span className="text-muted-foreground">{modules.length} module(s)</span>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="font-semibold">Programme</h3>
+                  {modules.map((module, index) => (
+                    <div key={module.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-sm flex items-center justify-center">
+                        {index + 1}
+                      </span>
+                      <span>{module.title || `Module ${index + 1}`}</span>
+                      <span className="text-sm text-muted-foreground ml-auto">{module.duration} min</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <div className="flex justify-end gap-3 mt-6">
+        <Button variant="outline" onClick={handleSaveDraft}>
+          <Save className="h-4 w-4 mr-2" />
+          Enregistrer le brouillon
+        </Button>
+        <Button onClick={handlePublish}>
+          Soumettre pour validation
+        </Button>
+      </div>
+    </DashboardLayout>
+  );
+}
