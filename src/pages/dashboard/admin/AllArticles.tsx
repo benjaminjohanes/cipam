@@ -1,14 +1,16 @@
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Eye, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { FileText, Trash2, CheckCircle, XCircle, Plus } from "lucide-react";
 import { useArticles } from "@/hooks/useArticles";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 const AllArticles = () => {
+  const navigate = useNavigate();
   const { articles, isLoading, updateArticleStatus, deleteArticle } = useArticles();
 
   const getStatusBadge = (status: string) => {
@@ -28,10 +30,16 @@ const AllArticles = () => {
     <DashboardLayout title="Articles" description="Gestion des articles de la plateforme">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Tous les articles ({articles?.length || 0})
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Tous les articles ({articles?.length || 0})
+            </CardTitle>
+            <Button onClick={() => navigate("/dashboard/create-article")}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nouvel article
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
