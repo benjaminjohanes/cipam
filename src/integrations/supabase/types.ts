@@ -250,40 +250,49 @@ export type Database = {
       }
       profiles: {
         Row: {
+          availability: string | null
           avatar_url: string | null
           bio: string | null
+          consultation_rate: number | null
           created_at: string | null
           email: string
           experience_years: number | null
           full_name: string | null
           id: string
           is_verified: boolean | null
+          location: string | null
           phone: string | null
           specialty: string | null
           updated_at: string | null
         }
         Insert: {
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
+          consultation_rate?: number | null
           created_at?: string | null
           email: string
           experience_years?: number | null
           full_name?: string | null
           id: string
           is_verified?: boolean | null
+          location?: string | null
           phone?: string | null
           specialty?: string | null
           updated_at?: string | null
         }
         Update: {
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
+          consultation_rate?: number | null
           created_at?: string | null
           email?: string
           experience_years?: number | null
           full_name?: string | null
           id?: string
           is_verified?: boolean | null
+          location?: string | null
           phone?: string | null
           specialty?: string | null
           updated_at?: string | null

@@ -33,6 +33,9 @@ interface Professional {
   is_verified: boolean | null;
   experience_years: number | null;
   created_at: string | null;
+  location: string | null;
+  consultation_rate: number | null;
+  availability: string | null;
 }
 
 const ProfessionalDetail = () => {
@@ -165,6 +168,12 @@ const ProfessionalDetail = () => {
                           <span>{professional.experience_years} ans d'expérience</span>
                         </div>
                       )}
+                      {professional.location && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>{professional.location}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
                         <span>Membre depuis {new Date(professional.created_at || '').getFullYear()}</span>
@@ -226,10 +235,24 @@ const ProfessionalDetail = () => {
                     <CardTitle className="text-lg font-display">Prendre rendez-vous</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center gap-2 text-green-600">
-                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                      <span className="text-sm font-medium">Disponible</span>
-                    </div>
+                    {professional.consultation_rate && professional.consultation_rate > 0 && (
+                      <div className="text-center p-3 bg-primary/10 rounded-lg">
+                        <p className="text-2xl font-bold text-primary">
+                          {formatPrice(professional.consultation_rate)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">par consultation</p>
+                      </div>
+                    )}
+                    
+                    {professional.availability && (
+                      <div className="flex items-start gap-2">
+                        <Clock className="w-4 h-4 mt-0.5 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Disponibilités</p>
+                          <p className="text-sm text-muted-foreground">{professional.availability}</p>
+                        </div>
+                      </div>
+                    )}
                     
                     <Separator />
                     

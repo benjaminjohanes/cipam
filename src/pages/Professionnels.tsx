@@ -18,6 +18,8 @@ interface Professional {
   bio: string | null;
   avatar_url: string | null;
   is_verified: boolean | null;
+  location: string | null;
+  consultation_rate: number | null;
 }
 
 const specialties = [
@@ -220,10 +222,21 @@ const Professionnels = () => {
                       )}
 
                       <div className="mt-4 space-y-2">
+                        {pro.location && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <MapPin className="w-4 h-4" />
+                            {pro.location}
+                          </div>
+                        )}
                         {pro.experience_years && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="w-4 h-4" />
                             {pro.experience_years} ans d'expérience
+                          </div>
+                        )}
+                        {pro.consultation_rate && pro.consultation_rate > 0 && (
+                          <div className="text-sm font-semibold text-primary">
+                            {new Intl.NumberFormat('fr-FR').format(pro.consultation_rate)} FCFA / consultation
                           </div>
                         )}
                       </div>
