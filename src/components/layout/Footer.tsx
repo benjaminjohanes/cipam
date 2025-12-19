@@ -58,15 +58,15 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-3 text-sm text-secondary/70">
                 <Mail className="w-4 h-4 text-accent" />
-                contact@cipam.org
+                cipam.global.contact@gmail.com
               </li>
               <li className="flex items-center gap-3 text-sm text-secondary/70">
                 <Phone className="w-4 h-4 text-accent" />
-                +225 01 52 40 14 70
+                +225 00 00 00 00
               </li>
               <li className="flex items-start gap-3 text-sm text-secondary/70">
                 <MapPin className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
-                Abomey-Calavi, Benin
+                Abidjan, Côte d'Ivoire
               </li>
             </ul>
             <div className="flex gap-3 mt-4">
