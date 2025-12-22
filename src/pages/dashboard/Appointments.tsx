@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User, Video, MapPin, MoreVertical, Loader2 } from "lucide-react";
+import { Calendar, Clock, User, Video, MapPin, MoreVertical, Loader2, Check, X, CheckCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -22,11 +22,21 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useUserAppointments, UserAppointment } from "@/hooks/useUserAppointments";
+import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 export default function Appointments() {
-  const { upcomingAppointments, pastAppointments, isLoading, cancelAppointment } = useUserAppointments("patient");
+  const { role } = useAuth();
+  const isProfessional = role === "professional" || role === "admin";
+  
+  const { 
+    upcomingAppointments, 
+    pastAppointments, 
+    isLoading, 
+    cancelAppointment,
+    updateStatus 
+  } = useUserAppointments(isProfessional ? "professional" : "patient");
 
   if (isLoading) {
     return (
@@ -38,35 +48,91 @@ export default function Appointments() {
     );
   }
 
+  const pendingAppointments = upcomingAppointments.filter(a => a.status === "pending");
+  const confirmedAppointments = upcomingAppointments.filter(a => a.status === "confirmed");
+
   return (
-    <DashboardLayout title="Mes rendez-vous" description="Gérez vos consultations">
-      <Tabs defaultValue="upcoming" className="space-y-6">
+    <DashboardLayout 
+      title={isProfessional ? "Gestion des rendez-vous" : "Mes rendez-vous"} 
+      description={isProfessional ? "Gérez les rendez-vous de vos patients" : "Gérez vos consultations"}
+    >
+      <Tabs defaultValue={isProfessional && pendingAppointments.length > 0 ? "pending" : "upcoming"} className="space-y-6">
         <TabsList>
-          <TabsTrigger value="upcoming">À venir ({upcomingAppointments.length})</TabsTrigger>
+          {isProfessional && (
+            <TabsTrigger value="pending" className="relative">
+              En attente
+              {pendingAppointments.length > 0 && (
+                <span className="ml-2 bg-yellow-500 text-white text-xs rounded-full px-2 py-0.5">
+                  {pendingAppointments.length}
+                </span>
+              )}
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="upcoming">
+            {isProfessional ? "Confirmés" : "À venir"} ({isProfessional ? confirmedAppointments.length : upcomingAppointments.length})
+          </TabsTrigger>
           <TabsTrigger value="past">Historique ({pastAppointments.length})</TabsTrigger>
         </TabsList>
 
+        {isProfessional && (
+          <TabsContent value="pending">
+            <div className="space-y-4">
+              {pendingAppointments.length > 0 ? (
+                pendingAppointments.map((apt) => (
+                  <AppointmentCard 
+                    key={apt.id} 
+                    appointment={apt} 
+                    showActions 
+                    isProfessional
+                    onConfirm={() => updateStatus.mutate({ id: apt.id, status: "confirmed" })}
+                    onReject={() => updateStatus.mutate({ id: apt.id, status: "cancelled" })}
+                    displayType="patient"
+                  />
+                ))
+              ) : (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-lg font-medium text-foreground">Aucune demande en attente</p>
+                    <p className="text-muted-foreground">Vous n'avez pas de nouvelles demandes de rendez-vous</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+        )}
+
         <TabsContent value="upcoming">
           <div className="space-y-4">
-            {upcomingAppointments.length > 0 ? (
-              upcomingAppointments.map((apt) => (
+            {(isProfessional ? confirmedAppointments : upcomingAppointments).length > 0 ? (
+              (isProfessional ? confirmedAppointments : upcomingAppointments).map((apt) => (
                 <AppointmentCard 
                   key={apt.id} 
                   appointment={apt} 
                   showActions 
+                  isProfessional={isProfessional}
                   onCancel={() => cancelAppointment.mutate(apt.id)}
-                  displayType="professional"
+                  onComplete={() => updateStatus.mutate({ id: apt.id, status: "completed" })}
+                  displayType={isProfessional ? "patient" : "professional"}
                 />
               ))
             ) : (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-lg font-medium text-foreground">Aucun rendez-vous à venir</p>
-                  <p className="text-muted-foreground mb-4">Prenez rendez-vous avec un professionnel</p>
-                  <Button asChild>
-                    <Link to="/professionnels">Trouver un professionnel</Link>
-                  </Button>
+                  <p className="text-lg font-medium text-foreground">
+                    {isProfessional ? "Aucun rendez-vous confirmé" : "Aucun rendez-vous à venir"}
+                  </p>
+                  <p className="text-muted-foreground mb-4">
+                    {isProfessional 
+                      ? "Vous n'avez pas de rendez-vous confirmés prochainement" 
+                      : "Prenez rendez-vous avec un professionnel"}
+                  </p>
+                  {!isProfessional && (
+                    <Button asChild>
+                      <Link to="/professionnels">Trouver un professionnel</Link>
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -77,7 +143,11 @@ export default function Appointments() {
           <div className="space-y-4">
             {pastAppointments.length > 0 ? (
               pastAppointments.map((apt) => (
-                <AppointmentCard key={apt.id} appointment={apt} displayType="professional" />
+                <AppointmentCard 
+                  key={apt.id} 
+                  appointment={apt} 
+                  displayType={isProfessional ? "patient" : "professional"} 
+                />
               ))
             ) : (
               <Card>
@@ -97,12 +167,20 @@ export default function Appointments() {
 function AppointmentCard({ 
   appointment, 
   showActions = false,
+  isProfessional = false,
   onCancel,
+  onConfirm,
+  onReject,
+  onComplete,
   displayType = "professional"
 }: { 
   appointment: UserAppointment;
   showActions?: boolean;
+  isProfessional?: boolean;
   onCancel?: () => void;
+  onConfirm?: () => void;
+  onReject?: () => void;
+  onComplete?: () => void;
   displayType?: "professional" | "patient";
 }) {
   const statusColors = {
@@ -150,7 +228,7 @@ function AppointmentCard({
             )}
             <div>
               <p className="font-semibold text-foreground">
-                {displayProfile?.full_name || "Professionnel"}
+                {displayProfile?.full_name || (displayType === "professional" ? "Professionnel" : "Patient")}
               </p>
               <p className="text-sm text-muted-foreground">
                 {displayProfile?.specialty || displayProfile?.email}
@@ -184,7 +262,44 @@ function AppointmentCard({
               {statusLabels[appointment.status]}
             </span>
             
-            {showActions && appointment.status !== "cancelled" && appointment.status !== "completed" && (
+            {/* Professional pending actions - Quick buttons */}
+            {showActions && isProfessional && appointment.status === "pending" && (
+              <div className="flex items-center gap-2">
+                <Button 
+                  size="sm" 
+                  onClick={onConfirm}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Check className="h-4 w-4 mr-1" />
+                  Confirmer
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="destructive">
+                      <X className="h-4 w-4 mr-1" />
+                      Refuser
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Refuser ce rendez-vous ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Le patient sera notifié que sa demande a été refusée.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction onClick={onReject}>
+                        Confirmer le refus
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
+
+            {/* Other actions via dropdown */}
+            {showActions && appointment.status !== "cancelled" && appointment.status !== "completed" && appointment.status !== "pending" && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -195,6 +310,15 @@ function AppointmentCard({
                   {appointment.type === 'video' && appointment.status === "confirmed" && (
                     <DropdownMenuItem>Rejoindre la consultation</DropdownMenuItem>
                   )}
+                  
+                  {/* Mark as completed - Professional only */}
+                  {isProfessional && appointment.status === "confirmed" && (
+                    <DropdownMenuItem onClick={onComplete}>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Marquer comme terminé
+                    </DropdownMenuItem>
+                  )}
+
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <DropdownMenuItem 
@@ -208,7 +332,7 @@ function AppointmentCard({
                       <AlertDialogHeader>
                         <AlertDialogTitle>Annuler le rendez-vous ?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Cette action est irréversible. Le professionnel sera notifié de l'annulation.
+                          Cette action est irréversible. {isProfessional ? "Le patient" : "Le professionnel"} sera notifié de l'annulation.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -221,6 +345,31 @@ function AppointmentCard({
                   </AlertDialog>
                 </DropdownMenuContent>
               </DropdownMenu>
+            )}
+
+            {/* Patient pending - can only cancel */}
+            {showActions && !isProfessional && appointment.status === "pending" && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Annuler le rendez-vous ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Cette action est irréversible. Votre demande de rendez-vous sera annulée.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Non, garder</AlertDialogCancel>
+                    <AlertDialogAction onClick={onCancel}>
+                      Oui, annuler
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         </div>
