@@ -14,6 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          id: string
+          notes: string | null
+          patient_id: string
+          professional_id: string
+          scheduled_at: string
+          service_id: string | null
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          patient_id: string
+          professional_id: string
+          scheduled_at: string
+          service_id?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          professional_id?: string
+          scheduled_at?: string
+          service_id?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       articles: {
         Row: {
           author_id: string
