@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { BookingDialog } from "@/components/booking/BookingDialog";
 
 interface Professional {
   id: string;
@@ -42,6 +43,7 @@ const ProfessionalDetail = () => {
   const { id } = useParams();
   const [professional, setProfessional] = useState<Professional | null>(null);
   const [loading, setLoading] = useState(true);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfessional = async () => {
@@ -257,7 +259,7 @@ const ProfessionalDetail = () => {
                     <Separator />
                     
                     <div className="space-y-3">
-                      <Button className="w-full" size="lg">
+                      <Button className="w-full" size="lg" onClick={() => setBookingOpen(true)}>
                         <Calendar className="w-4 h-4 mr-2" />
                         Réserver une consultation
                       </Button>
@@ -319,6 +321,13 @@ const ProfessionalDetail = () => {
       </section>
 
       <Footer />
+
+      {/* Booking Dialog */}
+      <BookingDialog
+        open={bookingOpen}
+        onOpenChange={setBookingOpen}
+        professional={professional}
+      />
     </div>
   );
 };
