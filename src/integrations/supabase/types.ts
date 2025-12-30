@@ -207,6 +207,107 @@ export type Database = {
           },
         ]
       }
+      event_registrations: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          payment_status: string
+          registered_at: string
+          status: string
+          ticket_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          payment_status?: string
+          registered_at?: string
+          status?: string
+          ticket_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          payment_status?: string
+          registered_at?: string
+          status?: string
+          ticket_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          is_free: boolean | null
+          location: string | null
+          max_participants: number | null
+          online_link: string | null
+          organizer_id: string
+          price: number
+          start_date: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_free?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          online_link?: string | null
+          organizer_id: string
+          price?: number
+          start_date: string
+          status?: string
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_free?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          online_link?: string | null
+          organizer_id?: string
+          price?: number
+          start_date?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       formations: {
         Row: {
           author_id: string

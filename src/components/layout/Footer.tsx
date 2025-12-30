@@ -28,6 +28,7 @@ export function Footer() {
               {[
                 { label: "Nos Professionnels", href: "/professionnels" },
                 { label: "Formations", href: "/formations" },
+                { label: "Événements", href: "/evenements" },
                 { label: "Prendre RDV", href: "/services" },
                 { label: "Articles", href: "/articles" },
                 { label: "FAQ", href: "/faq" },
