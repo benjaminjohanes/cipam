@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, Plus, Edit, Trash2, Eye, Users, Video, MapPin } from "lucide-react";
+import { ImageUpload } from "@/components/upload/ImageUpload";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -350,12 +351,11 @@ export default function AllEvents() {
                   </div>
 
                   <div>
-                    <Label htmlFor="image_url">URL de l'image</Label>
-                    <Input
-                      id="image_url"
+                    <Label>Image de l'événement</Label>
+                    <ImageUpload
                       value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      placeholder="https://..."
+                      onChange={(url) => setFormData({ ...formData, image_url: url })}
+                      bucket="event-images"
                     />
                   </div>
                 </div>
