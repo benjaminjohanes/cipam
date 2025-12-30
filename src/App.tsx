@@ -11,6 +11,7 @@ import Formations from "./pages/Formations";
 import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
 import Services from "./pages/Services";
+import ServiceDetail from "./pages/ServiceDetail";
 import Auth from "./pages/Auth";
 import FAQ from "./pages/FAQ";
 import Events from "./pages/Events";
@@ -73,6 +74,7 @@ const App = () => (
             <Route path="/articles" element={<Articles />} />
             <Route path="/articles/:id" element={<ArticleDetail />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/services/:id" element={<ServiceDetail />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/evenements" element={<Events />} />
