@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Download, Calendar, Ticket, Mail, Phone } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Users, Download, Ticket, Mail, Phone, MoreHorizontal, CheckCircle, XCircle, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -24,6 +26,8 @@ const paymentStatusLabels: Record<string, { label: string; variant: "default" | 
 };
 
 export default function EventParticipants() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [selectedEventId, setSelectedEventId] = useState<string>("all");
 
   // Fetch all events
@@ -72,6 +76,42 @@ export default function EventParticipants() {
       const { data, error } = await query;
       if (error) throw error;
       return data || [];
+    },
+  });
+
+  // Update registration status
+  const updateStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase
+        .from("event_registrations")
+        .update({ status })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-event-registrations"] });
+      toast({ title: "Statut mis à jour" });
+    },
+    onError: () => {
+      toast({ title: "Erreur", description: "Impossible de modifier le statut", variant: "destructive" });
+    },
+  });
+
+  // Update payment status
+  const updatePaymentStatus = useMutation({
+    mutationFn: async ({ id, payment_status }: { id: string; payment_status: string }) => {
+      const { error } = await supabase
+        .from("event_registrations")
+        .update({ payment_status })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-event-registrations"] });
+      toast({ title: "Statut de paiement mis à jour" });
+    },
+    onError: () => {
+      toast({ title: "Erreur", description: "Impossible de modifier le statut", variant: "destructive" });
     },
   });
 
@@ -129,10 +169,12 @@ export default function EventParticipants() {
   const pendingCount = registrations?.filter((r: any) => r.status === "pending").length || 0;
   const paidCount = registrations?.filter((r: any) => r.payment_status === "paid").length || 0;
 
+  const selectedEvent = selectedEventId !== "all" ? events?.find(e => e.id === selectedEventId) : null;
+
   return (
     <DashboardLayout 
       title="Participants aux événements" 
-      description="Consultez et exportez la liste des participants inscrits"
+      description={selectedEvent ? `Participants de: ${selectedEvent.title}` : "Consultez et gérez les participants inscrits"}
     >
       <div className="space-y-6">
         {/* Stats Cards */}
@@ -149,7 +191,7 @@ export default function EventParticipants() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Confirmés</CardTitle>
-              <Users className="h-4 w-4 text-green-600" />
+              <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">{confirmedCount}</div>
@@ -158,7 +200,7 @@ export default function EventParticipants() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">En attente</CardTitle>
-              <Users className="h-4 w-4 text-yellow-600" />
+              <Clock className="h-4 w-4 text-yellow-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
@@ -177,7 +219,7 @@ export default function EventParticipants() {
 
         {/* Filters and Export */}
         <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <div className="w-full sm:w-80">
+          <div className="w-full sm:w-96">
             <Select value={selectedEventId} onValueChange={setSelectedEventId}>
               <SelectTrigger>
                 <SelectValue placeholder="Filtrer par événement" />
@@ -208,6 +250,11 @@ export default function EventParticipants() {
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
               Liste des participants
+              {selectedEvent && (
+                <Badge variant="outline" className="ml-2">
+                  {selectedEvent.title}
+                </Badge>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -221,11 +268,12 @@ export default function EventParticipants() {
                       <TableHead>Ticket</TableHead>
                       <TableHead>Participant</TableHead>
                       <TableHead>Contact</TableHead>
-                      <TableHead>Événement</TableHead>
+                      {selectedEventId === "all" && <TableHead>Événement</TableHead>}
                       <TableHead>Date</TableHead>
                       <TableHead>Statut</TableHead>
                       <TableHead>Paiement</TableHead>
                       <TableHead>Inscription</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -261,12 +309,14 @@ export default function EventParticipants() {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <div className="font-medium">{reg.events?.title || "N/A"}</div>
-                            {reg.events?.location && (
-                              <div className="text-xs text-muted-foreground">{reg.events.location}</div>
-                            )}
-                          </TableCell>
+                          {selectedEventId === "all" && (
+                            <TableCell>
+                              <div className="font-medium">{reg.events?.title || "N/A"}</div>
+                              {reg.events?.location && (
+                                <div className="text-xs text-muted-foreground">{reg.events.location}</div>
+                              )}
+                            </TableCell>
+                          )}
                           <TableCell>
                             {reg.events?.start_date ? (
                               <div>
@@ -289,6 +339,53 @@ export default function EventParticipants() {
                             <div className="text-sm text-muted-foreground">
                               {format(new Date(reg.registered_at), "dd/MM/yyyy", { locale: fr })}
                             </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem 
+                                  onClick={() => updateStatus.mutate({ id: reg.id, status: "confirmed" })}
+                                  disabled={reg.status === "confirmed"}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                                  Confirmer inscription
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => updateStatus.mutate({ id: reg.id, status: "pending" })}
+                                  disabled={reg.status === "pending"}
+                                >
+                                  <Clock className="h-4 w-4 mr-2 text-yellow-600" />
+                                  Mettre en attente
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => updateStatus.mutate({ id: reg.id, status: "cancelled" })}
+                                  disabled={reg.status === "cancelled"}
+                                  className="text-destructive"
+                                >
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Annuler inscription
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => updatePaymentStatus.mutate({ id: reg.id, payment_status: "paid" })}
+                                  disabled={reg.payment_status === "paid"}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-2 text-primary" />
+                                  Marquer comme payé
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => updatePaymentStatus.mutate({ id: reg.id, payment_status: "refunded" })}
+                                  disabled={reg.payment_status === "refunded"}
+                                >
+                                  <XCircle className="h-4 w-4 mr-2 text-muted-foreground" />
+                                  Marquer comme remboursé
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
                       );
