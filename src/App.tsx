@@ -12,6 +12,7 @@ import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
 import Services from "./pages/Services";
 import Auth from "./pages/Auth";
+import FAQ from "./pages/FAQ";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/articles/:id" element={<ArticleDetail />} />
             <Route path="/services" element={<Services />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/faq" element={<FAQ />} />
             
             {/* Dashboard Routes - Common */}
             <Route path="/dashboard" element={<Dashboard />} />
