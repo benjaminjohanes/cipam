@@ -3,7 +3,7 @@ import {
   Home, User, BookOpen, Calendar, FileText, Settings, 
   Users, ShieldCheck, CreditCard, Bell, MessageSquare,
   GraduationCap, Briefcase, ClipboardList, TrendingUp,
-  Building, UserCog, FolderOpen, Award, Tags, Ticket
+  Building, UserCog, FolderOpen, Award, Tags, Ticket, Link2
 } from "lucide-react";
 import {
   Sidebar,
@@ -118,6 +118,7 @@ const menusByRole: Record<AppRole, MenuGroup[]> = {
         { title: "Mes formations", url: "/dashboard/my-formations", icon: BookOpen },
         { title: "Mes événements", url: "/dashboard/my-events", icon: Ticket },
         { title: "Créer une formation", url: "/dashboard/create-formation", icon: GraduationCap },
+        { title: "Mes affiliations", url: "/dashboard/my-affiliations", icon: Link2 },
       ]
     },
     {

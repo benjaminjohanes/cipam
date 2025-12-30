@@ -35,6 +35,7 @@ import Patients from "./pages/dashboard/Patients";
 import Earnings from "./pages/dashboard/Earnings";
 import Messages from "./pages/dashboard/Messages";
 import MyEventRegistrations from "./pages/dashboard/MyEventRegistrations";
+import MyAffiliations from "./pages/dashboard/MyAffiliations";
 import AdminUsers from "./pages/dashboard/admin/Users";
 import AdminUpgradeRequests from "./pages/dashboard/admin/UpgradeRequests";
 import AllServices from "./pages/dashboard/admin/AllServices";
@@ -103,6 +104,7 @@ const App = () => (
             <Route path="/dashboard/create-formation" element={<CreateFormation />} />
             <Route path="/dashboard/earnings" element={<Earnings />} />
             <Route path="/dashboard/messages" element={<Messages />} />
+            <Route path="/dashboard/my-affiliations" element={<MyAffiliations />} />
             
             {/* Admin Routes */}
             <Route path="/dashboard/overview" element={<Overview />} />
