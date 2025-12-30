@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, User, BookOpen, Users, Calendar, FileText, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, User, BookOpen, Users, Calendar, FileText, LogOut, LayoutDashboard, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -17,6 +17,7 @@ const navItems = [
   { label: "Accueil", href: "/" },
   { label: "Professionnels", href: "/professionnels", icon: Users },
   { label: "Formations", href: "/formations", icon: BookOpen },
+  { label: "Événements", href: "/evenements", icon: Ticket },
   { label: "Services", href: "/services", icon: Calendar },
   { label: "Articles", href: "/articles", icon: FileText },
 ];

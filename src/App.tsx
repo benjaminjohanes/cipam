@@ -13,6 +13,8 @@ import ArticleDetail from "./pages/ArticleDetail";
 import Services from "./pages/Services";
 import Auth from "./pages/Auth";
 import FAQ from "./pages/FAQ";
+import Events from "./pages/Events";
+import EventDetail from "./pages/EventDetail";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
@@ -68,6 +70,8 @@ const App = () => (
             <Route path="/services" element={<Services />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/evenements" element={<Events />} />
+            <Route path="/evenements/:id" element={<EventDetail />} />
             
             {/* Dashboard Routes - Common */}
             <Route path="/dashboard" element={<Dashboard />} />
