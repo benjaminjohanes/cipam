@@ -52,10 +52,38 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const nationalities = [
-  "Française", "Belge", "Suisse", "Canadienne", "Marocaine", "Algérienne", 
-  "Tunisienne", "Sénégalaise", "Ivoirienne", "Camerounaise", "Congolaise",
-  "Malienne", "Burkinabè", "Guinéenne", "Béninoise", "Togolaise", "Nigérienne",
-  "Gabonaise", "Malgache", "Mauricienne", "Haïtienne", "Libanaise", "Autre"
+  "Afghane", "Albanaise", "Algérienne", "Allemande", "Américaine", "Andorrane", "Angolaise",
+  "Antiguaise-et-Barbudienne", "Argentine", "Arménienne", "Australienne", "Autrichienne",
+  "Azerbaïdjanaise", "Bahamienne", "Bahreïnienne", "Bangladaise", "Barbadienne", "Belge",
+  "Bélizienne", "Béninoise", "Bhoutanaise", "Biélorusse", "Birmane", "Bissau-Guinéenne",
+  "Bolivienne", "Bosnienne", "Botswanaise", "Brésilienne", "Britannique", "Brunéienne",
+  "Bulgare", "Burkinabè", "Burundaise", "Cambodgienne", "Camerounaise", "Canadienne",
+  "Cap-Verdienne", "Centrafricaine", "Chilienne", "Chinoise", "Chypriote", "Colombienne",
+  "Comorienne", "Congolaise", "Costaricaine", "Croate", "Cubaine", "Danoise", "Djiboutienne",
+  "Dominicaine", "Dominiquaise", "Égyptienne", "Émirienne", "Équatorienne", "Érythréenne",
+  "Espagnole", "Estonienne", "Éthiopienne", "Fidjienne", "Finlandaise", "Française",
+  "Gabonaise", "Gambienne", "Géorgienne", "Ghanéenne", "Grecque", "Grenadienne",
+  "Guatémaltèque", "Guinéenne", "Guyanaise", "Haïtienne", "Hondurienne", "Hongroise",
+  "Indienne", "Indonésienne", "Irakienne", "Iranienne", "Irlandaise", "Islandaise",
+  "Israélienne", "Italienne", "Ivoirienne", "Jamaïcaine", "Japonaise", "Jordanienne",
+  "Kazakhe", "Kényane", "Kirghize", "Kiribatienne", "Koweïtienne", "Laotienne", "Lesothane",
+  "Lettone", "Libanaise", "Libérienne", "Libyenne", "Liechtensteinoise", "Lituanienne",
+  "Luxembourgeoise", "Macédonienne", "Malgache", "Malaisienne", "Malawienne", "Maldivienne",
+  "Malienne", "Maltaise", "Marocaine", "Marshallaise", "Mauricienne", "Mauritanienne",
+  "Mexicaine", "Micronésienne", "Moldave", "Monégasque", "Mongole", "Monténégrine",
+  "Mozambicaine", "Namibienne", "Nauruane", "Néerlandaise", "Néo-Zélandaise", "Népalaise",
+  "Nicaraguayenne", "Nigériane", "Nigérienne", "Nord-Coréenne", "Norvégienne", "Omanaise",
+  "Ougandaise", "Ouzbèke", "Pakistanaise", "Palaosienne", "Palestinienne", "Panaméenne",
+  "Papouane-Néo-Guinéenne", "Paraguayenne", "Péruvienne", "Philippine", "Polonaise",
+  "Portugaise", "Qatarienne", "Roumaine", "Russe", "Rwandaise", "Saint-Kitts-et-Nevienne",
+  "Saint-Lucienne", "Saint-Vincentaise", "Salomonaise", "Salvadorienne", "Samoane",
+  "Santoméenne", "Saoudienne", "Sénégalaise", "Serbe", "Seychelloise", "Sierra-Léonaise",
+  "Singapourienne", "Slovaque", "Slovène", "Somalienne", "Soudanaise", "Sri-Lankaise",
+  "Sud-Africaine", "Sud-Coréenne", "Sud-Soudanaise", "Suédoise", "Suisse", "Surinamaise",
+  "Swazie", "Syrienne", "Tadjike", "Tanzanienne", "Tchadienne", "Tchèque", "Thaïlandaise",
+  "Timoraise", "Togolaise", "Tonguienne", "Trinidadienne", "Tunisienne", "Turkmène",
+  "Turque", "Tuvaluane", "Ukrainienne", "Uruguayenne", "Vanuatuane", "Vaticane",
+  "Vénézuélienne", "Vietnamienne", "Yéménite", "Zambienne", "Zimbabwéenne", "Autre"
 ];
 
 const roleOptions: { value: AppRole; label: string; description: string; icon: React.ReactNode }[] = [
