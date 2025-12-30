@@ -196,8 +196,8 @@ const Services = () => {
                     {formatPrice(service.price)}
                   </span>
                   <Button size="sm" asChild>
-                    <Link to="/professionnels">
-                      Réserver
+                    <Link to={`/services/${service.id}`}>
+                      Voir détails
                     </Link>
                   </Button>
                 </div>
