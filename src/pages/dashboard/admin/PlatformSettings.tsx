@@ -15,10 +15,10 @@ import { toast } from "sonner";
 
 export default function PlatformSettings() {
   const [settings, setSettings] = useState({
-    siteName: "CIPAM",
-    siteDescription: "Plateforme de mise en relation patients-professionnels",
-    contactEmail: "contact@cipam.fr",
-    supportEmail: "support@cipam.fr",
+    siteName: "ALLô PSY",
+    siteDescription: "Plateforme de mise en relation usagers-professionnels",
+    contactEmail: "contact@allopsy.com",
+    supportEmail: "support@allopsy.com",
     maintenanceMode: false,
     allowRegistration: true,
     requireEmailVerification: true,

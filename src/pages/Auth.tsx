@@ -136,7 +136,7 @@ export default function Auth() {
       }
       toast({ title: "Erreur", description: message, variant: "destructive" });
     } else {
-      toast({ title: "Connexion réussie", description: "Bienvenue sur CIPAM!" });
+      toast({ title: "Connexion réussie", description: "Bienvenue sur ALLô PSY!" });
       navigate('/');
     }
     setIsSubmitting(false);
@@ -188,10 +188,10 @@ export default function Auth() {
             transition={{ duration: 0.5 }}
           >
             <div className="flex items-center gap-3 mb-8">
-              <img src={cipamLogo} alt="CIPAM" className="h-12 w-12 rounded-lg object-cover" />
+              <img src={cipamLogo} alt="ALLô PSY" className="h-12 w-12 rounded-lg object-cover" />
               <div>
-                <h1 className="text-2xl font-bold text-foreground">CIPAM</h1>
-                <p className="text-sm text-muted-foreground">Centre International de Psychologie</p>
+                <h1 className="text-2xl font-bold text-foreground">ALLô PSY</h1>
+                <p className="text-sm text-muted-foreground">La Psychologie dans la Pratique</p>
               </div>
             </div>
 
