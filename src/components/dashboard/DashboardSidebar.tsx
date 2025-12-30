@@ -84,6 +84,7 @@ const menusByRole: Record<AppRole, MenuGroup[]> = {
         { title: "Mes formations", url: "/dashboard/my-formations", icon: BookOpen },
         { title: "Mes événements", url: "/dashboard/my-events", icon: Ticket },
         { title: "Catalogue", url: "/dashboard/formations-catalog", icon: GraduationCap },
+        { title: "Mes affiliations", url: "/dashboard/my-affiliations", icon: Link2 },
       ]
     },
     {
