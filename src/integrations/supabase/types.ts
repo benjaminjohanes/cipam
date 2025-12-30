@@ -319,12 +319,14 @@ export type Database = {
           bio: string | null
           consultation_rate: number | null
           created_at: string | null
+          date_of_birth: string | null
           email: string
           experience_years: number | null
           full_name: string | null
           id: string
           is_verified: boolean | null
           location: string | null
+          nationality: string | null
           phone: string | null
           specialty: string | null
           updated_at: string | null
@@ -335,12 +337,14 @@ export type Database = {
           bio?: string | null
           consultation_rate?: number | null
           created_at?: string | null
+          date_of_birth?: string | null
           email: string
           experience_years?: number | null
           full_name?: string | null
           id: string
           is_verified?: boolean | null
           location?: string | null
+          nationality?: string | null
           phone?: string | null
           specialty?: string | null
           updated_at?: string | null
@@ -351,12 +355,14 @@ export type Database = {
           bio?: string | null
           consultation_rate?: number | null
           created_at?: string | null
+          date_of_birth?: string | null
           email?: string
           experience_years?: number | null
           full_name?: string | null
           id?: string
           is_verified?: boolean | null
           location?: string | null
+          nationality?: string | null
           phone?: string | null
           specialty?: string | null
           updated_at?: string | null
