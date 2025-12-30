@@ -178,10 +178,10 @@ export function DashboardSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader className="border-b border-border p-4">
         <Link to="/" className="flex items-center gap-3">
-          <img src={cipamLogo} alt="ALLô PSY" className="h-10 w-10 rounded-lg object-cover" />
+          <img src={cipamLogo} alt="ALLÔ PSY" className="h-10 w-10 rounded-lg object-cover" />
           {!collapsed && (
             <div>
-              <span className="text-lg font-display font-semibold text-foreground">ALLô PSY</span>
+              <span className="text-lg font-display font-semibold text-foreground">ALLÔ PSY</span>
               <p className="text-xs text-muted-foreground">Espace personnel</p>
             </div>
           )}

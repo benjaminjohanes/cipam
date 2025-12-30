@@ -10,14 +10,14 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="ALLô PSY Logo" className="h-12 w-auto rounded-lg" />
+              <img src={logo} alt="ALLÔ PSY Logo" className="h-12 w-auto rounded-lg" />
               <div>
-                <span className="text-xl font-display font-semibold">ALLô PSY</span>
+                <span className="text-xl font-display font-semibold">ALLÔ PSY</span>
                 <p className="text-xs text-secondary/70 italic">La Psychologie dans la Pratique</p>
               </div>
             </div>
             <p className="text-secondary/80 text-sm leading-relaxed">
-              ALLô PSY - Votre partenaire pour le bien-être mental et la psychologie appliquée.
+              ALLÔ PSY - Votre partenaire pour le bien-être mental et la psychologie appliquée.
             </p>
           </div>
 
@@ -85,7 +85,7 @@ export function Footer() {
 
         <div className="border-t border-secondary/10 mt-12 pt-8 text-center text-sm text-secondary/60">
           <p>
-            © {new Date().getFullYear()} ALLô PSY - La Psychologie dans la Pratique. Tous droits réservés.
+            © {new Date().getFullYear()} ALLÔ PSY - La Psychologie dans la Pratique. Tous droits réservés.
           </p>
         </div>
       </div>

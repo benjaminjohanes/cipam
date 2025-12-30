@@ -15,8 +15,8 @@ const faqCategories = [
     icon: HelpCircle,
     questions: [
       {
-        question: "Qu'est-ce que ALLô PSY ?",
-        answer: "ALLô PSY est une plateforme dédiée à la psychologie pratique. Nous mettons en relation des usagers avec des professionnels qualifiés, proposons des formations en psychologie et offrons des services de consultation en ligne et en présentiel."
+        question: "Qu'est-ce que ALLÔ PSY ?",
+        answer: "ALLÔ PSY est une plateforme dédiée à la psychologie pratique. Nous mettons en relation des usagers avec des professionnels qualifiés, proposons des formations en psychologie et offrons des services de consultation en ligne et en présentiel."
       },
       {
         question: "Comment fonctionne la plateforme ?",
@@ -24,7 +24,7 @@ const faqCategories = [
       },
       {
         question: "La plateforme est-elle accessible à l'international ?",
-        answer: "Oui, ALLô PSY est accessible dans le monde entier. Nos professionnels peuvent proposer des consultations en ligne (vidéo) ce qui permet un accompagnement à distance, peu importe votre localisation géographique."
+        answer: "Oui, ALLÔ PSY est accessible dans le monde entier. Nos professionnels peuvent proposer des consultations en ligne (vidéo) ce qui permet un accompagnement à distance, peu importe votre localisation géographique."
       }
     ]
   },
@@ -33,16 +33,16 @@ const faqCategories = [
     icon: Users,
     questions: [
       {
-        question: "Comment créer un compte sur ALLô PSY ?",
+        question: "Comment créer un compte sur ALLÔ PSY ?",
         answer: "Pour créer un compte, cliquez sur 'S'inscrire' en haut de la page. Remplissez le formulaire avec vos informations personnelles, choisissez votre type de compte (Usager, Étudiant ou Professionnel) et validez votre inscription. Un email de confirmation vous sera envoyé."
       },
       {
         question: "Quels sont les différents types de comptes ?",
-        answer: "ALLô PSY propose trois types de comptes : Usager (pour accéder aux consultations et services), Étudiant (pour proposer des services supervisés et suivre des formations), et Professionnel (pour offrir des services, formations et consultations de manière autonome)."
+        answer: "ALLÔ PSY propose trois types de comptes : Usager (pour accéder aux consultations et services), Étudiant (pour proposer des services supervisés et suivre des formations), et Professionnel (pour offrir des services, formations et consultations de manière autonome)."
       },
       {
         question: "Y a-t-il un âge minimum pour s'inscrire ?",
-        answer: "Oui, vous devez avoir au moins 18 ans pour créer un compte sur ALLô PSY. Cette restriction est en place pour garantir la conformité légale et la protection des utilisateurs."
+        answer: "Oui, vous devez avoir au moins 18 ans pour créer un compte sur ALLÔ PSY. Cette restriction est en place pour garantir la conformité légale et la protection des utilisateurs."
       },
       {
         question: "Comment devenir professionnel sur la plateforme ?",
@@ -143,7 +143,7 @@ const faqCategories = [
         answer: "Nous nous efforçons de répondre à toutes les demandes dans un délai de 24 à 48 heures ouvrées. Les demandes urgentes sont traitées en priorité."
       },
       {
-        question: "Où trouver plus d'informations sur ALLô PSY ?",
+        question: "Où trouver plus d'informations sur ALLÔ PSY ?",
         answer: "Consultez notre section Articles pour des ressources en psychologie, suivez-nous sur les réseaux sociaux ou abonnez-vous à notre newsletter pour rester informé de nos actualités."
       }
     ]

@@ -30,7 +30,7 @@ export function HeroSection() {
             </h1>
 
             <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">
-              ALLô PSY réunit les meilleurs professionnels de la psychologie pour vous accompagner 
+              ALLÔ PSY réunit les meilleurs professionnels de la psychologie pour vous accompagner 
               dans votre parcours vers l'équilibre et l'épanouissement personnel.
             </p>
 
@@ -91,7 +91,7 @@ export function HeroSection() {
               {/* Center element */}
               <div className="absolute inset-24 rounded-full gradient-hero flex items-center justify-center shadow-glow">
                 <div className="text-center text-primary-foreground">
-                  <div className="text-4xl font-display font-bold">ALLô PSY</div>
+                  <div className="text-4xl font-display font-bold">ALLÔ PSY</div>
                   <div className="text-sm mt-1 opacity-90">Excellence & Bienveillance</div>
                 </div>
               </div>
