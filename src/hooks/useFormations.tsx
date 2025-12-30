@@ -17,6 +17,9 @@ export interface Formation {
   author_id: string;
   created_at: string;
   updated_at: string;
+  affiliation_enabled: boolean | null;
+  affiliation_type: string | null;
+  affiliation_value: number | null;
   categories?: {
     id: string;
     name: string;
@@ -32,6 +35,9 @@ export interface FormationInsert {
   duration?: string;
   modules_count?: number;
   image_url?: string;
+  affiliation_enabled?: boolean;
+  affiliation_type?: string;
+  affiliation_value?: number;
 }
 
 export const useFormations = (onlyOwn: boolean = false) => {

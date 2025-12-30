@@ -14,6 +14,121 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_sales: {
+        Row: {
+          affiliation_id: string
+          buyer_id: string
+          commission_amount: number
+          commission_type: string
+          created_at: string | null
+          formation_id: string
+          id: string
+          paid_at: string | null
+          sale_amount: number
+          status: string
+        }
+        Insert: {
+          affiliation_id: string
+          buyer_id: string
+          commission_amount: number
+          commission_type: string
+          created_at?: string | null
+          formation_id: string
+          id?: string
+          paid_at?: string | null
+          sale_amount: number
+          status?: string
+        }
+        Update: {
+          affiliation_id?: string
+          buyer_id?: string
+          commission_amount?: number
+          commission_type?: string
+          created_at?: string | null
+          formation_id?: string
+          id?: string
+          paid_at?: string | null
+          sale_amount?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_sales_affiliation_id_fkey"
+            columns: ["affiliation_id"]
+            isOneToOne: false
+            referencedRelation: "affiliations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_sales_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_sales_formation_id_fkey"
+            columns: ["formation_id"]
+            isOneToOne: false
+            referencedRelation: "formations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliations: {
+        Row: {
+          affiliate_code: string
+          affiliate_id: string
+          clicks: number | null
+          conversions: number | null
+          created_at: string | null
+          formation_id: string
+          id: string
+          status: string
+          total_earned: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          affiliate_code: string
+          affiliate_id: string
+          clicks?: number | null
+          conversions?: number | null
+          created_at?: string | null
+          formation_id: string
+          id?: string
+          status?: string
+          total_earned?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          affiliate_code?: string
+          affiliate_id?: string
+          clicks?: number | null
+          conversions?: number | null
+          created_at?: string | null
+          formation_id?: string
+          id?: string
+          status?: string
+          total_earned?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliations_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliations_formation_id_fkey"
+            columns: ["formation_id"]
+            isOneToOne: false
+            referencedRelation: "formations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           created_at: string
@@ -317,6 +432,9 @@ export type Database = {
       }
       formations: {
         Row: {
+          affiliation_enabled: boolean | null
+          affiliation_type: string | null
+          affiliation_value: number | null
           author_id: string
           category_id: string | null
           created_at: string
@@ -332,6 +450,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          affiliation_enabled?: boolean | null
+          affiliation_type?: string | null
+          affiliation_value?: number | null
           author_id: string
           category_id?: string | null
           created_at?: string
@@ -347,6 +468,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          affiliation_enabled?: boolean | null
+          affiliation_type?: string | null
+          affiliation_value?: number | null
           author_id?: string
           category_id?: string | null
           created_at?: string
