@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useCategories } from "@/hooks/useCategories";
-
+import { useAffiliateTracking } from "@/hooks/useAffiliateTracking";
 const formations = [
   {
     id: 1,
@@ -106,6 +106,9 @@ const Formations = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const { categories, loading: categoriesLoading } = useCategories('formation');
+  
+  // Track affiliate clicks from URL parameter
+  useAffiliateTracking();
 
   const filteredFormations = formations.filter((formation) => {
     const matchesSearch = formation.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
