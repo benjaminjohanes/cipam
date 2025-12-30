@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDialog } from "@/components/booking/BookingDialog";
+import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -340,6 +341,13 @@ const ServiceDetail = () => {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Reviews Section */}
+              <ReviewSection
+                targetType="service"
+                targetId={service.id}
+                title="Avis sur ce service"
+              />
             </motion.div>
 
             {/* Sidebar - Booking Card */}

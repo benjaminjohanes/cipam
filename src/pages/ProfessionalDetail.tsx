@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDialog } from "@/components/booking/BookingDialog";
+import { ReviewSection } from "@/components/reviews/ReviewSection";
 
 interface Professional {
   id: string;
@@ -221,6 +222,20 @@ const ProfessionalDetail = () => {
                     <p className="text-muted-foreground">Aucune spécialité renseignée</p>
                   )}
                 </div>
+              </motion.div>
+
+              {/* Reviews Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-card rounded-2xl shadow-soft p-8"
+              >
+                <ReviewSection
+                  targetType="professional"
+                  targetId={professional.id}
+                  title="Avis des patients"
+                />
               </motion.div>
             </div>
 
