@@ -4,10 +4,11 @@ import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, GraduationCap, Briefcase, User, Shield, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, GraduationCap, Briefcase, User, Shield, ArrowLeft, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import cipamLogo from '@/assets/cipam_logo.jpg';
@@ -19,9 +20,27 @@ const loginSchema = z.object({
   password: z.string().min(6, { message: "Le mot de passe doit contenir au moins 6 caractères" })
 });
 
+// Calculate minimum date (18 years ago)
+const getMaxBirthDate = () => {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - 18);
+  return date.toISOString().split('T')[0];
+};
+
 const registerSchema = z.object({
   fullName: z.string().min(2, { message: "Le nom doit contenir au moins 2 caractères" }).max(100, { message: "Le nom est trop long" }),
   email: z.string().email({ message: "Email invalide" }),
+  nationality: z.string().min(2, { message: "Veuillez sélectionner votre nationalité" }),
+  dateOfBirth: z.string().refine((date) => {
+    const birthDate = new Date(date);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      return age - 1 >= 18;
+    }
+    return age >= 18;
+  }, { message: "Vous devez avoir au moins 18 ans pour vous inscrire" }),
   password: z.string().min(6, { message: "Le mot de passe doit contenir au moins 6 caractères" }),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
@@ -31,6 +50,13 @@ const registerSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
+
+const nationalities = [
+  "Française", "Belge", "Suisse", "Canadienne", "Marocaine", "Algérienne", 
+  "Tunisienne", "Sénégalaise", "Ivoirienne", "Camerounaise", "Congolaise",
+  "Malienne", "Burkinabè", "Guinéenne", "Béninoise", "Togolaise", "Nigérienne",
+  "Gabonaise", "Malgache", "Mauricienne", "Haïtienne", "Libanaise", "Autre"
+];
 
 const roleOptions: { value: AppRole; label: string; description: string; icon: React.ReactNode }[] = [
   { value: 'patient', label: 'Usager', description: 'Accédez aux consultations et services', icon: <User className="h-5 w-5" /> },
@@ -66,7 +92,7 @@ export default function Auth() {
 
   const registerForm = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' }
+    defaultValues: { fullName: '', email: '', nationality: '', dateOfBirth: '', password: '', confirmPassword: '' }
   });
 
   const handleLogin = async (data: LoginFormData) => {
@@ -90,7 +116,7 @@ export default function Auth() {
 
   const handleRegister = async (data: RegisterFormData) => {
     setIsSubmitting(true);
-    const { error } = await signUp(data.email, data.password, data.fullName, selectedRole);
+    const { error } = await signUp(data.email, data.password, data.fullName, selectedRole, data.nationality, data.dateOfBirth);
     
     if (error) {
       let message = "Erreur lors de l'inscription";
@@ -262,6 +288,40 @@ export default function Auth() {
                   />
                   {registerForm.formState.errors.fullName && (
                     <p className="text-sm text-destructive mt-1">{registerForm.formState.errors.fullName.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="nationality">Nationalité</Label>
+                  <Select
+                    onValueChange={(value) => registerForm.setValue('nationality', value)}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Sélectionnez votre nationalité" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {nationalities.map((nat) => (
+                        <SelectItem key={nat} value={nat}>{nat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {registerForm.formState.errors.nationality && (
+                    <p className="text-sm text-destructive mt-1">{registerForm.formState.errors.nationality.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="dateOfBirth">Date de naissance</Label>
+                  <Input
+                    id="dateOfBirth"
+                    type="date"
+                    max={getMaxBirthDate()}
+                    {...registerForm.register('dateOfBirth')}
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Vous devez avoir au moins 18 ans</p>
+                  {registerForm.formState.errors.dateOfBirth && (
+                    <p className="text-sm text-destructive mt-1">{registerForm.formState.errors.dateOfBirth.message}</p>
                   )}
                 </div>
 
