@@ -44,9 +44,9 @@ export function Header() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <img src={logo} alt="ALLô PSY Logo" className="h-14 w-auto" />
+            <img src={logo} alt="ALLÔ PSY Logo" className="h-14 w-auto" />
             <div className="hidden sm:block">
-              <span className="text-xl font-display font-semibold text-foreground">ALLô PSY</span>
+              <span className="text-xl font-display font-semibold text-foreground">ALLÔ PSY</span>
               <p className="text-xs text-muted-foreground italic">La Psychologie dans la Pratique</p>
             </div>
           </Link>

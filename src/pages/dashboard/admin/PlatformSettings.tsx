@@ -15,7 +15,7 @@ import { toast } from "sonner";
 
 export default function PlatformSettings() {
   const [settings, setSettings] = useState({
-    siteName: "ALLô PSY",
+    siteName: "ALLÔ PSY",
     siteDescription: "Plateforme de mise en relation usagers-professionnels",
     contactEmail: "contact@allopsy.com",
     supportEmail: "support@allopsy.com",
