@@ -28,7 +28,7 @@ export function CTASection() {
               Commencez votre parcours vers le bien-être aujourd'hui
             </h2>
             <p className="text-primary-foreground/80 mt-6 text-lg max-w-2xl mx-auto">
-              Rejoignez des milliers de personnes qui ont choisi CIPAM pour leur accompagnement psychologique.
+              Rejoignez des milliers de personnes qui ont choisi ALLô PSY pour leur accompagnement psychologique.
             </p>
           </motion.div>
 
