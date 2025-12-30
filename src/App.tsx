@@ -51,6 +51,7 @@ import Roles from "./pages/dashboard/admin/Roles";
 import PlatformSettings from "./pages/dashboard/admin/PlatformSettings";
 import CreateArticle from "./pages/dashboard/admin/CreateArticle";
 import AllEvents from "./pages/dashboard/admin/AllEvents";
+import EventParticipants from "./pages/dashboard/admin/EventParticipants";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -116,6 +117,7 @@ const App = () => (
             <Route path="/dashboard/create-article" element={<CreateArticle />} />
             <Route path="/dashboard/all-appointments" element={<AllAppointments />} />
             <Route path="/dashboard/all-events" element={<AllEvents />} />
+            <Route path="/dashboard/event-participants" element={<EventParticipants />} />
             <Route path="/dashboard/team" element={<Team />} />
             <Route path="/dashboard/roles" element={<Roles />} />
             <Route path="/dashboard/platform-settings" element={<PlatformSettings />} />
