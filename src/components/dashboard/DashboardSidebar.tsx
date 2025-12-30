@@ -48,6 +48,7 @@ const menusByRole: Record<AppRole, MenuGroup[]> = {
       label: "Services",
       items: [
         { title: "Mes rendez-vous", url: "/dashboard/appointments", icon: Calendar },
+        { title: "Mes événements", url: "/dashboard/my-events", icon: Ticket },
         { title: "Trouver un professionnel", url: "/dashboard/find-professional", icon: Users },
         { title: "Mes formations", url: "/dashboard/my-formations", icon: BookOpen },
       ]
@@ -78,9 +79,10 @@ const menusByRole: Record<AppRole, MenuGroup[]> = {
       ]
     },
     {
-      label: "Formations",
+      label: "Formations & Événements",
       items: [
         { title: "Mes formations", url: "/dashboard/my-formations", icon: BookOpen },
+        { title: "Mes événements", url: "/dashboard/my-events", icon: Ticket },
         { title: "Catalogue", url: "/dashboard/formations-catalog", icon: GraduationCap },
       ]
     },
@@ -114,6 +116,7 @@ const menusByRole: Record<AppRole, MenuGroup[]> = {
       items: [
         { title: "Mes services", url: "/dashboard/my-services", icon: Briefcase },
         { title: "Mes formations", url: "/dashboard/my-formations", icon: BookOpen },
+        { title: "Mes événements", url: "/dashboard/my-events", icon: Ticket },
         { title: "Créer une formation", url: "/dashboard/create-formation", icon: GraduationCap },
       ]
     },
