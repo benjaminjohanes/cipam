@@ -54,7 +54,7 @@ export default function Appointments() {
   return (
     <DashboardLayout 
       title={isProfessional ? "Gestion des rendez-vous" : "Mes rendez-vous"} 
-      description={isProfessional ? "Gérez les rendez-vous de vos patients" : "Gérez vos consultations"}
+      description={isProfessional ? "Gérez les rendez-vous de vos usagers" : "Gérez vos consultations"}
     >
       <Tabs defaultValue={isProfessional && pendingAppointments.length > 0 ? "pending" : "upcoming"} className="space-y-6">
         <TabsList>
@@ -228,7 +228,7 @@ function AppointmentCard({
             )}
             <div>
               <p className="font-semibold text-foreground">
-                {displayProfile?.full_name || (displayType === "professional" ? "Professionnel" : "Patient")}
+                {displayProfile?.full_name || (displayType === "professional" ? "Professionnel" : "Usager")}
               </p>
               <p className="text-sm text-muted-foreground">
                 {displayProfile?.specialty || displayProfile?.email}

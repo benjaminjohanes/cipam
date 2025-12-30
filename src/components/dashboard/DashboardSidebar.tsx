@@ -106,7 +106,7 @@ const menusByRole: Record<AppRole, MenuGroup[]> = {
       items: [
         { title: "Mes rendez-vous", url: "/dashboard/appointments", icon: Calendar },
         { title: "Disponibilités", url: "/dashboard/availability", icon: ClipboardList },
-        { title: "Mes patients", url: "/dashboard/patients", icon: Users },
+        { title: "Mes usagers", url: "/dashboard/patients", icon: Users },
       ]
     },
     {

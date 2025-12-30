@@ -4,16 +4,16 @@ import { Users } from "lucide-react";
 
 const Patients = () => {
   return (
-    <DashboardLayout title="Mes patients" description="Gérez vos patients">
+    <DashboardLayout title="Mes usagers" description="Gérez vos usagers">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Liste des patients
+            Liste des usagers
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Aucun patient pour le moment.</p>
+          <p className="text-muted-foreground">Aucun usager pour le moment.</p>
         </CardContent>
       </Card>
     </DashboardLayout>
