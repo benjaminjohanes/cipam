@@ -34,6 +34,7 @@ import Stats from "./pages/dashboard/Stats";
 import Patients from "./pages/dashboard/Patients";
 import Earnings from "./pages/dashboard/Earnings";
 import Messages from "./pages/dashboard/Messages";
+import MyEventRegistrations from "./pages/dashboard/MyEventRegistrations";
 import AdminUsers from "./pages/dashboard/admin/Users";
 import AdminUpgradeRequests from "./pages/dashboard/admin/UpgradeRequests";
 import AllServices from "./pages/dashboard/admin/AllServices";
@@ -81,6 +82,7 @@ const App = () => (
             <Route path="/dashboard/appointments" element={<Appointments />} />
             <Route path="/dashboard/my-formations" element={<MyFormations />} />
             <Route path="/dashboard/notifications" element={<Notifications />} />
+            <Route path="/dashboard/my-events" element={<MyEventRegistrations />} />
             
             {/* Dashboard Routes - Patient */}
             <Route path="/dashboard/find-professional" element={<FindProfessional />} />
