@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookOpen, Plus, Trash2, GripVertical, Upload, Save, Eye, Loader2 } from "lucide-react";
+import { BookOpen, Plus, Trash2, GripVertical, Upload, Save, Eye, Loader2, Link2 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useCategories } from "@/hooks/useCategories";
 import { useFormations } from "@/hooks/useFormations";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface Module {
   id: string;
@@ -37,6 +38,9 @@ export default function CreateFormation() {
     price: "",
     isFree: false,
     thumbnail: "",
+    affiliationEnabled: false,
+    affiliationType: "percentage" as "percentage" | "fixed",
+    affiliationValue: "",
   });
 
   const [modules, setModules] = useState<Module[]>([
@@ -85,6 +89,9 @@ export default function CreateFormation() {
       duration: calculateTotalDuration(),
       modules_count: modules.filter(m => m.title.trim()).length,
       image_url: formData.thumbnail || undefined,
+      affiliation_enabled: formData.affiliationEnabled,
+      affiliation_type: formData.affiliationType,
+      affiliation_value: formData.affiliationEnabled ? Number(formData.affiliationValue) || 0 : 0,
     });
     setSubmitting(false);
 
@@ -110,6 +117,9 @@ export default function CreateFormation() {
       duration: calculateTotalDuration(),
       modules_count: modules.filter(m => m.title.trim()).length,
       image_url: formData.thumbnail || undefined,
+      affiliation_enabled: formData.affiliationEnabled,
+      affiliation_type: formData.affiliationType,
+      affiliation_value: formData.affiliationEnabled ? Number(formData.affiliationValue) || 0 : 0,
     });
     setSubmitting(false);
 
@@ -212,26 +222,99 @@ export default function CreateFormation() {
                 <Switch
                   id="free"
                   checked={formData.isFree}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFree: checked }))}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFree: checked, affiliationEnabled: checked ? false : prev.affiliationEnabled }))}
                 />
                 <Label htmlFor="free">Formation gratuite</Label>
               </div>
 
               {!formData.isFree && (
                 <div className="space-y-2">
-                  <Label htmlFor="price">Prix (€)</Label>
+                  <Label htmlFor="price">Prix (FCFA)</Label>
                   <Input
                     id="price"
                     type="number"
                     value={formData.price}
                     onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                    placeholder="49"
-                    className="w-32"
+                    placeholder="25000"
+                    className="w-40"
                   />
                 </div>
               )}
             </CardContent>
           </Card>
+
+          {/* Affiliation Card */}
+          {!formData.isFree && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Link2 className="h-5 w-5" />
+                  Programme d'affiliation
+                </CardTitle>
+                <CardDescription>
+                  Permettez à d'autres utilisateurs de promouvoir votre formation et gagner une commission
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="affiliation"
+                    checked={formData.affiliationEnabled}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, affiliationEnabled: checked }))}
+                  />
+                  <Label htmlFor="affiliation">Activer l'affiliation</Label>
+                </div>
+
+                {formData.affiliationEnabled && (
+                  <div className="space-y-4 pt-4 border-t">
+                    <div className="space-y-3">
+                      <Label>Type de commission</Label>
+                      <RadioGroup
+                        value={formData.affiliationType}
+                        onValueChange={(value: "percentage" | "fixed") => setFormData(prev => ({ ...prev, affiliationType: value, affiliationValue: "" }))}
+                        className="flex gap-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="percentage" id="percentage" />
+                          <Label htmlFor="percentage" className="cursor-pointer">Pourcentage (%)</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="fixed" id="fixed" />
+                          <Label htmlFor="fixed" className="cursor-pointer">Montant fixe (FCFA)</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="affiliationValue">
+                        {formData.affiliationType === "percentage" ? "Pourcentage de commission" : "Montant de commission"}
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="affiliationValue"
+                          type="number"
+                          value={formData.affiliationValue}
+                          onChange={(e) => setFormData(prev => ({ ...prev, affiliationValue: e.target.value }))}
+                          placeholder={formData.affiliationType === "percentage" ? "10" : "5000"}
+                          className="w-40"
+                          min="0"
+                          max={formData.affiliationType === "percentage" ? "100" : undefined}
+                        />
+                        <span className="text-muted-foreground">
+                          {formData.affiliationType === "percentage" ? "%" : "FCFA"}
+                        </span>
+                      </div>
+                      {formData.affiliationType === "percentage" && formData.price && formData.affiliationValue && (
+                        <p className="text-sm text-muted-foreground">
+                          Commission estimée: {Math.round(Number(formData.price) * Number(formData.affiliationValue) / 100)} FCFA par vente
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="modules" className="space-y-6">
