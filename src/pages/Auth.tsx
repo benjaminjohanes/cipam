@@ -33,7 +33,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const roleOptions: { value: AppRole; label: string; description: string; icon: React.ReactNode }[] = [
-  { value: 'patient', label: 'Patient', description: 'Accédez aux consultations et services', icon: <User className="h-5 w-5" /> },
+  { value: 'patient', label: 'Usager', description: 'Accédez aux consultations et services', icon: <User className="h-5 w-5" /> },
   { value: 'student', label: 'Étudiant', description: 'Proposez vos services et suivez des formations', icon: <GraduationCap className="h-5 w-5" /> },
   { value: 'professional', label: 'Professionnel', description: 'Offrez vos services et formations', icon: <Briefcase className="h-5 w-5" /> },
 ];
@@ -147,7 +147,7 @@ export default function Auth() {
             <p className="text-muted-foreground mb-8">
               {isLogin 
                 ? 'Accédez à votre espace personnel' 
-                : 'Rejoignez notre communauté de professionnels et patients'}
+                : 'Rejoignez notre communauté de professionnels et usagers'}
             </p>
 
             {/* Toggle Login/Register */}
