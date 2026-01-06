@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Professionnels from "./pages/Professionnels";
 import ProfessionalDetail from "./pages/ProfessionalDetail";
 import Formations from "./pages/Formations";
+import FormationDetail from "./pages/FormationDetail";
 import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
 import Services from "./pages/Services";
@@ -71,6 +72,7 @@ const App = () => (
             <Route path="/professionnels" element={<Professionnels />} />
             <Route path="/professionnels/:id" element={<ProfessionalDetail />} />
             <Route path="/formations" element={<Formations />} />
+            <Route path="/formations/:id" element={<FormationDetail />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/articles/:id" element={<ArticleDetail />} />
             <Route path="/services" element={<Services />} />

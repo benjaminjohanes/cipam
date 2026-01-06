@@ -20,7 +20,7 @@ interface Review {
 }
 
 interface ReviewSectionProps {
-  targetType: 'service' | 'professional';
+  targetType: 'service' | 'professional' | 'formation';
   targetId: string;
   title?: string;
 }
