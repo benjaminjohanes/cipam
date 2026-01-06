@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 interface ReviewFormProps {
-  targetType: 'service' | 'professional';
+  targetType: 'service' | 'professional' | 'formation';
   targetId: string;
   onReviewSubmitted?: () => void;
 }
