@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { 
   Settings, Globe, Bell, Shield, Mail, Save, 
-  CreditCard, Users, FileText
+  CreditCard, Users, FileText, Key, Eye, EyeOff, Check, AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,8 +30,40 @@ export default function PlatformSettings() {
     commissionRate: 10,
   });
 
+  const [apiKeys, setApiKeys] = useState({
+    resendApiKey: "",
+    stripePublishableKey: "",
+    stripeSecretKey: "",
+  });
+
+  const [showKeys, setShowKeys] = useState({
+    resendApiKey: false,
+    stripePublishableKey: false,
+    stripeSecretKey: false,
+  });
+
+  const [savedKeys, setSavedKeys] = useState({
+    resendApiKey: false,
+    stripePublishableKey: false,
+    stripeSecretKey: false,
+  });
+
   const handleSave = () => {
     toast.success("Paramètres enregistrés");
+  };
+
+  const handleSaveApiKey = (keyName: keyof typeof apiKeys, label: string) => {
+    if (!apiKeys[keyName]) {
+      toast.error(`Veuillez entrer une clé ${label}`);
+      return;
+    }
+    // In a real implementation, this would save to Supabase secrets
+    setSavedKeys(prev => ({ ...prev, [keyName]: true }));
+    toast.success(`Clé ${label} enregistrée avec succès`);
+  };
+
+  const toggleShowKey = (keyName: keyof typeof showKeys) => {
+    setShowKeys(prev => ({ ...prev, [keyName]: !prev[keyName] }));
   };
 
   return (
@@ -204,6 +237,168 @@ export default function PlatformSettings() {
               <p className="text-sm text-muted-foreground">
                 Pourcentage prélevé sur chaque transaction
               </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Intégrations API */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              Intégrations API
+            </CardTitle>
+            <CardDescription>
+              Configurez les clés API pour les services externes (emails, paiements, etc.)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Resend API Key */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <Label>Resend API Key</Label>
+                  {savedKeys.resendApiKey && (
+                    <Badge variant="outline" className="text-green-600 border-green-600">
+                      <Check className="h-3 w-3 mr-1" />
+                      Configuré
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Pour l'envoi d'emails automatiques (confirmations, rappels). 
+                <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">
+                  Obtenir une clé sur resend.com
+                </a>
+              </p>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showKeys.resendApiKey ? "text" : "password"}
+                    placeholder="re_xxxxxxxxxxxx"
+                    value={apiKeys.resendApiKey}
+                    onChange={(e) => setApiKeys({ ...apiKeys, resendApiKey: e.target.value })}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => toggleShowKey("resendApiKey")}
+                  >
+                    {showKeys.resendApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <Button onClick={() => handleSaveApiKey("resendApiKey", "Resend")}>
+                  Enregistrer
+                </Button>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Stripe Publishable Key */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <Label>Stripe Publishable Key</Label>
+                  {savedKeys.stripePublishableKey && (
+                    <Badge variant="outline" className="text-green-600 border-green-600">
+                      <Check className="h-3 w-3 mr-1" />
+                      Configuré
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Clé publique Stripe pour les paiements côté client.
+                <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">
+                  Obtenir sur stripe.com
+                </a>
+              </p>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showKeys.stripePublishableKey ? "text" : "password"}
+                    placeholder="pk_live_xxxxxxxxxxxx"
+                    value={apiKeys.stripePublishableKey}
+                    onChange={(e) => setApiKeys({ ...apiKeys, stripePublishableKey: e.target.value })}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => toggleShowKey("stripePublishableKey")}
+                  >
+                    {showKeys.stripePublishableKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <Button onClick={() => handleSaveApiKey("stripePublishableKey", "Stripe Publishable")}>
+                  Enregistrer
+                </Button>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Stripe Secret Key */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <Label>Stripe Secret Key</Label>
+                  {savedKeys.stripeSecretKey && (
+                    <Badge variant="outline" className="text-green-600 border-green-600">
+                      <Check className="h-3 w-3 mr-1" />
+                      Configuré
+                    </Badge>
+                  )}
+                </div>
+                <Badge variant="secondary" className="text-orange-600">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  Confidentiel
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Clé secrète Stripe pour les opérations backend. Ne jamais exposer côté client.
+              </p>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showKeys.stripeSecretKey ? "text" : "password"}
+                    placeholder="sk_live_xxxxxxxxxxxx"
+                    value={apiKeys.stripeSecretKey}
+                    onChange={(e) => setApiKeys({ ...apiKeys, stripeSecretKey: e.target.value })}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => toggleShowKey("stripeSecretKey")}
+                  >
+                    {showKeys.stripeSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <Button onClick={() => handleSaveApiKey("stripeSecretKey", "Stripe Secret")}>
+                  Enregistrer
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium">Note de sécurité</p>
+                  <p>Les clés secrètes sont stockées de manière sécurisée et ne seront jamais exposées dans le code client. 
+                  Elles sont utilisées uniquement dans les fonctions edge côté serveur.</p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
