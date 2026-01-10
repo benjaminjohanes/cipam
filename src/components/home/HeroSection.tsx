@@ -50,27 +50,27 @@ export function HeroSection() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-border">
-              <div>
-                <div className="flex items-center gap-2 text-primary">
+            <div className="grid grid-cols-3 gap-3 sm:gap-6 pt-8 border-t border-border">
+              <div className="text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-primary">
                   <Users className="w-5 h-5" />
-                  <span className="text-2xl font-bold">50+</span>
+                  <span className="text-xl sm:text-2xl font-bold">50+</span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">Professionnels</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">Professionnels</p>
               </div>
-              <div>
-                <div className="flex items-center gap-2 text-primary">
+              <div className="text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-primary">
                   <BookOpen className="w-5 h-5" />
-                  <span className="text-2xl font-bold">100+</span>
+                  <span className="text-xl sm:text-2xl font-bold">100+</span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">Formations</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">Formations</p>
               </div>
-              <div>
-                <div className="flex items-center gap-2 text-primary">
+              <div className="text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-primary">
                   <Calendar className="w-5 h-5" />
-                  <span className="text-2xl font-bold">5000+</span>
+                  <span className="text-xl sm:text-2xl font-bold">5000+</span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">Consultations</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">Consultations</p>
               </div>
             </div>
           </motion.div>

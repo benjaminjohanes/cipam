@@ -57,17 +57,17 @@ export function Footer() {
           <div>
             <h4 className="font-display font-semibold text-lg mb-4">Contact</h4>
             <ul className="space-y-3">
-              <li className="flex items-center gap-3 text-sm text-secondary/70">
-                <Mail className="w-4 h-4 text-accent" />
-                cipam.global.contact@gmail.com
+              <li className="flex items-start gap-3 text-sm text-secondary/70">
+                <Mail className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
+                <span className="break-all">cipam.global.contact@gmail.com</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-secondary/70">
-                <Phone className="w-4 h-4 text-accent" />
-                +229 01 52 40 14 70
+                <Phone className="w-4 h-4 text-accent flex-shrink-0" />
+                <span>+229 01 52 40 14 70</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-secondary/70">
                 <MapPin className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
-                Abomey-Calavi, Benin
+                <span>Abomey-Calavi, Benin</span>
               </li>
             </ul>
             <div className="flex gap-3 mt-4">
