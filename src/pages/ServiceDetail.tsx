@@ -42,7 +42,7 @@ interface Service {
     id: string;
     name: string;
   } | null;
-  provider: ServiceProvider;
+  provider: ServiceProvider | null;
 }
 
 interface RelatedService {
@@ -244,7 +244,7 @@ const ServiceDetail = () => {
                     <Clock className="w-4 h-4" />
                     <span>Consultation</span>
                   </div>
-                  {service.provider.location && (
+                  {service.provider?.location && (
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
                       <span>{service.provider.location}</span>
@@ -290,57 +290,59 @@ const ServiceDetail = () => {
               </div>
 
               {/* Provider Section */}
-              <div>
-                <h2 className="text-xl font-display font-semibold mb-4">Proposé par</h2>
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="w-16 h-16">
-                        <AvatarImage src={service.provider.avatar_url || undefined} />
-                        <AvatarFallback className="text-lg">
-                          {service.provider.full_name?.charAt(0) || 'P'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-foreground">
-                            {service.provider.full_name || 'Professionnel'}
-                          </h3>
-                          {service.provider.is_verified && (
-                            <Shield className="w-5 h-5 text-primary" />
+              {service.provider && (
+                <div>
+                  <h2 className="text-xl font-display font-semibold mb-4">Proposé par</h2>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="w-16 h-16">
+                          <AvatarImage src={service.provider.avatar_url || undefined} />
+                          <AvatarFallback className="text-lg">
+                            {service.provider.full_name?.charAt(0) || 'P'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-foreground">
+                              {service.provider.full_name || 'Professionnel'}
+                            </h3>
+                            {service.provider.is_verified && (
+                              <Shield className="w-5 h-5 text-primary" />
+                            )}
+                          </div>
+                          <p className="text-muted-foreground">{service.provider.specialty || 'Psychologue'}</p>
+                          
+                          {service.provider.experience_years && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {service.provider.experience_years} ans d'expérience
+                            </p>
                           )}
-                        </div>
-                        <p className="text-muted-foreground">{service.provider.specialty || 'Psychologue'}</p>
-                        
-                        {service.provider.experience_years && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {service.provider.experience_years} ans d'expérience
-                          </p>
-                        )}
-                        
-                        {service.provider.bio && (
-                          <p className="text-sm text-muted-foreground mt-3 line-clamp-3">
-                            {service.provider.bio}
-                          </p>
-                        )}
-                        
-                        <div className="flex gap-3 mt-4">
-                          <Button variant="outline" size="sm" asChild>
-                            <Link to={`/professionnels/${service.provider.id}`}>
-                              <User className="w-4 h-4 mr-2" />
-                              Voir le profil
-                            </Link>
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <MessageCircle className="w-4 h-4 mr-2" />
-                            Contacter
-                          </Button>
+                          
+                          {service.provider.bio && (
+                            <p className="text-sm text-muted-foreground mt-3 line-clamp-3">
+                              {service.provider.bio}
+                            </p>
+                          )}
+                          
+                          <div className="flex gap-3 mt-4">
+                            <Button variant="outline" size="sm" asChild>
+                              <Link to={`/professionnels/${service.provider.id}`}>
+                                <User className="w-4 h-4 mr-2" />
+                                Voir le profil
+                              </Link>
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <MessageCircle className="w-4 h-4 mr-2" />
+                              Contacter
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
 
               {/* Reviews Section */}
               <ReviewSection
