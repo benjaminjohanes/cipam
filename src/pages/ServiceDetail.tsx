@@ -141,6 +141,72 @@ const ServiceDetail = () => {
     fetchService();
   }, [id, navigate, toast]);
 
+  // SEO Meta tags dynamiques
+  useEffect(() => {
+    if (service) {
+      // Titre SEO optimisé (max 60 caractères)
+      const seoTitle = `${service.title}${service.provider?.full_name ? ` - ${service.provider.full_name}` : ''} | CIPAM`;
+      document.title = seoTitle.length > 60 ? `${service.title} | CIPAM` : seoTitle;
+
+      // Meta description (max 160 caractères)
+      const baseDescription = service.description || `Découvrez ${service.title} proposé par nos professionnels qualifiés.`;
+      const seoDescription = baseDescription.length > 160 
+        ? baseDescription.substring(0, 157) + '...' 
+        : baseDescription;
+
+      // Mettre à jour ou créer la meta description
+      let metaDescription = document.querySelector('meta[name="description"]');
+      if (!metaDescription) {
+        metaDescription = document.createElement('meta');
+        metaDescription.setAttribute('name', 'description');
+        document.head.appendChild(metaDescription);
+      }
+      metaDescription.setAttribute('content', seoDescription);
+
+      // Open Graph tags pour le partage social
+      const updateOrCreateMeta = (property: string, content: string) => {
+        let meta = document.querySelector(`meta[property="${property}"]`);
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.setAttribute('property', property);
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+      };
+
+      updateOrCreateMeta('og:title', service.title);
+      updateOrCreateMeta('og:description', seoDescription);
+      updateOrCreateMeta('og:type', 'product');
+      updateOrCreateMeta('og:url', window.location.href);
+      if (service.image_url) {
+        updateOrCreateMeta('og:image', service.image_url);
+      }
+
+      // Twitter Card tags
+      const updateOrCreateTwitterMeta = (name: string, content: string) => {
+        let meta = document.querySelector(`meta[name="${name}"]`);
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.setAttribute('name', name);
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+      };
+
+      updateOrCreateTwitterMeta('twitter:card', 'summary_large_image');
+      updateOrCreateTwitterMeta('twitter:title', service.title);
+      updateOrCreateTwitterMeta('twitter:description', seoDescription);
+      if (service.image_url) {
+        updateOrCreateTwitterMeta('twitter:image', service.image_url);
+      }
+    }
+
+    // Cleanup: restaurer le titre par défaut au démontage
+    return () => {
+      document.title = 'CIPAM - Centre de Psychologie et de Bien-être';
+    };
+  }, [service]);
+
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({
