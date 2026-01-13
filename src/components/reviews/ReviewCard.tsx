@@ -14,7 +14,7 @@ interface ReviewCardProps {
     user: {
       full_name: string | null;
       avatar_url: string | null;
-    };
+    } | null;
   };
   onReport?: (reviewId: string) => void;
 }
@@ -24,9 +24,9 @@ export function ReviewCard({ review, onReport }: ReviewCardProps) {
     <div className="border-b border-border pb-6 last:border-b-0 last:pb-0">
       <div className="flex items-start gap-4">
         <Avatar className="w-10 h-10">
-          <AvatarImage src={review.user.avatar_url || undefined} />
+          <AvatarImage src={review.user?.avatar_url || undefined} />
           <AvatarFallback>
-            {review.user.full_name?.charAt(0) || 'U'}
+            {review.user?.full_name?.charAt(0) || 'U'}
           </AvatarFallback>
         </Avatar>
         
@@ -34,7 +34,7 @@ export function ReviewCard({ review, onReport }: ReviewCardProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-foreground">
-                {review.user.full_name || 'Utilisateur anonyme'}
+                {review.user?.full_name || 'Utilisateur anonyme'}
               </p>
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex items-center gap-0.5">
