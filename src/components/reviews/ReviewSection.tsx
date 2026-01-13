@@ -16,7 +16,7 @@ interface Review {
   user: {
     full_name: string | null;
     avatar_url: string | null;
-  };
+  } | null;
 }
 
 interface ReviewSectionProps {
