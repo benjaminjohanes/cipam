@@ -20,6 +20,7 @@ interface Service {
   image_url: string | null;
   provider_id: string;
   category_id: string | null;
+  slug: string | null;
   provider?: {
     full_name: string | null;
   };
@@ -38,7 +39,7 @@ const Services = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select("id, title, description, price, image_url, provider_id, category_id")
+        .select("id, title, description, price, image_url, provider_id, category_id, slug")
         .eq("status", "approved")
         .order("created_at", { ascending: false });
 
@@ -217,7 +218,7 @@ const Services = () => {
                       {service.price > 0 ? formatPrice(service.price) : "Gratuit"}
                     </span>
                     <Button size="sm" asChild>
-                      <Link to={`/services/${service.id}`}>
+                      <Link to={`/services/${service.slug || service.id}`}>
                         Voir détails
                       </Link>
                     </Button>

@@ -50,6 +50,7 @@ interface RelatedService {
   title: string;
   description: string | null;
   price: number;
+  slug: string | null;
   category: {
     id: string;
     name: string;
@@ -81,7 +82,10 @@ const ServiceDetail = () => {
       if (!id) return;
 
       try {
-        const { data, error } = await supabase
+        // Vérifier si c'est un UUID ou un slug
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+        
+        let query = supabase
           .from('services')
           .select(`
             *,
@@ -91,9 +95,16 @@ const ServiceDetail = () => {
               experience_years, consultation_rate, is_verified, location
             )
           `)
-          .eq('id', id)
-          .eq('status', 'approved')
-          .single();
+          .eq('status', 'approved');
+        
+        // Rechercher par UUID ou par slug
+        if (isUuid) {
+          query = query.eq('id', id);
+        } else {
+          query = query.eq('slug', id);
+        }
+        
+        const { data, error } = await query.single();
 
         if (error) throw error;
         setService(data as Service);
@@ -109,7 +120,7 @@ const ServiceDetail = () => {
             `)
             .eq('category_id', data.category.id)
             .eq('status', 'approved')
-            .neq('id', id)
+            .neq('id', data.id)
             .limit(3);
 
           if (related) setRelatedServices(related as RelatedService[]);
@@ -454,7 +465,7 @@ const ServiceDetail = () => {
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-primary">{formatPrice(related.price)}</span>
                         <Button size="sm" variant="outline" asChild>
-                          <Link to={`/services/${related.id}`}>Voir</Link>
+                          <Link to={`/services/${related.slug || related.id}`}>Voir</Link>
                         </Button>
                       </div>
                     </CardContent>
