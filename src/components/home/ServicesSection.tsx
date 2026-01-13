@@ -12,6 +12,7 @@ interface Service {
   description: string | null;
   price: number;
   image_url: string | null;
+  slug: string | null;
 }
 
 const iconColors = [
@@ -31,7 +32,7 @@ export function ServicesSection() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select("id, title, description, price, image_url")
+        .select("id, title, description, price, image_url, slug")
         .eq("status", "approved")
         .order("created_at", { ascending: false })
         .limit(6);
@@ -129,7 +130,7 @@ export function ServicesSection() {
                 transition={{ delay: index * 0.1 }}
               >
                 <Link
-                  to={`/services/${service.id}`}
+                  to={`/services/${service.slug || service.id}`}
                   className="block group h-full bg-card rounded-2xl p-6 shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-1"
                 >
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${colorClass} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
