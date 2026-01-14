@@ -1,3 +1,6 @@
+# CIPAM - Robots.txt
+# https://cipam.lovable.app
+
 User-agent: Googlebot
 Allow: /
 
@@ -12,3 +15,10 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemap dynamique
+Sitemap: https://rheytgaoexnzsbvnwbrz.supabase.co/functions/v1/sitemap
+
+# Pages à ne pas indexer
+Disallow: /dashboard/
+Disallow: /auth
