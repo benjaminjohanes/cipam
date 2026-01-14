@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import useSEO from "@/hooks/useSEO";
 import {
   Select,
   SelectContent,
@@ -48,6 +49,7 @@ const priceRanges = [
 ];
 
 const Professionnels = () => {
+  useSEO();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("Tous");
   const [selectedLocation, setSelectedLocation] = useState("Toutes");

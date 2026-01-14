@@ -12,6 +12,7 @@ import { useAffiliateTracking } from "@/hooks/useAffiliateTracking";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import useSEO from "@/hooks/useSEO";
 
 interface Formation {
   id: string;
@@ -33,6 +34,7 @@ interface Formation {
 }
 
 const Formations = () => {
+  useSEO();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const { categories, loading: categoriesLoading } = useCategories('formation');
