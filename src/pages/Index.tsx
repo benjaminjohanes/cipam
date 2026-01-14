@@ -5,8 +5,11 @@ import { ServicesSection } from "@/components/home/ServicesSection";
 import { ProfessionalsSection } from "@/components/home/ProfessionalsSection";
 import { FormationsSection } from "@/components/home/FormationsSection";
 import { CTASection } from "@/components/home/CTASection";
+import useSEO from "@/hooks/useSEO";
 
 const Index = () => {
+  useSEO();
+
   return (
     <div className="min-h-screen bg-background">
       <Header />

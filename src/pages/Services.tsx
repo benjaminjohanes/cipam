@@ -11,6 +11,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import useSEO from "@/hooks/useSEO";
 
 interface Service {
   id: string;
@@ -30,6 +31,7 @@ interface Service {
 }
 
 const Services = () => {
+  useSEO();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const { categories, loading: categoriesLoading } = useCategories('service');
