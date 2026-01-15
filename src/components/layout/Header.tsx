@@ -155,6 +155,12 @@ export function Header() {
                         Tableau de bord
                       </Link>
                     </Button>
+                    <Button variant="outline" asChild className="w-full">
+                      <Link to="/dashboard/profile" onClick={() => setMobileMenuOpen(false)}>
+                        <User className="h-4 w-4 mr-2" />
+                        Mon profil
+                      </Link>
+                    </Button>
                     <Button variant="destructive" onClick={handleSignOut} className="w-full">
                       <LogOut className="h-4 w-4 mr-2" />
                       Déconnexion
