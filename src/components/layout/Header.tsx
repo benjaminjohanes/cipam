@@ -88,7 +88,7 @@ export function Header() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className="flex items-center gap-2">
+                    <Link to="/dashboard/profile" className="flex items-center gap-2">
                       <User className="h-4 w-4" />
                       Mon profil
                     </Link>
