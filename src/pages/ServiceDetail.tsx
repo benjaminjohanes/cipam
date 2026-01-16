@@ -17,6 +17,7 @@ import { BookingDialog } from "@/components/booking/BookingDialog";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useReviewStats } from "@/hooks/useReviewStats";
 
 interface ServiceProvider {
   id: string;
@@ -72,6 +73,7 @@ const ServiceDetail = () => {
   const [loading, setLoading] = useState(true);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [relatedServices, setRelatedServices] = useState<RelatedService[]>([]);
+  const { stats: reviewStats } = useReviewStats('service', service?.id || '');
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
@@ -200,8 +202,8 @@ const ServiceDetail = () => {
         updateOrCreateTwitterMeta('twitter:image', service.image_url);
       }
 
-      // JSON-LD Schema.org pour les services
-      const jsonLd = {
+      // JSON-LD Schema.org pour les services avec vraies données d'avis
+      const jsonLd: Record<string, any> = {
         "@context": "https://schema.org",
         "@type": "Service",
         "@id": window.location.href,
@@ -234,6 +236,17 @@ const ServiceDetail = () => {
         "serviceType": service.category?.name || "Consultation psychologique"
       };
 
+      // Ajouter AggregateRating seulement si des avis existent
+      if (reviewStats.totalReviews > 0) {
+        jsonLd.aggregateRating = {
+          "@type": "AggregateRating",
+          "ratingValue": reviewStats.averageRating.toFixed(1),
+          "bestRating": "5",
+          "worstRating": "1",
+          "ratingCount": reviewStats.totalReviews
+        };
+      }
+
       let script = document.querySelector('script[data-schema="service"]');
       if (!script) {
         script = document.createElement('script');
@@ -250,7 +263,7 @@ const ServiceDetail = () => {
       const existingScript = document.querySelector('script[data-schema="service"]');
       if (existingScript) existingScript.remove();
     };
-  }, [service]);
+  }, [service, reviewStats]);
 
   const handleShare = async () => {
     if (navigator.share) {
