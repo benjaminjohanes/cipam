@@ -199,11 +199,56 @@ const ServiceDetail = () => {
       if (service.image_url) {
         updateOrCreateTwitterMeta('twitter:image', service.image_url);
       }
+
+      // JSON-LD Schema.org pour les services
+      const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "@id": window.location.href,
+        "name": service.title,
+        "description": seoDescription,
+        "image": service.image_url || undefined,
+        "url": window.location.href,
+        "provider": service.provider ? {
+          "@type": "Person",
+          "name": service.provider.full_name || "Professionnel",
+          "jobTitle": service.provider.specialty || "Psychologue",
+          "image": service.provider.avatar_url || undefined,
+          "address": service.provider.location ? {
+            "@type": "PostalAddress",
+            "addressLocality": service.provider.location
+          } : undefined
+        } : undefined,
+        "category": service.category?.name || "Services psychologiques",
+        "offers": {
+          "@type": "Offer",
+          "price": service.price,
+          "priceCurrency": "XOF",
+          "availability": "https://schema.org/InStock",
+          "validFrom": new Date().toISOString().split('T')[0]
+        },
+        "areaServed": {
+          "@type": "Place",
+          "name": "Afrique de l'Ouest"
+        },
+        "serviceType": service.category?.name || "Consultation psychologique"
+      };
+
+      let script = document.querySelector('script[data-schema="service"]');
+      if (!script) {
+        script = document.createElement('script');
+        script.setAttribute('type', 'application/ld+json');
+        script.setAttribute('data-schema', 'service');
+        document.head.appendChild(script);
+      }
+      script.textContent = JSON.stringify(jsonLd);
     }
 
-    // Cleanup: restaurer le titre par défaut au démontage
+    // Cleanup: restaurer le titre et supprimer le JSON-LD au démontage
     return () => {
       document.title = 'CIPAM - Centre de Psychologie et de Bien-être';
+      const existingScript = document.querySelector('script[data-schema="service"]');
+      if (existingScript) existingScript.remove();
     };
   }, [service]);
 

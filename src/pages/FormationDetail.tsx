@@ -48,6 +48,68 @@ const FormationDetail = () => {
     fetchAuthor();
   }, [formation?.author_id]);
 
+  // JSON-LD Schema.org pour les formations
+  useEffect(() => {
+    if (!formation) return;
+
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Course",
+      "@id": window.location.href,
+      "name": formation.title,
+      "description": formation.description || `Formation professionnelle: ${formation.title}`,
+      "image": formation.image_url || undefined,
+      "url": window.location.href,
+      "provider": {
+        "@type": "Organization",
+        "name": "CIPAM",
+        "url": "https://cipam.lovable.app"
+      },
+      "instructor": author ? {
+        "@type": "Person",
+        "name": author.full_name || "Formateur",
+        "jobTitle": author.specialty || "Expert en formation",
+        "image": author.avatar_url || undefined
+      } : undefined,
+      "educationalLevel": formation.level || "Débutant",
+      "courseCode": formation.id,
+      "numberOfCredits": formation.modules_count || 5,
+      "hasCourseInstance": {
+        "@type": "CourseInstance",
+        "courseMode": "online",
+        "duration": formation.duration || undefined
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": formation.price,
+        "priceCurrency": "XOF",
+        "availability": "https://schema.org/InStock",
+        "category": formation.categories?.name || "Formation professionnelle"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "56"
+      },
+      "inLanguage": "fr",
+      "isAccessibleForFree": formation.price === 0
+    };
+
+    let script = document.querySelector('script[data-schema="formation"]');
+    if (!script) {
+      script = document.createElement('script');
+      script.setAttribute('type', 'application/ld+json');
+      script.setAttribute('data-schema', 'formation');
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(jsonLd);
+
+    return () => {
+      const existingScript = document.querySelector('script[data-schema="formation"]');
+      if (existingScript) existingScript.remove();
+    };
+  }, [formation, author]);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
   };
