@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDialog } from "@/components/booking/BookingDialog";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
+import { useReviewStats } from "@/hooks/useReviewStats";
 
 interface Professional {
   id: string;
@@ -45,6 +46,7 @@ const ProfessionalDetail = () => {
   const [professional, setProfessional] = useState<Professional | null>(null);
   const [loading, setLoading] = useState(true);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const { stats: reviewStats } = useReviewStats('professional', id || '');
 
   useEffect(() => {
     const fetchProfessional = async () => {
@@ -67,11 +69,11 @@ const ProfessionalDetail = () => {
     fetchProfessional();
   }, [id]);
 
-  // JSON-LD Schema.org pour SEO
+  // JSON-LD Schema.org pour SEO avec vraies données d'avis
   useEffect(() => {
     if (!professional) return;
 
-    const jsonLd = {
+    const jsonLd: Record<string, any> = {
       "@context": "https://schema.org",
       "@type": "Person",
       "@id": window.location.href,
@@ -102,6 +104,17 @@ const ProfessionalDetail = () => {
       } : undefined
     };
 
+    // Ajouter AggregateRating seulement si des avis existent
+    if (reviewStats.totalReviews > 0) {
+      jsonLd.aggregateRating = {
+        "@type": "AggregateRating",
+        "ratingValue": reviewStats.averageRating.toFixed(1),
+        "bestRating": "5",
+        "worstRating": "1",
+        "ratingCount": reviewStats.totalReviews
+      };
+    }
+
     // Créer ou mettre à jour le script JSON-LD
     let script = document.querySelector('script[data-schema="professional"]');
     if (!script) {
@@ -117,7 +130,7 @@ const ProfessionalDetail = () => {
       const existingScript = document.querySelector('script[data-schema="professional"]');
       if (existingScript) existingScript.remove();
     };
-  }, [professional]);
+  }, [professional, reviewStats]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';

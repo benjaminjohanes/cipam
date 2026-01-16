@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { useFormations } from "@/hooks/useFormations";
 import { useAuth } from "@/hooks/useAuth";
+import { useReviewStats } from "@/hooks/useReviewStats";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -31,6 +32,7 @@ const FormationDetail = () => {
   const { formations, loading } = useFormations();
   const [author, setAuthor] = useState<AuthorProfile | null>(null);
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const { stats: reviewStats } = useReviewStats('formation', id || '');
 
   const formation = formations.find(f => f.id === id);
 
@@ -48,11 +50,11 @@ const FormationDetail = () => {
     fetchAuthor();
   }, [formation?.author_id]);
 
-  // JSON-LD Schema.org pour les formations
+  // JSON-LD Schema.org pour les formations avec vraies données d'avis
   useEffect(() => {
     if (!formation) return;
 
-    const jsonLd = {
+    const jsonLd: Record<string, any> = {
       "@context": "https://schema.org",
       "@type": "Course",
       "@id": window.location.href,
@@ -86,14 +88,20 @@ const FormationDetail = () => {
         "availability": "https://schema.org/InStock",
         "category": formation.categories?.name || "Formation professionnelle"
       },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "56"
-      },
       "inLanguage": "fr",
       "isAccessibleForFree": formation.price === 0
     };
+
+    // Ajouter AggregateRating seulement si des avis existent
+    if (reviewStats.totalReviews > 0) {
+      jsonLd.aggregateRating = {
+        "@type": "AggregateRating",
+        "ratingValue": reviewStats.averageRating.toFixed(1),
+        "bestRating": "5",
+        "worstRating": "1",
+        "ratingCount": reviewStats.totalReviews
+      };
+    }
 
     let script = document.querySelector('script[data-schema="formation"]');
     if (!script) {
@@ -108,7 +116,7 @@ const FormationDetail = () => {
       const existingScript = document.querySelector('script[data-schema="formation"]');
       if (existingScript) existingScript.remove();
     };
-  }, [formation, author]);
+  }, [formation, author, reviewStats]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
@@ -204,10 +212,12 @@ const FormationDetail = () => {
                     <BookOpen className="w-4 h-4" />
                     <span>{formation.modules_count || 5} modules</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 fill-cipam-gold text-cipam-gold" />
-                    <span>4.8 (56 avis)</span>
-                  </div>
+                  {reviewStats.totalReviews > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Star className="w-4 h-4 fill-cipam-gold text-cipam-gold" />
+                      <span>{reviewStats.averageRating.toFixed(1)} ({reviewStats.totalReviews} avis)</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
                     <span>234 étudiants</span>
