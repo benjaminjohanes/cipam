@@ -67,6 +67,58 @@ const ProfessionalDetail = () => {
     fetchProfessional();
   }, [id]);
 
+  // JSON-LD Schema.org pour SEO
+  useEffect(() => {
+    if (!professional) return;
+
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "@id": window.location.href,
+      "name": professional.full_name || "Professionnel",
+      "jobTitle": professional.specialty || "Psychologue",
+      "description": professional.bio || undefined,
+      "image": professional.avatar_url || undefined,
+      "email": professional.email,
+      "telephone": professional.phone || undefined,
+      "address": professional.location ? {
+        "@type": "PostalAddress",
+        "addressLocality": professional.location
+      } : undefined,
+      "worksFor": {
+        "@type": "Organization",
+        "name": "CIPAM",
+        "url": "https://cipam.lovable.app"
+      },
+      "memberOf": {
+        "@type": "Organization",
+        "name": "CIPAM - Centre de Psychologie et de Bien-être"
+      },
+      "knowsAbout": professional.specialty || undefined,
+      "hasCredential": professional.is_verified ? {
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": "Certification professionnelle",
+        "name": "Membre certifié CIPAM"
+      } : undefined
+    };
+
+    // Créer ou mettre à jour le script JSON-LD
+    let script = document.querySelector('script[data-schema="professional"]');
+    if (!script) {
+      script = document.createElement('script');
+      script.setAttribute('type', 'application/ld+json');
+      script.setAttribute('data-schema', 'professional');
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(jsonLd);
+
+    // Cleanup au démontage
+    return () => {
+      const existingScript = document.querySelector('script[data-schema="professional"]');
+      if (existingScript) existingScript.remove();
+    };
+  }, [professional]);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
   };
