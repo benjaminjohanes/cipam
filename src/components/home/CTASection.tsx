@@ -60,7 +60,7 @@ export function CTASection() {
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+            <Button size="lg" variant="outline" asChild className="border-white/50 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm">
               <Link to="/professionnels">
                 Explorer les professionnels
               </Link>
