@@ -120,56 +120,125 @@ export function FormationsSection() {
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 60, scale: 0.9 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: {
+        type: "spring" as const,
+        stiffness: 70,
+        damping: 15
+      }
+    }
+  };
+
   return (
     <section className="py-24 bg-cipam-cream">
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
           className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12"
         >
           <div>
-            <span className="text-primary font-medium text-sm uppercase tracking-wider">Formations</span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mt-3 text-foreground">
-              Développez vos compétences
-            </h2>
-            <p className="text-muted-foreground mt-4 max-w-xl">
-              Des formations en ligne et en présentiel dispensées par nos meilleurs experts.
-            </p>
-          </div>
-          <Button variant="outline" asChild className="self-start md:self-auto">
-            <Link to="/formations">
-              Toutes les formations
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Link>
-          </Button>
-        </motion.div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {formations.map((formation, index) => (
-            <motion.div
-              key={formation.id}
-              initial={{ opacity: 0, y: 30 }}
+            <motion.span 
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-primary font-medium text-sm uppercase tracking-wider inline-block"
+            >
+              Formations
+            </motion.span>
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-3xl md:text-4xl font-display font-bold mt-3 text-foreground"
+            >
+              Développez vos compétences
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-muted-foreground mt-4 max-w-xl"
+            >
+              Des formations en ligne et en présentiel dispensées par nos meilleurs experts.
+            </motion.p>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Button variant="outline" asChild className="self-start md:self-auto group">
+              <Link to="/formations">
+                Toutes les formations
+                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </Button>
+          </motion.div>
+        </motion.div>
+
+        <motion.div 
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
+          {formations.map((formation) => (
+            <motion.div
+              key={formation.id}
+              variants={cardVariants}
+              whileHover={{ y: -12, transition: { duration: 0.3 } }}
             >
               <Link
                 to={`/formations/${formation.id}`}
-                className="block group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-medium transition-all duration-300"
+                className="block group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-medium transition-shadow duration-300"
               >
                 <div className="aspect-video relative overflow-hidden">
-                  <img
+                  <motion.img
                     src={formation.image_url || "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&h=400&fit=crop"}
                     alt={formation.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover"
+                    whileHover={{ scale: 1.08 }}
+                    transition={{ duration: 0.6 }}
                   />
-                  <div className="absolute inset-0 bg-foreground/20 group-hover:bg-foreground/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center">
+                  <motion.div 
+                    className="absolute inset-0 bg-foreground/20 flex items-center justify-center"
+                    initial={{ opacity: 0 }}
+                    whileHover={{ opacity: 1, backgroundColor: "rgba(0,0,0,0.4)" }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <motion.div 
+                      className="w-14 h-14 rounded-full bg-primary flex items-center justify-center"
+                      initial={{ scale: 0 }}
+                      whileHover={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
                       <Play className="w-6 h-6 text-primary-foreground fill-primary-foreground" />
-                    </div>
-                  </div>
+                    </motion.div>
+                  </motion.div>
                   <Badge className="absolute top-4 right-4 bg-card/90 text-foreground">
                     {formation.level}
                   </Badge>
@@ -209,7 +278,7 @@ export function FormationsSection() {
                     <span className="text-xl font-bold text-primary">
                       {formation.price > 0 ? formatPrice(formation.price) : "Gratuit"}
                     </span>
-                    <Button size="sm">
+                    <Button size="sm" className="group-hover:bg-primary/90">
                       S'inscrire
                     </Button>
                   </div>
@@ -217,7 +286,7 @@ export function FormationsSection() {
               </Link>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
