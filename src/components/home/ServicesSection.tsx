@@ -97,26 +97,78 @@ export function ServicesSection() {
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 40, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: {
+        type: "spring" as const,
+        stiffness: 100,
+        damping: 15
+      }
+    }
+  };
+
   return (
     <section className="py-24 bg-secondary/30">
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="text-primary font-medium text-sm uppercase tracking-wider">Nos Services</span>
-          <h2 className="text-3xl md:text-4xl font-display font-bold mt-3 text-foreground">
+          <motion.span 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-primary font-medium text-sm uppercase tracking-wider inline-block"
+          >
+            Nos Services
+          </motion.span>
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-3xl md:text-4xl font-display font-bold mt-3 text-foreground"
+          >
             Des solutions adaptées à vos besoins
-          </h2>
-          <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-muted-foreground mt-4 max-w-2xl mx-auto"
+          >
             Découvrez notre gamme complète de services psychologiques, conçus pour vous accompagner 
             à chaque étape de votre parcours vers le bien-être.
-          </p>
+          </motion.p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div 
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
           {services.map((service, index) => {
             const IconComponent = defaultIcons[index % defaultIcons.length];
             const colorClass = iconColors[index % iconColors.length];
@@ -124,18 +176,20 @@ export function ServicesSection() {
             return (
               <motion.div
                 key={service.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                variants={cardVariants}
+                whileHover={{ y: -8, transition: { duration: 0.3 } }}
               >
                 <Link
                   to={`/services/${service.slug || service.id}`}
-                  className="block group h-full bg-card rounded-2xl p-6 shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-1"
+                  className="block group h-full bg-card rounded-2xl p-6 shadow-soft hover:shadow-medium transition-shadow duration-300"
                 >
-                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${colorClass} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
+                  <motion.div 
+                    className={`w-14 h-14 rounded-xl bg-gradient-to-br ${colorClass} flex items-center justify-center mb-5`}
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
                     <IconComponent className="w-7 h-7 text-primary-foreground" />
-                  </div>
+                  </motion.div>
                   <h3 className="text-xl font-display font-semibold text-foreground mb-2">
                     {service.title}
                   </h3>
@@ -153,7 +207,7 @@ export function ServicesSection() {
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
