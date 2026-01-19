@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import logo from "@/assets/cipam_logo.jpg";
+import logo from "@/assets/logo.jpeg";
 
 const navItems = [
   { label: "Accueil", href: "/" },
@@ -25,7 +25,7 @@ const navItems = [
 const roleLabels: Record<string, string> = {
   student: "Étudiant",
   professional: "Professionnel",
-  patient: "Patient",
+  patient: "Usager",
   admin: "Administrateur",
 };
 
@@ -46,10 +46,6 @@ export function Header() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
             <img src={logo} alt="ALLÔ PSY Logo" className="h-14 w-auto" />
-            <div className="hidden sm:block">
-              <span className="text-xl font-display font-semibold text-foreground">ALLÔ PSY</span>
-              <p className="text-xs text-muted-foreground italic">La Psychologie dans la Pratique</p>
-            </div>
           </Link>
 
           {/* Desktop Navigation */}

@@ -3,6 +3,7 @@ import { ArrowRight, Play, Star, Users, BookOpen, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
+import logo from "@/assets/logo.jpeg";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -66,9 +67,9 @@ export function HeroSection() {
             <motion.div 
               variants={fadeInUp}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full text-accent text-sm font-medium"
             >
-              <Star className="w-4 h-4 fill-primary" />
+              <Star className="w-4 h-4 fill-accent" />
               Centre d'Excellence en Psychologie
             </motion.div>
 
@@ -77,7 +78,7 @@ export function HeroSection() {
               transition={{ duration: 0.6 }}
               className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight"
             >
-              Votre <span className="text-gradient">bien-être mental</span> est notre priorité
+              Vous méritez d'être <span className="text-gradient">écouté et soutenu</span>, sans jugement
             </motion.h1>
 
             <motion.p 
@@ -126,7 +127,7 @@ export function HeroSection() {
                   transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }}
                   className="text-center sm:text-left"
                 >
-                  <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-primary">
+                  <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-accent">
                     <stat.icon className="w-5 h-5" />
                     <span className="text-xl sm:text-2xl font-bold">{stat.value}</span>
                   </div>
@@ -158,16 +159,13 @@ export function HeroSection() {
               />
               <div className="absolute inset-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 backdrop-blur-sm" />
               
-              {/* Center element */}
+              {/* Center element with logo */}
               <motion.div 
-                className="absolute inset-24 rounded-full gradient-hero flex items-center justify-center shadow-glow"
+                className="absolute inset-24 rounded-full bg-white flex items-center justify-center shadow-glow overflow-hidden"
                 animate={{ rotate: [0, 2, -2, 0] }}
                 transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
               >
-                <div className="text-center text-primary-foreground">
-                  <div className="text-4xl font-display font-bold">ALLÔ PSY</div>
-                  <div className="text-sm mt-1 opacity-90">Excellence & Bienveillance</div>
-                </div>
+                <img src={logo} alt="ALLÔ PSY" className="w-full h-full object-contain p-4" />
               </motion.div>
 
               {/* Floating cards */}
@@ -182,8 +180,8 @@ export function HeroSection() {
                 className="absolute top-10 right-0 bg-card p-4 rounded-xl shadow-medium"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-accent" />
                   </div>
                   <div>
                     <div className="text-sm font-semibold">RDV Confirmé</div>
@@ -203,8 +201,8 @@ export function HeroSection() {
                 className="absolute bottom-10 left-0 bg-card p-4 rounded-xl shadow-medium"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                    <BookOpen className="w-5 h-5 text-accent" />
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <BookOpen className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <div className="text-sm font-semibold">Nouvelle Formation</div>

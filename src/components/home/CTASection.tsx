@@ -25,10 +25,10 @@ export function CTASection() {
             viewport={{ once: true }}
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold text-primary-foreground leading-tight px-2">
-              Commencez votre parcours vers le bien-être aujourd'hui
+              Vous méritez d'être écouté et soutenu, sans jugement
             </h2>
             <p className="text-primary-foreground/80 mt-4 sm:mt-6 text-base sm:text-lg max-w-2xl mx-auto px-4 sm:px-0">
-              Rejoignez des milliers de personnes qui ont choisi ALLÔ PSY pour leur accompagnement psychologique.
+              Rejoignez des milliers de personnes qui ont choisi ALLÔ PSY pour leur accompagnement psychologique personnalisé.
             </p>
           </motion.div>
 

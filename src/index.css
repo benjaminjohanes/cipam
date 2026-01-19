@@ -6,30 +6,30 @@
 
 @layer base {
   :root {
-    /* CIPAM Brand Colors - Professional Psychology Theme */
+    /* ALLÔ PSY Brand Colors - Navy Blue & Green Theme */
     --background: 45 30% 97%;
-    --foreground: 210 40% 15%;
+    --foreground: 215 50% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 40% 15%;
+    --card-foreground: 215 50% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 40% 15%;
+    --popover-foreground: 215 50% 15%;
 
-    /* Primary - Deep Teal/Cyan from logo */
-    --primary: 195 70% 35%;
+    /* Primary - Navy Blue from logo */
+    --primary: 215 55% 25%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Warm Cream */
-    --secondary: 45 40% 92%;
-    --secondary-foreground: 210 40% 15%;
+    /* Secondary - Light Cream/Gray */
+    --secondary: 45 40% 94%;
+    --secondary-foreground: 215 50% 15%;
 
-    /* Muted - Soft Gray-Blue */
+    /* Muted - Soft Gray */
     --muted: 210 20% 94%;
     --muted-foreground: 210 15% 45%;
 
-    /* Accent - Lighter Cyan */
-    --accent: 195 65% 50%;
+    /* Accent - Green from logo */
+    --accent: 135 45% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -37,75 +37,76 @@
 
     --border: 210 20% 88%;
     --input: 210 20% 88%;
-    --ring: 195 70% 35%;
+    --ring: 215 55% 25%;
 
     --radius: 0.75rem;
 
-    /* Custom CIPAM tokens */
-    --cipam-teal: 195 70% 35%;
-    --cipam-teal-light: 195 65% 50%;
-    --cipam-teal-dark: 195 75% 25%;
-    --cipam-cream: 45 40% 95%;
-    --cipam-gold: 38 60% 55%;
-    --cipam-navy: 210 50% 20%;
+    /* Custom ALLÔ PSY tokens */
+    --allopsy-navy: 215 55% 25%;
+    --allopsy-navy-light: 215 50% 35%;
+    --allopsy-navy-dark: 215 60% 18%;
+    --allopsy-green: 135 45% 50%;
+    --allopsy-green-light: 135 45% 60%;
+    --allopsy-green-dark: 135 50% 40%;
+    --allopsy-cream: 45 40% 95%;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(195 70% 35%) 0%, hsl(195 65% 50%) 50%, hsl(180 50% 45%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(215 55% 25%) 0%, hsl(135 45% 50%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(45 30% 98%) 100%);
-    --gradient-overlay: linear-gradient(180deg, transparent 0%, hsl(210 40% 15% / 0.7) 100%);
+    --gradient-overlay: linear-gradient(180deg, transparent 0%, hsl(215 50% 15% / 0.7) 100%);
 
     /* Shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(210 40% 15% / 0.08);
-    --shadow-medium: 0 8px 30px -6px hsl(210 40% 15% / 0.12);
-    --shadow-glow: 0 0 40px hsl(195 70% 35% / 0.2);
+    --shadow-soft: 0 4px 20px -4px hsl(215 50% 15% / 0.08);
+    --shadow-medium: 0 8px 30px -6px hsl(215 50% 15% / 0.12);
+    --shadow-glow: 0 0 40px hsl(135 45% 50% / 0.2);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 195 70% 35%;
+    --sidebar-primary: 215 55% 25%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 45 40% 95%;
-    --sidebar-accent-foreground: 210 40% 15%;
+    --sidebar-accent: 135 45% 50%;
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 210 20% 88%;
-    --sidebar-ring: 195 70% 35%;
+    --sidebar-ring: 215 55% 25%;
   }
 
   .dark {
-    --background: 210 40% 10%;
+    --background: 215 50% 10%;
     --foreground: 45 30% 95%;
 
-    --card: 210 35% 14%;
+    --card: 215 45% 14%;
     --card-foreground: 45 30% 95%;
 
-    --popover: 210 35% 14%;
+    --popover: 215 45% 14%;
     --popover-foreground: 45 30% 95%;
 
-    --primary: 195 65% 50%;
-    --primary-foreground: 210 40% 10%;
+    --primary: 135 45% 50%;
+    --primary-foreground: 215 50% 10%;
 
-    --secondary: 210 30% 18%;
+    --secondary: 215 40% 18%;
     --secondary-foreground: 45 30% 95%;
 
-    --muted: 210 30% 18%;
+    --muted: 215 40% 18%;
     --muted-foreground: 210 15% 65%;
 
-    --accent: 195 60% 45%;
+    --accent: 135 45% 45%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 30% 22%;
-    --input: 210 30% 22%;
-    --ring: 195 65% 50%;
+    --border: 215 40% 22%;
+    --input: 215 40% 22%;
+    --ring: 135 45% 50%;
 
-    --sidebar-background: 210 40% 10%;
+    --sidebar-background: 215 50% 10%;
     --sidebar-foreground: 45 30% 95%;
-    --sidebar-primary: 195 65% 50%;
-    --sidebar-primary-foreground: 210 40% 10%;
-    --sidebar-accent: 210 30% 18%;
+    --sidebar-primary: 135 45% 50%;
+    --sidebar-primary-foreground: 215 50% 10%;
+    --sidebar-accent: 215 40% 18%;
     --sidebar-accent-foreground: 45 30% 95%;
-    --sidebar-border: 210 30% 22%;
-    --sidebar-ring: 195 65% 50%;
+    --sidebar-border: 215 40% 22%;
+    --sidebar-ring: 135 45% 50%;
   }
 }
 
