@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import logo from "@/assets/logo.jpeg";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   { label: "Accueil", href: "/" },
