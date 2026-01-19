@@ -1,23 +1,19 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, Facebook, Linkedin, Twitter } from "lucide-react";
-import logo from "@/assets/cipam_logo.jpg";
+import logo from "@/assets/logo.jpeg";
 
 export function Footer() {
   return (
-    <footer className="bg-cipam-navy text-secondary py-16">
+    <footer className="bg-allopsy-navy text-secondary py-16">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="ALLÔ PSY Logo" className="h-12 w-auto rounded-lg" />
-              <div>
-                <span className="text-xl font-display font-semibold">ALLÔ PSY</span>
-                <p className="text-xs text-secondary/70 italic">La Psychologie dans la Pratique</p>
-              </div>
+              <img src={logo} alt="ALLÔ PSY Logo" className="h-16 w-auto rounded-lg bg-white p-1" />
             </div>
-            <p className="text-secondary/80 text-sm leading-relaxed">
-              ALLÔ PSY - Votre partenaire pour le bien-être mental et la psychologie appliquée.
+            <p className="text-secondary/80 text-sm leading-relaxed italic">
+              "Vous méritez d'être écouté et soutenu, sans jugement"
             </p>
           </div>
 
@@ -61,9 +57,12 @@ export function Footer() {
                 <Mail className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
                 <span className="break-all">cipam.global.contact@gmail.com</span>
               </li>
-              <li className="flex items-center gap-3 text-sm text-secondary/70">
-                <Phone className="w-4 h-4 text-accent flex-shrink-0" />
-                <span>+229 01 52 40 14 70</span>
+              <li className="flex items-start gap-3 text-sm text-secondary/70">
+                <Phone className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
+                <div className="flex flex-col">
+                  <span>+229 01 52 01 17 77</span>
+                  <span>+229 01 59 05 40 93</span>
+                </div>
               </li>
               <li className="flex items-start gap-3 text-sm text-secondary/70">
                 <MapPin className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
@@ -86,7 +85,7 @@ export function Footer() {
 
         <div className="border-t border-secondary/10 mt-12 pt-8 text-center text-sm text-secondary/60">
           <p>
-            © {new Date().getFullYear()} ALLÔ PSY - La Psychologie dans la Pratique. Tous droits réservés.
+            © {new Date().getFullYear()} ALLÔ PSY. Tous droits réservés.
           </p>
         </div>
       </div>
