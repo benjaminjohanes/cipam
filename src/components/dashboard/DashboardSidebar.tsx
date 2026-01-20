@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
-import cipamLogo from "@/assets/cipam_logo.jpg";
+import logo from "@/assets/logo.png";
 
 type AppRole = 'student' | 'professional' | 'patient' | 'admin';
 
@@ -186,7 +186,7 @@ export function DashboardSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader className="border-b border-border p-4">
         <Link to="/" className="flex items-center gap-3">
-          <img src={cipamLogo} alt="ALLÔ PSY" className="h-10 w-10 rounded-lg object-cover" />
+          <img src={logo} alt="ALLÔ PSY" className="h-10 w-10 rounded-lg object-contain" />
           {!collapsed && (
             <div>
               <span className="text-lg font-display font-semibold text-foreground">ALLÔ PSY</span>
