@@ -430,6 +430,56 @@ export type Database = {
         }
         Relationships: []
       }
+      formation_modules: {
+        Row: {
+          content: string | null
+          content_type: string
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          formation_id: string
+          id: string
+          position: number
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          content?: string | null
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          formation_id: string
+          id?: string
+          position?: number
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          content?: string | null
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          formation_id?: string
+          id?: string
+          position?: number
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formation_modules_formation_id_fkey"
+            columns: ["formation_id"]
+            isOneToOne: false
+            referencedRelation: "formations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       formations: {
         Row: {
           affiliation_enabled: boolean | null
