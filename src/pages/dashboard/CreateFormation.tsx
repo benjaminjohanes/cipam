@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookOpen, Plus, Trash2, GripVertical, Upload, Save, Eye, Loader2, Link2 } from "lucide-react";
+import { BookOpen, Plus, Trash2, GripVertical, Save, Eye, Loader2, Link2, FileText, Video } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,13 +15,17 @@ import { toast } from "sonner";
 import { useCategories } from "@/hooks/useCategories";
 import { useFormations } from "@/hooks/useFormations";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ImageUpload } from "@/components/upload/ImageUpload";
+import { VideoUpload } from "@/components/upload/VideoUpload";
 
 interface Module {
   id: string;
   title: string;
   description: string;
   duration: number;
+  contentType: "text" | "video";
   content: string;
+  videoUrl: string;
 }
 
 export default function CreateFormation() {
@@ -44,13 +48,13 @@ export default function CreateFormation() {
   });
 
   const [modules, setModules] = useState<Module[]>([
-    { id: "1", title: "", description: "", duration: 30, content: "" },
+    { id: "1", title: "", description: "", duration: 30, contentType: "text", content: "", videoUrl: "" },
   ]);
 
   const addModule = () => {
     setModules(prev => [
       ...prev,
-      { id: Date.now().toString(), title: "", description: "", duration: 30, content: "" },
+      { id: Date.now().toString(), title: "", description: "", duration: 30, contentType: "text", content: "", videoUrl: "" },
     ]);
   };
 
@@ -204,11 +208,11 @@ export default function CreateFormation() {
 
               <div className="space-y-2">
                 <Label>Image de couverture</Label>
-                <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                  <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">Cliquez pour télécharger une image</p>
-                  <p className="text-xs text-muted-foreground mt-1">PNG, JPG jusqu'à 5MB</p>
-                </div>
+                <ImageUpload
+                  value={formData.thumbnail}
+                  onChange={(url) => setFormData(prev => ({ ...prev, thumbnail: url }))}
+                  bucket="formation-images"
+                />
               </div>
             </CardContent>
           </Card>
@@ -387,17 +391,52 @@ export default function CreateFormation() {
                               onChange={(e) => updateModule(module.id, "duration", Number(e.target.value))}
                             />
                           </div>
+                          <div className="space-y-2">
+                            <Label>Type de contenu</Label>
+                            <Select
+                              value={module.contentType}
+                              onValueChange={(v: "text" | "video") => updateModule(module.id, "contentType", v)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="text">
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4" />
+                                    Texte
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="video">
+                                  <div className="flex items-center gap-2">
+                                    <Video className="h-4 w-4" />
+                                    Vidéo
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
 
-                        <div className="space-y-2">
-                          <Label>Contenu du module</Label>
-                          <Textarea
-                            value={module.content}
-                            onChange={(e) => updateModule(module.id, "content", e.target.value)}
-                            placeholder="Rédigez le contenu détaillé du module..."
-                            rows={6}
-                          />
-                        </div>
+                        {module.contentType === "text" ? (
+                          <div className="space-y-2">
+                            <Label>Contenu du module</Label>
+                            <Textarea
+                              value={module.content}
+                              onChange={(e) => updateModule(module.id, "content", e.target.value)}
+                              placeholder="Rédigez le contenu détaillé du module..."
+                              rows={6}
+                            />
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <Label>Vidéo du module</Label>
+                            <VideoUpload
+                              value={module.videoUrl}
+                              onChange={(url) => updateModule(module.id, "videoUrl", url)}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -417,9 +456,19 @@ export default function CreateFormation() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                  <BookOpen className="h-12 w-12 text-muted-foreground" />
-                </div>
+                {formData.thumbnail ? (
+                  <div className="aspect-video rounded-lg overflow-hidden">
+                    <img 
+                      src={formData.thumbnail} 
+                      alt="Aperçu" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+                    <BookOpen className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                )}
 
                 <div>
                   <h2 className="text-2xl font-bold">{formData.title || "Titre de la formation"}</h2>
