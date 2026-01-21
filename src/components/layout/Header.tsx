@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, User, BookOpen, Users, Calendar, FileText, LogOut, LayoutDashboard, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/contexts/LanguageContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,29 +13,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import logo from "@/assets/logo.png";
 import CurrencyToggle from "@/components/CurrencyToggle";
-import LanguageToggle from "@/components/LanguageToggle";
+
+const navItems = [
+  { label: "Accueil", href: "/" },
+  { label: "Professionnels", href: "/professionnels", icon: Users },
+  { label: "Formations", href: "/formations", icon: BookOpen },
+  { label: "Événements", href: "/evenements", icon: Ticket },
+  { label: "Services", href: "/services", icon: Calendar },
+  { label: "Articles", href: "/articles", icon: FileText },
+];
+
+const roleLabels: Record<string, string> = {
+  student: "Étudiant",
+  professional: "Professionnel",
+  patient: "Usager",
+  admin: "Administrateur",
+};
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, profile, role, signOut } = useAuth();
-  const { t } = useLanguage();
   const navigate = useNavigate();
-
-  const navItems = [
-    { label: t.nav.home, href: "/", icon: undefined },
-    { label: t.nav.professionals, href: "/professionnels", icon: Users },
-    { label: t.nav.formations, href: "/formations", icon: BookOpen },
-    { label: t.nav.events, href: "/evenements", icon: Ticket },
-    { label: t.nav.services, href: "/services", icon: Calendar },
-    { label: t.nav.articles, href: "/articles", icon: FileText },
-  ];
-
-  const roleLabels: Record<string, string> = {
-    student: t.roles.student,
-    professional: t.roles.professional,
-    patient: t.roles.patient,
-    admin: t.roles.admin,
-  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -66,8 +63,7 @@ export function Header() {
           </nav>
 
           {/* Desktop CTA */}
-          <div className="hidden lg:flex items-center gap-2">
-            <LanguageToggle />
+          <div className="hidden lg:flex items-center gap-3">
             <CurrencyToggle />
             {user ? (
               <DropdownMenu>
@@ -86,29 +82,29 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard" className="flex items-center gap-2">
                       <LayoutDashboard className="h-4 w-4" />
-                      {t.nav.dashboard}
+                      Tableau de bord
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard/profile" className="flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      {t.nav.profile}
+                      Mon profil
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                     <LogOut className="h-4 w-4 mr-2" />
-                    {t.nav.logout}
+                    Déconnexion
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link to="/auth">{t.nav.login}</Link>
+                  <Link to="/auth">Se connecter</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link to="/auth?mode=register">{t.nav.register}</Link>
+                  <Link to="/auth?mode=register">S'inscrire</Link>
                 </Button>
               </>
             )}
@@ -146,43 +142,39 @@ export function Header() {
                 </Link>
               ))}
               <div className="px-4 py-2 flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">{t.nav.language}</span>
-                <LanguageToggle />
-              </div>
-              <div className="px-4 py-2 flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">{t.nav.currency}</span>
+                <span className="text-sm text-muted-foreground">Devise</span>
                 <CurrencyToggle />
               </div>
               <div className="pt-4 flex flex-col gap-2">
                 {user ? (
                   <>
                     <div className="px-4 py-2 text-sm text-muted-foreground">
-                      {t.common.connectedAs} <strong>{profile?.full_name || user.email}</strong>
+                      Connecté en tant que <strong>{profile?.full_name || user.email}</strong>
                     </div>
                     <Button variant="outline" asChild className="w-full">
                       <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                         <LayoutDashboard className="h-4 w-4 mr-2" />
-                        {t.nav.dashboard}
+                        Tableau de bord
                       </Link>
                     </Button>
                     <Button variant="outline" asChild className="w-full">
                       <Link to="/dashboard/profile" onClick={() => setMobileMenuOpen(false)}>
                         <User className="h-4 w-4 mr-2" />
-                        {t.nav.profile}
+                        Mon profil
                       </Link>
                     </Button>
                     <Button variant="destructive" onClick={handleSignOut} className="w-full">
                       <LogOut className="h-4 w-4 mr-2" />
-                      {t.nav.logout}
+                      Déconnexion
                     </Button>
                   </>
                 ) : (
                   <>
                     <Button variant="outline" asChild className="w-full">
-                      <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>{t.nav.login}</Link>
+                      <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>Se connecter</Link>
                     </Button>
                     <Button asChild className="w-full">
-                      <Link to="/auth?mode=register" onClick={() => setMobileMenuOpen(false)}>{t.nav.register}</Link>
+                      <Link to="/auth?mode=register" onClick={() => setMobileMenuOpen(false)}>S'inscrire</Link>
                     </Button>
                   </>
                 )}
