@@ -26,6 +26,7 @@ import UpgradeRequest from "./pages/dashboard/UpgradeRequest";
 import Availability from "./pages/dashboard/Availability";
 import MyServices from "./pages/dashboard/MyServices";
 import CreateFormation from "./pages/dashboard/CreateFormation";
+import EditFormation from "./pages/dashboard/EditFormation";
 import ProposeService from "./pages/dashboard/ProposeService";
 import FindProfessional from "./pages/dashboard/FindProfessional";
 import Payments from "./pages/dashboard/Payments";
@@ -107,6 +108,7 @@ const App = () => (
             <Route path="/dashboard/patients" element={<Patients />} />
             <Route path="/dashboard/stats" element={<Stats />} />
             <Route path="/dashboard/create-formation" element={<CreateFormation />} />
+            <Route path="/dashboard/edit-formation/:id" element={<EditFormation />} />
             <Route path="/dashboard/earnings" element={<Earnings />} />
             <Route path="/dashboard/messages" element={<Messages />} />
             <Route path="/dashboard/my-affiliations" element={<MyAffiliations />} />
