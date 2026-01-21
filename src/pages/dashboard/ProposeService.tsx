@@ -9,31 +9,39 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useServices } from "@/hooks/useServices";
+import { useCategories } from "@/hooks/useCategories";
+import { ImageUpload } from "@/components/upload/ImageUpload";
 
 export default function ProposeService() {
   const navigate = useNavigate();
+  const { addService } = useServices(true);
+  const { categories } = useCategories("service");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "",
-    targetAudience: "",
-    experience: "",
-    price: "",
-    duration: "60",
+    category_id: "",
+    price: 0,
+    image_url: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const result = await addService({
+      title: formData.title,
+      description: formData.description,
+      category_id: formData.category_id || undefined,
+      price: formData.price,
+      image_url: formData.image_url,
+    });
     
-    toast.success("Votre proposition de service a été soumise avec succès");
-    navigate("/dashboard");
+    if (result) {
+      navigate("/dashboard/my-services");
+    }
     setIsSubmitting(false);
   };
 
@@ -83,80 +91,47 @@ export default function ProposeService() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="category">Catégorie *</Label>
-                  <Select 
-                    value={formData.category} 
-                    onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionnez une catégorie" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tutoring">Soutien scolaire</SelectItem>
-                      <SelectItem value="coaching">Coaching</SelectItem>
-                      <SelectItem value="counseling">Conseil</SelectItem>
-                      <SelectItem value="wellness">Bien-être</SelectItem>
-                      <SelectItem value="other">Autre</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="targetAudience">Public cible *</Label>
-                  <Input
-                    id="targetAudience"
-                    required
-                    value={formData.targetAudience}
-                    onChange={(e) => setFormData(prev => ({ ...prev, targetAudience: e.target.value }))}
-                    placeholder="Ex: Étudiants du lycée et collège"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="experience">Votre expérience dans ce domaine *</Label>
-                  <Textarea
-                    id="experience"
-                    required
-                    value={formData.experience}
-                    onChange={(e) => setFormData(prev => ({ ...prev, experience: e.target.value }))}
-                    placeholder="Décrivez votre formation et expérience pertinentes pour ce service..."
-                    rows={3}
-                  />
-                </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="price">Prix proposé (€) *</Label>
+                    <Label htmlFor="category">Catégorie</Label>
+                    <Select 
+                      value={formData.category_id} 
+                      onValueChange={(v) => setFormData(prev => ({ ...prev, category_id: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Prix (FCFA) *</Label>
                     <Input
                       id="price"
                       type="number"
                       required
+                      min="0"
                       value={formData.price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                      placeholder="25"
+                      onChange={(e) => setFormData(prev => ({ ...prev, price: Number(e.target.value) }))}
+                      placeholder="5000"
                     />
                   </div>
+                </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="duration">Durée de la séance *</Label>
-                    <Select 
-                      value={formData.duration} 
-                      onValueChange={(v) => setFormData(prev => ({ ...prev, duration: v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="30">30 minutes</SelectItem>
-                        <SelectItem value="45">45 minutes</SelectItem>
-                        <SelectItem value="60">1 heure</SelectItem>
-                        <SelectItem value="90">1h30</SelectItem>
-                        <SelectItem value="120">2 heures</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-2">
+                  <Label>Image du service</Label>
+                  <ImageUpload
+                    value={formData.image_url}
+                    onChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+                    bucket="services"
+                  />
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
