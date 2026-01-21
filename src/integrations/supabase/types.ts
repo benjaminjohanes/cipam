@@ -628,6 +628,7 @@ export type Database = {
           location: string | null
           nationality: string | null
           phone: string | null
+          preferred_currency: string | null
           specialty: string | null
           updated_at: string | null
         }
@@ -646,6 +647,7 @@ export type Database = {
           location?: string | null
           nationality?: string | null
           phone?: string | null
+          preferred_currency?: string | null
           specialty?: string | null
           updated_at?: string | null
         }
@@ -664,6 +666,7 @@ export type Database = {
           location?: string | null
           nationality?: string | null
           phone?: string | null
+          preferred_currency?: string | null
           specialty?: string | null
           updated_at?: string | null
         }
