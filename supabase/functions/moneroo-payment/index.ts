@@ -85,6 +85,11 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Ensure customer fields are valid strings
+    const customerFirstName = (body.customer.first_name || "Client").trim() || "Client";
+    const customerLastName = (body.customer.last_name || "CIPAM").trim() || "CIPAM";
+    const customerEmail = body.customer.email || "client@cipam.app";
+
     // Initialize Moneroo payment
     const monerooResponse = await fetch("https://api.moneroo.io/v1/payments/initialize", {
       method: "POST",
@@ -98,9 +103,9 @@ Deno.serve(async (req) => {
         currency: body.currency || "XOF",
         description: body.description,
         customer: {
-          email: body.customer.email,
-          first_name: body.customer.first_name,
-          last_name: body.customer.last_name,
+          email: customerEmail,
+          first_name: customerFirstName,
+          last_name: customerLastName,
         },
         return_url: body.return_url,
         metadata: body.metadata,
