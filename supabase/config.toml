@@ -1,1 +1,4 @@
 project_id = "rheytgaoexnzsbvnwbrz"
+
+[functions.moneroo-payment]
+verify_jwt = false

@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
+import { useMonerooPayment } from "@/hooks/useMonerooPayment";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -55,6 +56,7 @@ const durations = [
 export function BookingDialog({ open, onOpenChange, professional }: BookingDialogProps) {
   const { toast } = useToast();
   const { formatPrice } = useCurrency();
+  const { initiatePayment, isProcessing } = useMonerooPayment();
   const [step, setStep] = useState(1);
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string>("");
@@ -62,6 +64,13 @@ export function BookingDialog({ open, onOpenChange, professional }: BookingDialo
   const [type, setType] = useState<"video" | "in-person">("video");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Calculate total price based on duration
+  const calculatePrice = () => {
+    if (!professional.consultation_rate) return 0;
+    const durationMinutes = parseInt(duration);
+    return Math.round((professional.consultation_rate / 60) * durationMinutes);
+  };
 
   const handleSubmit = async () => {
     if (!date || !time) {
@@ -92,6 +101,59 @@ export function BookingDialog({ open, onOpenChange, professional }: BookingDialo
       const scheduledAt = new Date(date);
       scheduledAt.setHours(hours, minutes, 0, 0);
 
+      const totalPrice = calculatePrice();
+
+      // If consultation has a price, redirect to payment
+      if (totalPrice > 0) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, email')
+          .eq('id', user.id)
+          .single();
+
+        const nameParts = (profile?.full_name || "Utilisateur").split(' ');
+        const firstName = nameParts[0] || "Utilisateur";
+        const lastName = nameParts.slice(1).join(' ') || "";
+
+        // First create a pending appointment
+        const { data: appointment, error: appointmentError } = await supabase
+          .from("appointments")
+          .insert({
+            patient_id: user.id,
+            professional_id: professional.id,
+            scheduled_at: scheduledAt.toISOString(),
+            duration_minutes: parseInt(duration),
+            type,
+            notes: notes || null,
+            status: "pending"
+          })
+          .select()
+          .single();
+
+        if (appointmentError) throw appointmentError;
+
+        // Then initiate payment
+        await initiatePayment({
+          amount: totalPrice,
+          currency: "XOF",
+          description: `Consultation avec ${professional.full_name || 'Professionnel'} - ${format(date, "d MMMM yyyy", { locale: fr })} à ${time}`,
+          customer: {
+            email: profile?.email || user.email || "",
+            first_name: firstName,
+            last_name: lastName,
+          },
+          metadata: {
+            type: "appointment",
+            item_id: appointment.id,
+            user_id: user.id,
+          },
+          returnPath: `/dashboard/appointments?payment=success`,
+        });
+
+        return;
+      }
+
+      // Free consultation - direct booking
       const { error } = await supabase
         .from("appointments")
         .insert({
@@ -313,14 +375,22 @@ export function BookingDialog({ open, onOpenChange, professional }: BookingDialo
                   {type === "video" ? "Consultation vidéo" : "Consultation en personne"}
                 </p>
               </div>
+              {calculatePrice() > 0 && (
+                <div className="pt-2 mt-2 border-t border-border">
+                  <p className="font-semibold text-foreground flex justify-between">
+                    <span>Total à payer:</span>
+                    <span className="text-primary">{formatPrice(calculatePrice())}</span>
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep(2)}>
                 Retour
               </Button>
-              <Button onClick={handleSubmit} disabled={loading}>
-                {loading ? "Envoi..." : "Confirmer le rendez-vous"}
+              <Button onClick={handleSubmit} disabled={loading || isProcessing}>
+                {loading || isProcessing ? "Traitement..." : calculatePrice() > 0 ? "Payer et confirmer" : "Confirmer le rendez-vous"}
               </Button>
             </div>
           </div>
