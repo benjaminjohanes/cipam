@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
@@ -7,11 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useEventDetail, useEvents, useUserRegistrationForEvent } from "@/hooks/useEvents";
+import { useEventDetail, useUserRegistrationForEvent } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
+import { useMonerooPayment } from "@/hooks/useMonerooPayment";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { 
   Calendar, MapPin, Video, Users, Clock, 
-  Ticket, ArrowLeft, CheckCircle, User, Share2, ExternalLink
+  Ticket, ArrowLeft, CheckCircle, User, Share2, ExternalLink, Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -26,18 +30,89 @@ const typeLabels: Record<string, { label: string; icon: React.ReactNode }> = {
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { data: event, isLoading } = useEventDetail(id || "");
-  const { data: registration } = useUserRegistrationForEvent(id || "");
-  const { registerForEvent } = useEvents();
+  const { data: registration, refetch: refetchRegistration } = useUserRegistrationForEvent(id || "");
+  const { initiatePayment, isProcessing } = useMonerooPayment();
+  const [isRegistering, setIsRegistering] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!user) {
       navigate("/auth?mode=login");
       return;
     }
-    if (event) {
-      registerForEvent.mutate({ eventId: event.id, isFree: event.is_free });
+    
+    if (!event) return;
+
+    setIsRegistering(true);
+
+    try {
+      // For free events, register directly
+      if (event.is_free || event.price === 0) {
+        const { data, error } = await supabase
+          .from("event_registrations")
+          .insert({
+            event_id: event.id,
+            user_id: user.id,
+            payment_status: "free",
+            ticket_number: "",
+          })
+          .select()
+          .single();
+
+        if (error) {
+          if (error.message.includes("duplicate")) {
+            toast.error("Vous êtes déjà inscrit à cet événement");
+          } else {
+            toast.error("Erreur lors de l'inscription");
+          }
+          return;
+        }
+
+        toast.success("Inscription réussie !", {
+          description: `Votre numéro de ticket : ${data.ticket_number}`
+        });
+        refetchRegistration();
+        return;
+      }
+
+      // For paid events, initiate payment
+      const nameParts = (profile?.full_name || "Client CIPAM").split(" ");
+      const firstName = nameParts[0] || "Client";
+      const lastName = nameParts.slice(1).join(" ") || "CIPAM";
+
+      const result = await initiatePayment({
+        amount: event.price,
+        description: `Inscription: ${event.title}`,
+        customer: {
+          email: profile?.email || user.email || "client@cipam.app",
+          first_name: firstName,
+          last_name: lastName,
+        },
+        metadata: {
+          type: "event",
+          item_id: event.id,
+          user_id: user.id,
+        },
+        returnPath: `/evenements/${event.id}`,
+      });
+
+      // If payment was initiated successfully, create pending registration
+      if (result.success) {
+        await supabase
+          .from("event_registrations")
+          .insert({
+            event_id: event.id,
+            user_id: user.id,
+            payment_status: "pending",
+            ticket_number: "",
+          });
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("Une erreur est survenue");
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -302,15 +377,22 @@ export default function EventDetail() {
                       className="w-full" 
                       size="lg"
                       onClick={handleRegister}
-                      disabled={isFull || registerForEvent.isPending}
+                      disabled={isFull || isRegistering || isProcessing}
                     >
-                      <Ticket className="h-5 w-5 mr-2" />
-                      {registerForEvent.isPending 
-                        ? "Inscription..." 
-                        : event.is_free 
-                          ? "S'inscrire gratuitement" 
-                          : "Réserver ma place"
-                      }
+                      {(isRegistering || isProcessing) ? (
+                        <>
+                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                          {isProcessing ? "Redirection..." : "Inscription..."}
+                        </>
+                      ) : (
+                        <>
+                          <Ticket className="h-5 w-5 mr-2" />
+                          {event.is_free || event.price === 0
+                            ? "S'inscrire gratuitement" 
+                            : `Payer ${event.price.toLocaleString()} FCFA`
+                          }
+                        </>
+                      )}
                     </Button>
                   )}
 
