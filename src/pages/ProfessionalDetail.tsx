@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BookingDialog } from "@/components/booking/BookingDialog";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { useReviewStats } from "@/hooks/useReviewStats";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Professional {
   id: string;
@@ -43,6 +44,7 @@ interface Professional {
 
 const ProfessionalDetail = () => {
   const { id } = useParams();
+  const { formatPrice } = useCurrency();
   const [professional, setProfessional] = useState<Professional | null>(null);
   const [loading, setLoading] = useState(true);
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -132,9 +134,6 @@ const ProfessionalDetail = () => {
     };
   }, [professional, reviewStats]);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
-  };
 
   if (loading) {
     return (

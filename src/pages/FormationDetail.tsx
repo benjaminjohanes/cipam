@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useReviewStats } from "@/hooks/useReviewStats";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface AuthorProfile {
   id: string;
@@ -30,6 +31,7 @@ interface AuthorProfile {
 const FormationDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { formatPrice } = useCurrency();
   const { formations, loading } = useFormations();
   const { modules, fetchModulesByFormation, loading: modulesLoading } = useFormationModules();
   const [author, setAuthor] = useState<AuthorProfile | null>(null);
@@ -127,9 +129,6 @@ const FormationDetail = () => {
     };
   }, [formation, author, reviewStats, modules]);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
-  };
 
   const formatModuleDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);

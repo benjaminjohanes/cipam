@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import useSEO from "@/hooks/useSEO";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import {
   Select,
   SelectContent,
@@ -50,6 +51,7 @@ const priceRanges = [
 
 const Professionnels = () => {
   useSEO();
+  const { formatPrice } = useCurrency();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("Tous");
   const [selectedLocation, setSelectedLocation] = useState("Toutes");
@@ -295,7 +297,7 @@ const Professionnels = () => {
                         )}
                         {pro.consultation_rate && pro.consultation_rate > 0 && (
                           <div className="text-sm font-semibold text-primary">
-                            {new Intl.NumberFormat('fr-FR').format(pro.consultation_rate)} FCFA / consultation
+                            {formatPrice(pro.consultation_rate, { showFree: false })} / consultation
                           </div>
                         )}
                       </div>

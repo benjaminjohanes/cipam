@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import logo from "@/assets/logo.png";
+import CurrencyToggle from "@/components/CurrencyToggle";
 
 const navItems = [
   { label: "Accueil", href: "/" },
@@ -63,6 +64,7 @@ export function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
+            <CurrencyToggle />
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -139,6 +141,10 @@ export function Header() {
                   {item.label}
                 </Link>
               ))}
+              <div className="px-4 py-2 flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Devise</span>
+                <CurrencyToggle />
+              </div>
               <div className="pt-4 flex flex-col gap-2">
                 {user ? (
                   <>

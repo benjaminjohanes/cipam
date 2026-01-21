@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import useSEO from "@/hooks/useSEO";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Formation {
   id: string;
@@ -35,6 +36,7 @@ interface Formation {
 
 const Formations = () => {
   useSEO();
+  const { formatPrice } = useCurrency();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const { categories, loading: categoriesLoading } = useCategories('formation');
@@ -80,9 +82,6 @@ const Formations = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
-  };
 
   const categoryNames = ["Tous", ...categories.filter(c => c.is_active).map(c => c.name)];
 

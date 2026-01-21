@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Formation {
   id: string;
@@ -25,6 +26,8 @@ interface Formation {
 }
 
 export function FormationsSection() {
+  const { formatPrice } = useCurrency();
+  
   const { data: formations, isLoading } = useQuery({
     queryKey: ["home-formations"],
     queryFn: async () => {
@@ -57,10 +60,6 @@ export function FormationsSection() {
       })) as Formation[];
     },
   });
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
-  };
 
   if (isLoading) {
     return (
