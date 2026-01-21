@@ -492,6 +492,12 @@ export type Database = {
           duration: string | null
           id: string
           image_url: string | null
+          includes_certificate: boolean | null
+          includes_community: boolean | null
+          includes_lifetime_access: boolean | null
+          includes_resources: boolean | null
+          includes_updates: boolean | null
+          learning_objectives: string[] | null
           level: string
           modules_count: number | null
           price: number
@@ -510,6 +516,12 @@ export type Database = {
           duration?: string | null
           id?: string
           image_url?: string | null
+          includes_certificate?: boolean | null
+          includes_community?: boolean | null
+          includes_lifetime_access?: boolean | null
+          includes_resources?: boolean | null
+          includes_updates?: boolean | null
+          learning_objectives?: string[] | null
           level?: string
           modules_count?: number | null
           price?: number
@@ -528,6 +540,12 @@ export type Database = {
           duration?: string | null
           id?: string
           image_url?: string | null
+          includes_certificate?: boolean | null
+          includes_community?: boolean | null
+          includes_lifetime_access?: boolean | null
+          includes_resources?: boolean | null
+          includes_updates?: boolean | null
+          learning_objectives?: string[] | null
           level?: string
           modules_count?: number | null
           price?: number
