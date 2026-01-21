@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
 import Professionnels from "./pages/Professionnels";
 import ProfessionalDetail from "./pages/ProfessionalDetail";
@@ -69,7 +70,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <CurrencyProvider>
+          <LanguageProvider>
+            <CurrencyProvider>
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/professionnels" element={<Professionnels />} />
@@ -138,7 +140,8 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </CurrencyProvider>
+            </CurrencyProvider>
+          </LanguageProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
