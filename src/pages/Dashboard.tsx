@@ -5,9 +5,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 // Patient Dashboard
 function PatientDashboard() {
+  const { formatPrice } = useCurrency();
+  
   return (
     <DashboardLayout title="Bienvenue" description="Gérez vos rendez-vous et formations">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -32,7 +35,7 @@ function PatientDashboard() {
         />
         <StatCard 
           title="Dépenses" 
-          value="450€" 
+          value={formatPrice(280000)} 
           icon={CreditCard}
           description="Ce mois"
         />
@@ -101,6 +104,8 @@ function PatientDashboard() {
 
 // Student Dashboard
 function StudentDashboard() {
+  const { formatPrice } = useCurrency();
+  
   return (
     <DashboardLayout title="Tableau de bord étudiant" description="Gérez vos services et formations">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -118,7 +123,7 @@ function StudentDashboard() {
         />
         <StatCard 
           title="Revenus" 
-          value="320€" 
+          value={formatPrice(200000)} 
           icon={CreditCard}
           description="Ce mois"
         />
@@ -189,6 +194,8 @@ function StudentDashboard() {
 
 // Professional Dashboard
 function ProfessionalDashboard() {
+  const { formatPrice } = useCurrency();
+  
   return (
     <DashboardLayout title="Tableau de bord professionnel" description="Gérez votre activité">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -207,7 +214,7 @@ function ProfessionalDashboard() {
         />
         <StatCard 
           title="Revenus du mois" 
-          value="2,450€" 
+          value={formatPrice(1530625)} 
           icon={CreditCard}
           description="+15% vs mois dernier"
           trend="+15%"
@@ -295,6 +302,8 @@ function ProfessionalDashboard() {
 
 // Admin Dashboard
 function AdminDashboard() {
+  const { formatPrice } = useCurrency();
+  
   return (
     <DashboardLayout title="Administration CIPAM" description="Vue d'ensemble de la plateforme">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -319,7 +328,7 @@ function AdminDashboard() {
         />
         <StatCard 
           title="Revenus plateforme" 
-          value="12,450€" 
+          value={formatPrice(7781250)} 
           icon={CreditCard}
           description="+22% vs mois dernier"
           trend="+22%"
@@ -377,7 +386,7 @@ function AdminDashboard() {
                 time="Il y a 15 min"
               />
               <ActivityItem 
-                text="Paiement reçu - 150€"
+                text={`Paiement reçu - ${formatPrice(93750)}`}
                 time="Il y a 1h"
               />
               <ActivityItem 
