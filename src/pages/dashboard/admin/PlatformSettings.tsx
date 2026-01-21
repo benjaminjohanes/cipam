@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { 
   Settings, Globe, Bell, Shield, Mail, Save, 
-  CreditCard, Users, FileText, Key, Eye, EyeOff, Check, AlertCircle
+  CreditCard, Users, FileText, Key, Eye, EyeOff, Check, AlertCircle, Wallet
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -34,18 +34,21 @@ export default function PlatformSettings() {
     resendApiKey: "",
     stripePublishableKey: "",
     stripeSecretKey: "",
+    monerooSecretKey: "",
   });
 
   const [showKeys, setShowKeys] = useState({
     resendApiKey: false,
     stripePublishableKey: false,
     stripeSecretKey: false,
+    monerooSecretKey: false,
   });
 
   const [savedKeys, setSavedKeys] = useState({
     resendApiKey: false,
     stripePublishableKey: false,
     stripeSecretKey: false,
+    monerooSecretKey: false,
   });
 
   const handleSave = () => {
@@ -385,6 +388,56 @@ export default function PlatformSettings() {
                   </Button>
                 </div>
                 <Button onClick={() => handleSaveApiKey("stripeSecretKey", "Stripe Secret")}>
+                  Enregistrer
+                </Button>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Moneroo Secret Key */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-muted-foreground" />
+                  <Label>Moneroo Secret Key</Label>
+                  {savedKeys.monerooSecretKey && (
+                    <Badge variant="outline" className="text-green-600 border-green-600">
+                      <Check className="h-3 w-3 mr-1" />
+                      Configuré
+                    </Badge>
+                  )}
+                </div>
+                <Badge variant="secondary" className="text-orange-600">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  Confidentiel
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Clé secrète Moneroo pour les paiements mobile money et cartes en Afrique.
+                <a href="https://moneroo.io" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">
+                  Obtenir sur moneroo.io
+                </a>
+              </p>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showKeys.monerooSecretKey ? "text" : "password"}
+                    placeholder="sk_live_xxxxxxxxxxxx"
+                    value={apiKeys.monerooSecretKey}
+                    onChange={(e) => setApiKeys({ ...apiKeys, monerooSecretKey: e.target.value })}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => toggleShowKey("monerooSecretKey")}
+                  >
+                    {showKeys.monerooSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <Button onClick={() => handleSaveApiKey("monerooSecretKey", "Moneroo")}>
                   Enregistrer
                 </Button>
               </div>
