@@ -1,14 +1,63 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Bell, Mail, Shield, Moon, Globe } from "lucide-react";
+import { Bell, Mail, Shield, Moon, Globe, DollarSign } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Currency } from "@/lib/currency";
 
 export default function Settings() {
+  const { currency, setCurrency } = useCurrency();
+
   return (
     <DashboardLayout title="Paramètres" description="Configurez votre compte">
       <div className="max-w-2xl space-y-6">
+        {/* Currency */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Devise
+            </CardTitle>
+            <CardDescription>
+              Choisissez la devise par défaut pour l'affichage des prix
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RadioGroup 
+              value={currency} 
+              onValueChange={(value) => setCurrency(value as Currency)}
+              className="grid grid-cols-2 gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="FCFA" id="fcfa" />
+                <Label htmlFor="fcfa" className="flex items-center gap-2 cursor-pointer">
+                  <span className="text-lg">🇨🇫</span>
+                  <div>
+                    <p className="font-medium">Franc CFA (FCFA)</p>
+                    <p className="text-xs text-muted-foreground">Devise locale</p>
+                  </div>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="USD" id="usd" />
+                <Label htmlFor="usd" className="flex items-center gap-2 cursor-pointer">
+                  <span className="text-lg">🇺🇸</span>
+                  <div>
+                    <p className="font-medium">Dollar US (USD)</p>
+                    <p className="text-xs text-muted-foreground">Devise internationale</p>
+                  </div>
+                </Label>
+              </div>
+            </RadioGroup>
+            <p className="text-xs text-muted-foreground mt-4">
+              Note : Les taux de conversion sont approximatifs (1 USD ≈ 625 FCFA)
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Notifications */}
         <Card>
           <CardHeader>
