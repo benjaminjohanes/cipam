@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import Index from "./pages/Index";
 import Professionnels from "./pages/Professionnels";
 import ProfessionalDetail from "./pages/ProfessionalDetail";
@@ -63,12 +64,13 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
+    <CurrencyProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/professionnels" element={<Professionnels />} />
             <Route path="/professionnels/:id" element={<ProfessionalDetail />} />
@@ -133,12 +135,13 @@ const App = () => (
             <Route path="/dashboard/platform-settings" element={<PlatformSettings />} />
             <Route path="/dashboard/reports" element={<Reports />} />
             
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </CurrencyProvider>
   </QueryClientProvider>
 );
 

@@ -24,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Professional {
   id: string;
@@ -53,6 +54,7 @@ const durations = [
 
 export function BookingDialog({ open, onOpenChange, professional }: BookingDialogProps) {
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
   const [step, setStep] = useState(1);
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string>("");
@@ -60,10 +62,6 @@ export function BookingDialog({ open, onOpenChange, professional }: BookingDialo
   const [type, setType] = useState<"video" | "in-person">("video");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
-  };
 
   const handleSubmit = async () => {
     if (!date || !time) {

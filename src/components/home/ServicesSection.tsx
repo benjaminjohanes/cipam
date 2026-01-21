@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Service {
   id: string;
@@ -27,6 +28,8 @@ const iconColors = [
 const defaultIcons = [Calendar, BookOpen, Users, Brain, Heart, MessageCircle];
 
 export function ServicesSection() {
+  const { formatPrice } = useCurrency();
+  
   const { data: services, isLoading } = useQuery({
     queryKey: ["home-services"],
     queryFn: async () => {
@@ -41,10 +44,6 @@ export function ServicesSection() {
       return data as Service[];
     },
   });
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
-  };
 
   if (isLoading) {
     return (

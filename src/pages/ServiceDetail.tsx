@@ -18,6 +18,7 @@ import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useReviewStats } from "@/hooks/useReviewStats";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface ServiceProvider {
   id: string;
@@ -69,15 +70,12 @@ const ServiceDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [relatedServices, setRelatedServices] = useState<RelatedService[]>([]);
   const { stats: reviewStats } = useReviewStats('service', service?.id || '');
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
-  };
 
   useEffect(() => {
     const fetchService = async () => {
