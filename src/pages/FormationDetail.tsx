@@ -16,6 +16,7 @@ import { useFormations } from "@/hooks/useFormations";
 import { useFormationModules, FormationModule } from "@/hooks/useFormationModules";
 import { useAuth } from "@/hooks/useAuth";
 import { useReviewStats } from "@/hooks/useReviewStats";
+import { useMonerooPayment } from "@/hooks/useMonerooPayment";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -34,8 +35,8 @@ const FormationDetail = () => {
   const { formatPrice } = useCurrency();
   const { formations, loading } = useFormations();
   const { modules, fetchModulesByFormation, loading: modulesLoading } = useFormationModules();
+  const { initiatePayment, isProcessing } = useMonerooPayment();
   const [author, setAuthor] = useState<AuthorProfile | null>(null);
-  const [isEnrolling, setIsEnrolling] = useState(false);
   const { stats: reviewStats } = useReviewStats('formation', id || '');
 
   const formation = formations.find(f => f.id === id);
@@ -144,11 +145,42 @@ const FormationDetail = () => {
       toast.error("Veuillez vous connecter pour vous inscrire");
       return;
     }
-    
-    setIsEnrolling(true);
-    // TODO: Implement payment flow with Stripe
-    toast.info("Le système de paiement sera bientôt disponible");
-    setIsEnrolling(false);
+
+    if (!formation) return;
+
+    // Free formations - direct enrollment
+    if (formation.price === 0) {
+      toast.success("Inscription réussie ! Vous avez accès à cette formation.");
+      return;
+    }
+
+    // Get user profile for payment
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', user.id)
+      .single();
+
+    const nameParts = (profile?.full_name || "Utilisateur").split(' ');
+    const firstName = nameParts[0] || "Utilisateur";
+    const lastName = nameParts.slice(1).join(' ') || "";
+
+    await initiatePayment({
+      amount: formation.price,
+      currency: "XOF",
+      description: `Inscription à la formation: ${formation.title}`,
+      customer: {
+        email: profile?.email || user.email || "",
+        first_name: firstName,
+        last_name: lastName,
+      },
+      metadata: {
+        type: "formation",
+        item_id: formation.id,
+        user_id: user.id,
+      },
+      returnPath: `/formations/${formation.id}?payment=success`,
+    });
   };
 
   // Get includes from formation
@@ -304,9 +336,9 @@ const FormationDetail = () => {
                       className="w-full mb-4" 
                       size="lg"
                       onClick={handleEnroll}
-                      disabled={isEnrolling}
+                      disabled={isProcessing}
                     >
-                      {isEnrolling ? "Chargement..." : "S'inscrire maintenant"}
+                      {isProcessing ? "Redirection vers le paiement..." : "S'inscrire maintenant"}
                     </Button>
 
                     <Button variant="outline" className="w-full mb-6">
