@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   Clock, BookOpen, Users, Star, Award, CheckCircle, 
-  Play, ArrowLeft, User, Calendar, Share2 
+  Play, ArrowLeft, User, Calendar, Share2, Video, FileText
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { useFormations } from "@/hooks/useFormations";
+import { useFormationModules, FormationModule } from "@/hooks/useFormationModules";
 import { useAuth } from "@/hooks/useAuth";
 import { useReviewStats } from "@/hooks/useReviewStats";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,11 +31,19 @@ const FormationDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { formations, loading } = useFormations();
+  const { modules, fetchModulesByFormation, loading: modulesLoading } = useFormationModules();
   const [author, setAuthor] = useState<AuthorProfile | null>(null);
   const [isEnrolling, setIsEnrolling] = useState(false);
   const { stats: reviewStats } = useReviewStats('formation', id || '');
 
   const formation = formations.find(f => f.id === id);
+
+  // Fetch modules when formation is loaded
+  useEffect(() => {
+    if (id) {
+      fetchModulesByFormation(id);
+    }
+  }, [id]);
 
   useEffect(() => {
     const fetchAuthor = async () => {
@@ -75,7 +84,7 @@ const FormationDetail = () => {
       } : undefined,
       "educationalLevel": formation.level || "Débutant",
       "courseCode": formation.id,
-      "numberOfCredits": formation.modules_count || 5,
+      "numberOfCredits": formation.modules_count || modules.length || 5,
       "hasCourseInstance": {
         "@type": "CourseInstance",
         "courseMode": "online",
@@ -116,10 +125,19 @@ const FormationDetail = () => {
       const existingScript = document.querySelector('script[data-schema="formation"]');
       if (existingScript) existingScript.remove();
     };
-  }, [formation, author, reviewStats]);
+  }, [formation, author, reviewStats, modules]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
+  };
+
+  const formatModuleDuration = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) {
+      return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
+    }
+    return `${mins} min`;
   };
 
   const handleEnroll = async () => {
@@ -134,14 +152,43 @@ const FormationDetail = () => {
     setIsEnrolling(false);
   };
 
-  // Simulated modules for display
-  const modules = [
-    { id: 1, title: "Introduction et fondamentaux", duration: "45 min", completed: false },
-    { id: 2, title: "Concepts avancés", duration: "1h 30", completed: false },
-    { id: 3, title: "Études de cas pratiques", duration: "2h", completed: false },
-    { id: 4, title: "Exercices et mises en situation", duration: "1h 45", completed: false },
-    { id: 5, title: "Évaluation et certification", duration: "30 min", completed: false },
-  ];
+  // Get includes from formation
+  const getIncludes = () => {
+    const includes = [];
+    if (formation?.includes_lifetime_access) includes.push("Accès illimité au contenu");
+    if (formation?.includes_certificate) includes.push("Certificat de complétion");
+    if (formation?.includes_resources) includes.push("Ressources téléchargeables");
+    if (formation?.includes_community) includes.push("Support communauté");
+    if (formation?.includes_updates) includes.push("Mises à jour gratuites");
+    
+    // Default includes if none are set
+    if (includes.length === 0) {
+      return [
+        "Accès illimité au contenu",
+        "Certificat de complétion",
+        "Ressources téléchargeables",
+        "Support communauté",
+        "Mises à jour gratuites"
+      ];
+    }
+    return includes;
+  };
+
+  // Get learning objectives
+  const getLearningObjectives = () => {
+    if (formation?.learning_objectives && formation.learning_objectives.length > 0) {
+      return formation.learning_objectives;
+    }
+    // Default objectives if none are set
+    return [
+      "Comprendre les concepts fondamentaux",
+      "Appliquer les techniques en pratique",
+      "Analyser des cas concrets",
+      "Développer vos compétences professionnelles",
+      "Obtenir une certification reconnue",
+      "Rejoindre une communauté d'apprenants"
+    ];
+  };
 
   if (loading) {
     return (
@@ -210,7 +257,7 @@ const FormationDetail = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4" />
-                    <span>{formation.modules_count || 5} modules</span>
+                    <span>{modules.length > 0 ? modules.length : (formation.modules_count || 0)} modules</span>
                   </div>
                   {reviewStats.totalReviews > 0 && (
                     <div className="flex items-center gap-2">
@@ -218,10 +265,6 @@ const FormationDetail = () => {
                       <span>{reviewStats.averageRating.toFixed(1)} ({reviewStats.totalReviews} avis)</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    <span>234 étudiants</span>
-                  </div>
                 </div>
 
                 {/* Formation Image */}
@@ -251,9 +294,11 @@ const FormationDetail = () => {
                   <CardContent className="p-6">
                     <div className="text-center mb-6">
                       <div className="text-3xl font-bold text-primary">
-                        {formatPrice(formation.price)}
+                        {formation.price === 0 ? "Gratuit" : formatPrice(formation.price)}
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">Accès à vie</p>
+                      {formation.price > 0 && (
+                        <p className="text-sm text-muted-foreground mt-1">Accès à vie</p>
+                      )}
                     </div>
 
                     <Button 
@@ -275,26 +320,12 @@ const FormationDetail = () => {
                     <div className="space-y-4">
                       <h4 className="font-semibold text-foreground">Cette formation inclut :</h4>
                       <ul className="space-y-3 text-sm text-muted-foreground">
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                          Accès illimité au contenu
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                          Certificat de complétion
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                          Ressources téléchargeables
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                          Support communauté
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                          Mises à jour gratuites
-                        </li>
+                        {getIncludes().map((item, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                            {item}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </CardContent>
@@ -324,25 +355,46 @@ const FormationDetail = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      {modules.map((module, index) => (
-                        <div 
-                          key={module.id}
-                          className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
-                              {index + 1}
-                            </div>
-                            <div>
-                              <h4 className="font-medium text-foreground">{module.title}</h4>
-                              <p className="text-sm text-muted-foreground">{module.duration}</p>
-                            </div>
+                    {modulesLoading ? (
+                      <div className="space-y-3">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="animate-pulse">
+                            <div className="h-16 bg-muted rounded-lg"></div>
                           </div>
-                          <Play className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : modules.length > 0 ? (
+                      <div className="space-y-3">
+                        {modules.map((module, index) => (
+                          <div 
+                            key={module.id}
+                            className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
+                                {index + 1}
+                              </div>
+                              <div>
+                                <h4 className="font-medium text-foreground">{module.title}</h4>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  {module.content_type === 'video' ? (
+                                    <Video className="w-3 h-3" />
+                                  ) : (
+                                    <FileText className="w-3 h-3" />
+                                  )}
+                                  <span>{formatModuleDuration(module.duration_minutes)}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <Play className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-center py-4">
+                        Le contenu de cette formation sera bientôt disponible.
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -362,14 +414,7 @@ const FormationDetail = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="grid md:grid-cols-2 gap-4">
-                      {[
-                        "Comprendre les concepts fondamentaux",
-                        "Appliquer les techniques en pratique",
-                        "Analyser des cas concrets",
-                        "Développer vos compétences professionnelles",
-                        "Obtenir une certification reconnue",
-                        "Rejoindre une communauté d'apprenants"
-                      ].map((item, index) => (
+                      {getLearningObjectives().map((item, index) => (
                         <div key={index} className="flex items-start gap-3">
                           <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                           <span className="text-muted-foreground">{item}</span>

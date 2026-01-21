@@ -20,6 +20,12 @@ export interface Formation {
   affiliation_enabled: boolean | null;
   affiliation_type: string | null;
   affiliation_value: number | null;
+  learning_objectives: string[] | null;
+  includes_certificate: boolean | null;
+  includes_lifetime_access: boolean | null;
+  includes_resources: boolean | null;
+  includes_community: boolean | null;
+  includes_updates: boolean | null;
   categories?: {
     id: string;
     name: string;
@@ -38,6 +44,12 @@ export interface FormationInsert {
   affiliation_enabled?: boolean;
   affiliation_type?: string;
   affiliation_value?: number;
+  learning_objectives?: string[];
+  includes_certificate?: boolean;
+  includes_lifetime_access?: boolean;
+  includes_resources?: boolean;
+  includes_community?: boolean;
+  includes_updates?: boolean;
 }
 
 export const useFormations = (onlyOwn: boolean = false) => {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookOpen, Plus, Trash2, GripVertical, Save, Eye, Loader2, Link2, FileText, Video } from "lucide-react";
+import { BookOpen, Plus, Trash2, GripVertical, Save, Eye, Loader2, Link2, FileText, Video, CheckCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useCategories } from "@/hooks/useCategories";
 import { useFormations } from "@/hooks/useFormations";
+import { useFormationModules } from "@/hooks/useFormationModules";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ImageUpload } from "@/components/upload/ImageUpload";
 import { VideoUpload } from "@/components/upload/VideoUpload";
@@ -32,6 +34,7 @@ export default function CreateFormation() {
   const navigate = useNavigate();
   const { categories, loading: categoriesLoading } = useCategories('formation');
   const { addFormation } = useFormations(true);
+  const { addModules } = useFormationModules();
   const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -47,9 +50,36 @@ export default function CreateFormation() {
     affiliationValue: "",
   });
 
+  // Learning objectives
+  const [learningObjectives, setLearningObjectives] = useState<string[]>([""]);
+
+  // Formation includes options
+  const [includes, setIncludes] = useState({
+    certificate: false,
+    lifetimeAccess: true,
+    resources: false,
+    community: false,
+    updates: false,
+  });
+
   const [modules, setModules] = useState<Module[]>([
     { id: "1", title: "", description: "", duration: 30, contentType: "text", content: "", videoUrl: "" },
   ]);
+
+  // Learning objectives handlers
+  const addObjective = () => {
+    setLearningObjectives(prev => [...prev, ""]);
+  };
+
+  const removeObjective = (index: number) => {
+    if (learningObjectives.length > 1) {
+      setLearningObjectives(prev => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateObjective = (index: number, value: string) => {
+    setLearningObjectives(prev => prev.map((obj, i) => i === index ? value : obj));
+  };
 
   const addModule = () => {
     setModules(prev => [
@@ -77,13 +107,17 @@ export default function CreateFormation() {
     return hours > 0 ? `${hours}h${minutes > 0 ? minutes : ''}` : `${minutes}min`;
   };
 
-  const handleSaveDraft = async () => {
+  const saveFormation = async (asDraft: boolean) => {
     if (!formData.title.trim()) {
       toast.error("Le titre est requis");
       return;
     }
 
     setSubmitting(true);
+
+    // Filter out empty objectives
+    const validObjectives = learningObjectives.filter(obj => obj.trim());
+
     const result = await addFormation({
       title: formData.title,
       description: formData.description || undefined,
@@ -96,48 +130,48 @@ export default function CreateFormation() {
       affiliation_enabled: formData.affiliationEnabled,
       affiliation_type: formData.affiliationType,
       affiliation_value: formData.affiliationEnabled ? Number(formData.affiliationValue) || 0 : 0,
+      learning_objectives: validObjectives,
+      includes_certificate: includes.certificate,
+      includes_lifetime_access: includes.lifetimeAccess,
+      includes_resources: includes.resources,
+      includes_community: includes.community,
+      includes_updates: includes.updates,
     });
-    setSubmitting(false);
 
     if (result) {
-      toast.success("Formation créée avec succès");
+      // Save modules to the database
+      const validModules = modules.filter(m => m.title.trim());
+      if (validModules.length > 0) {
+        const modulesToInsert = validModules.map((module, index) => ({
+          formation_id: result.id,
+          title: module.title,
+          description: module.description || undefined,
+          content_type: module.contentType as 'text' | 'video',
+          content: module.contentType === 'text' ? module.content : undefined,
+          video_url: module.contentType === 'video' ? module.videoUrl : undefined,
+          duration_minutes: module.duration,
+          position: index,
+        }));
+
+        await addModules(modulesToInsert);
+      }
+
+      toast.success(asDraft ? "Formation créée avec succès" : "Formation soumise pour validation");
       navigate("/dashboard/my-formations");
     }
-  };
 
-  const handlePublish = async () => {
-    if (!formData.title.trim()) {
-      toast.error("Le titre est requis");
-      return;
-    }
-
-    setSubmitting(true);
-    const result = await addFormation({
-      title: formData.title,
-      description: formData.description || undefined,
-      category_id: formData.category_id || undefined,
-      level: formData.level,
-      price: formData.isFree ? 0 : Number(formData.price) || 0,
-      duration: calculateTotalDuration(),
-      modules_count: modules.filter(m => m.title.trim()).length,
-      image_url: formData.thumbnail || undefined,
-      affiliation_enabled: formData.affiliationEnabled,
-      affiliation_type: formData.affiliationType,
-      affiliation_value: formData.affiliationEnabled ? Number(formData.affiliationValue) || 0 : 0,
-    });
     setSubmitting(false);
-
-    if (result) {
-      toast.success("Formation soumise pour validation");
-      navigate("/dashboard/my-formations");
-    }
   };
+
+  const handleSaveDraft = () => saveFormation(true);
+  const handlePublish = () => saveFormation(false);
 
   return (
     <DashboardLayout title="Créer une formation" description="Partagez vos connaissances avec la communauté">
       <Tabs defaultValue="general" className="space-y-6">
         <TabsList>
           <TabsTrigger value="general">Informations générales</TabsTrigger>
+          <TabsTrigger value="content">Contenu & Objectifs</TabsTrigger>
           <TabsTrigger value="modules">Modules</TabsTrigger>
           <TabsTrigger value="preview">Aperçu</TabsTrigger>
         </TabsList>
@@ -321,6 +355,113 @@ export default function CreateFormation() {
           )}
         </TabsContent>
 
+        {/* New Content & Objectives Tab */}
+        <TabsContent value="content" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" />
+                Ce que les apprenants vont acquérir
+              </CardTitle>
+              <CardDescription>
+                Listez les compétences et connaissances que les participants acquerront
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {learningObjectives.map((objective, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                  <Input
+                    value={objective}
+                    onChange={(e) => updateObjective(index, e.target.value)}
+                    placeholder={`Ex: Comprendre les mécanismes du stress`}
+                    className="flex-1"
+                  />
+                  {learningObjectives.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => removeObjective(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button variant="outline" onClick={addObjective} className="w-full">
+                <Plus className="h-4 w-4 mr-2" />
+                Ajouter un objectif
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Cette formation inclut</CardTitle>
+              <CardDescription>
+                Cochez ce que votre formation offre aux participants
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="includes-certificate"
+                  checked={includes.certificate}
+                  onCheckedChange={(checked) => setIncludes(prev => ({ ...prev, certificate: checked === true }))}
+                />
+                <Label htmlFor="includes-certificate" className="cursor-pointer">
+                  Certificat de complétion
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="includes-lifetime"
+                  checked={includes.lifetimeAccess}
+                  onCheckedChange={(checked) => setIncludes(prev => ({ ...prev, lifetimeAccess: checked === true }))}
+                />
+                <Label htmlFor="includes-lifetime" className="cursor-pointer">
+                  Accès illimité au contenu
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="includes-resources"
+                  checked={includes.resources}
+                  onCheckedChange={(checked) => setIncludes(prev => ({ ...prev, resources: checked === true }))}
+                />
+                <Label htmlFor="includes-resources" className="cursor-pointer">
+                  Ressources téléchargeables
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="includes-community"
+                  checked={includes.community}
+                  onCheckedChange={(checked) => setIncludes(prev => ({ ...prev, community: checked === true }))}
+                />
+                <Label htmlFor="includes-community" className="cursor-pointer">
+                  Accès à la communauté / Support
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="includes-updates"
+                  checked={includes.updates}
+                  onCheckedChange={(checked) => setIncludes(prev => ({ ...prev, updates: checked === true }))}
+                />
+                <Label htmlFor="includes-updates" className="cursor-pointer">
+                  Mises à jour gratuites
+                </Label>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="modules" className="space-y-6">
           <Card>
             <CardHeader>
@@ -479,12 +620,64 @@ export default function CreateFormation() {
 
                 <div className="flex items-center gap-4">
                   <span className="text-2xl font-bold text-primary">
-                    {formData.isFree ? "Gratuit" : `${formData.price || "0"}€`}
+                    {formData.isFree ? "Gratuit" : `${formData.price || "0"} FCFA`}
                   </span>
                   <span className="text-muted-foreground">•</span>
                   <span className="text-muted-foreground">{modules.filter(m => m.title.trim()).length} module(s)</span>
                   <span className="text-muted-foreground">•</span>
                   <span className="text-muted-foreground">{calculateTotalDuration()}</span>
+                </div>
+
+                {/* Learning objectives preview */}
+                {learningObjectives.some(obj => obj.trim()) && (
+                  <div className="space-y-3">
+                    <h3 className="font-semibold">Ce que vous apprendrez</h3>
+                    <div className="grid md:grid-cols-2 gap-2">
+                      {learningObjectives.filter(obj => obj.trim()).map((objective, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-muted-foreground">{objective}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Includes preview */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold">Cette formation inclut</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {includes.lifetimeAccess && (
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                        Accès illimité au contenu
+                      </li>
+                    )}
+                    {includes.certificate && (
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                        Certificat de complétion
+                      </li>
+                    )}
+                    {includes.resources && (
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                        Ressources téléchargeables
+                      </li>
+                    )}
+                    {includes.community && (
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                        Accès à la communauté / Support
+                      </li>
+                    )}
+                    {includes.updates && (
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                        Mises à jour gratuites
+                      </li>
+                    )}
+                  </ul>
                 </div>
 
                 <div className="space-y-2">
