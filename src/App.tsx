@@ -65,86 +65,86 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <LanguageProvider>
+    <LanguageProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
             <CurrencyProvider>
-            <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/professionnels" element={<Professionnels />} />
-            <Route path="/professionnels/:id" element={<ProfessionalDetail />} />
-            <Route path="/formations" element={<Formations />} />
-            <Route path="/formations/:id" element={<FormationDetail />} />
-            <Route path="/articles" element={<Articles />} />
-            <Route path="/articles/:id" element={<ArticleDetail />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/services/:id" element={<ServiceDetail />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/evenements" element={<Events />} />
-            <Route path="/evenements/:id" element={<EventDetail />} />
-            
-            {/* Dashboard Routes - Common */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/profile" element={<Profile />} />
-            <Route path="/dashboard/settings" element={<Settings />} />
-            <Route path="/dashboard/appointments" element={<Appointments />} />
-            <Route path="/dashboard/my-formations" element={<MyFormations />} />
-            <Route path="/dashboard/notifications" element={<Notifications />} />
-            <Route path="/dashboard/my-events" element={<MyEventRegistrations />} />
-            
-            {/* Dashboard Routes - Patient */}
-            <Route path="/dashboard/find-professional" element={<FindProfessional />} />
-            <Route path="/dashboard/payments" element={<Payments />} />
-            
-            {/* Dashboard Routes - Student */}
-            <Route path="/dashboard/propose-service" element={<ProposeService />} />
-            <Route path="/dashboard/my-services" element={<MyServices />} />
-            <Route path="/dashboard/pending-services" element={<PendingServices />} />
-            <Route path="/dashboard/formations-catalog" element={<FormationsCatalog />} />
-            <Route path="/dashboard/upgrade-request" element={<UpgradeRequest />} />
-            
-            {/* Dashboard Routes - Professional */}
-            <Route path="/dashboard/availability" element={<Availability />} />
-            <Route path="/dashboard/patients" element={<Patients />} />
-            <Route path="/dashboard/stats" element={<Stats />} />
-            <Route path="/dashboard/create-formation" element={<CreateFormation />} />
-            <Route path="/dashboard/edit-formation/:id" element={<EditFormation />} />
-            <Route path="/dashboard/earnings" element={<Earnings />} />
-            <Route path="/dashboard/messages" element={<Messages />} />
-            <Route path="/dashboard/my-affiliations" element={<MyAffiliations />} />
-            
-            {/* Admin Routes */}
-            <Route path="/dashboard/overview" element={<Overview />} />
-            <Route path="/dashboard/users" element={<AdminUsers />} />
-            <Route path="/dashboard/professionals" element={<Professionals />} />
-            <Route path="/dashboard/students" element={<Students />} />
-            <Route path="/dashboard/upgrade-requests" element={<AdminUpgradeRequests />} />
-            <Route path="/dashboard/categories" element={<Categories />} />
-            <Route path="/dashboard/all-formations" element={<AllFormations />} />
-            <Route path="/dashboard/all-services" element={<AllServices />} />
-            <Route path="/dashboard/all-articles" element={<AllArticles />} />
-            <Route path="/dashboard/create-article" element={<CreateArticle />} />
-            <Route path="/dashboard/all-appointments" element={<AllAppointments />} />
-            <Route path="/dashboard/all-events" element={<AllEvents />} />
-            <Route path="/dashboard/event-participants" element={<EventParticipants />} />
-            <Route path="/dashboard/all-affiliations" element={<AllAffiliations />} />
-            <Route path="/dashboard/team" element={<Team />} />
-            <Route path="/dashboard/roles" element={<Roles />} />
-            <Route path="/dashboard/platform-settings" element={<PlatformSettings />} />
-            <Route path="/dashboard/reports" element={<Reports />} />
-            
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/professionnels" element={<Professionnels />} />
+                <Route path="/professionnels/:id" element={<ProfessionalDetail />} />
+                <Route path="/formations" element={<Formations />} />
+                <Route path="/formations/:id" element={<FormationDetail />} />
+                <Route path="/articles" element={<Articles />} />
+                <Route path="/articles/:id" element={<ArticleDetail />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/services/:id" element={<ServiceDetail />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/evenements" element={<Events />} />
+                <Route path="/evenements/:id" element={<EventDetail />} />
+                
+                {/* Dashboard Routes - Common */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard/profile" element={<Profile />} />
+                <Route path="/dashboard/settings" element={<Settings />} />
+                <Route path="/dashboard/appointments" element={<Appointments />} />
+                <Route path="/dashboard/my-formations" element={<MyFormations />} />
+                <Route path="/dashboard/notifications" element={<Notifications />} />
+                <Route path="/dashboard/my-events" element={<MyEventRegistrations />} />
+                
+                {/* Dashboard Routes - Patient */}
+                <Route path="/dashboard/find-professional" element={<FindProfessional />} />
+                <Route path="/dashboard/payments" element={<Payments />} />
+                
+                {/* Dashboard Routes - Student */}
+                <Route path="/dashboard/propose-service" element={<ProposeService />} />
+                <Route path="/dashboard/my-services" element={<MyServices />} />
+                <Route path="/dashboard/pending-services" element={<PendingServices />} />
+                <Route path="/dashboard/formations-catalog" element={<FormationsCatalog />} />
+                <Route path="/dashboard/upgrade-request" element={<UpgradeRequest />} />
+                
+                {/* Dashboard Routes - Professional */}
+                <Route path="/dashboard/availability" element={<Availability />} />
+                <Route path="/dashboard/patients" element={<Patients />} />
+                <Route path="/dashboard/stats" element={<Stats />} />
+                <Route path="/dashboard/create-formation" element={<CreateFormation />} />
+                <Route path="/dashboard/edit-formation/:id" element={<EditFormation />} />
+                <Route path="/dashboard/earnings" element={<Earnings />} />
+                <Route path="/dashboard/messages" element={<Messages />} />
+                <Route path="/dashboard/my-affiliations" element={<MyAffiliations />} />
+                
+                {/* Admin Routes */}
+                <Route path="/dashboard/overview" element={<Overview />} />
+                <Route path="/dashboard/users" element={<AdminUsers />} />
+                <Route path="/dashboard/professionals" element={<Professionals />} />
+                <Route path="/dashboard/students" element={<Students />} />
+                <Route path="/dashboard/upgrade-requests" element={<AdminUpgradeRequests />} />
+                <Route path="/dashboard/categories" element={<Categories />} />
+                <Route path="/dashboard/all-formations" element={<AllFormations />} />
+                <Route path="/dashboard/all-services" element={<AllServices />} />
+                <Route path="/dashboard/all-articles" element={<AllArticles />} />
+                <Route path="/dashboard/create-article" element={<CreateArticle />} />
+                <Route path="/dashboard/all-appointments" element={<AllAppointments />} />
+                <Route path="/dashboard/all-events" element={<AllEvents />} />
+                <Route path="/dashboard/event-participants" element={<EventParticipants />} />
+                <Route path="/dashboard/all-affiliations" element={<AllAffiliations />} />
+                <Route path="/dashboard/team" element={<Team />} />
+                <Route path="/dashboard/roles" element={<Roles />} />
+                <Route path="/dashboard/platform-settings" element={<PlatformSettings />} />
+                <Route path="/dashboard/reports" element={<Reports />} />
+                
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </CurrencyProvider>
-          </LanguageProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 
