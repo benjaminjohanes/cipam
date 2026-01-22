@@ -770,6 +770,33 @@ export type Database = {
           },
         ]
       }
+      role_change_history: {
+        Row: {
+          changed_by: string
+          created_at: string
+          id: string
+          new_role: string
+          old_role: string
+          user_id: string
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string
+          id?: string
+          new_role: string
+          old_role: string
+          user_id: string
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          id?: string
+          new_role?: string
+          old_role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category_id: string | null
