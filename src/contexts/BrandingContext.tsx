@@ -8,11 +8,15 @@ interface BrandingContextValue {
 
 const defaultBranding: BrandingSettings = {
   site_name: "Allô Psy",
+  slogan: "Vous méritez d'être écouté et soutenu, sans jugement",
   header_logo: "",
   footer_logo: "",
   favicon: "",
   primary_color: "215 55% 25%",
   accent_color: "135 45% 50%",
+  contact_email: "cipam.global.contact@gmail.com",
+  contact_phones: ["+229 01 52 01 17 77", "+229 01 59 05 40 93"],
+  contact_address: "Abomey-Calavi, Benin",
 };
 
 const BrandingContext = createContext<BrandingContextValue>({
