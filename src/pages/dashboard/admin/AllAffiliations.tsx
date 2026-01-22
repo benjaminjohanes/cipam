@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
 import { format, subDays, eachDayOfInterval, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -62,7 +63,7 @@ interface AffiliateSale {
 }
 
 // Performance Charts Component
-function PerformanceCharts({ affiliations, sales }: { affiliations: Affiliation[], sales: AffiliateSale[] }) {
+function PerformanceCharts({ affiliations, sales, formatPrice }: { affiliations: Affiliation[], sales: AffiliateSale[], formatPrice: (price: number) => string }) {
   const [period, setPeriod] = useState<"7" | "30" | "90">("30");
   
   const chartData = useMemo(() => {
@@ -150,13 +151,13 @@ function PerformanceCharts({ affiliations, sales }: { affiliations: Affiliation[
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Revenus générés</p>
-            <p className="text-2xl font-bold">{periodStats.totalRevenue.toFixed(2)}€</p>
+            <p className="text-2xl font-bold">{formatPrice(periodStats.totalRevenue)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Commissions versées</p>
-            <p className="text-2xl font-bold text-green-600">{periodStats.totalCommissions.toFixed(2)}€</p>
+            <p className="text-2xl font-bold text-green-600">{formatPrice(periodStats.totalCommissions)}</p>
           </CardContent>
         </Card>
       </div>
@@ -238,10 +239,10 @@ function PerformanceCharts({ affiliations, sales }: { affiliations: Affiliation[
                     fontSize={12} 
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `${value}€`}
+                    tickFormatter={(value) => formatPrice(value)}
                   />
                   <Tooltip 
-                    formatter={(value: number) => [`${value.toFixed(2)}€`]}
+                    formatter={(value: number) => [formatPrice(value)]}
                     contentStyle={{ 
                       backgroundColor: 'hsl(var(--card))', 
                       border: '1px solid hsl(var(--border))',
@@ -314,6 +315,7 @@ function PerformanceCharts({ affiliations, sales }: { affiliations: Affiliation[
 }
 
 export default function AllAffiliations() {
+  const { formatPrice } = useCurrency();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedAffiliation, setSelectedAffiliation] = useState<Affiliation | null>(null);
@@ -443,7 +445,7 @@ export default function AllAffiliations() {
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">Commissions totales</p>
               </div>
-              <p className="text-2xl font-bold text-green-600">{totalEarnings.toFixed(2)}€</p>
+              <p className="text-2xl font-bold text-green-600">{formatPrice(totalEarnings)}</p>
             </CardContent>
           </Card>
         </div>
@@ -459,7 +461,7 @@ export default function AllAffiliations() {
           </TabsList>
 
           <TabsContent value="charts">
-            <PerformanceCharts affiliations={affiliations} sales={sales} />
+            <PerformanceCharts affiliations={affiliations} sales={sales} formatPrice={formatPrice} />
           </TabsContent>
 
           <TabsContent value="affiliations">
