@@ -6,38 +6,51 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  usePatientDashboard, 
+  useStudentDashboard, 
+  useProfessionalDashboard, 
+  useAdminDashboard 
+} from "@/hooks/useDashboardData";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 // Patient Dashboard
 function PatientDashboard() {
   const { formatPrice } = useCurrency();
+  const { data, isLoading } = usePatientDashboard();
   
   return (
     <DashboardLayout title="Bienvenue" description="Gérez vos rendez-vous et formations">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard 
           title="Rendez-vous à venir" 
-          value="2" 
+          value={isLoading ? null : String(data?.upcomingAppointments || 0)} 
           icon={Calendar}
           description="Cette semaine"
-          trend="+1"
+          loading={isLoading}
         />
         <StatCard 
           title="Formations en cours" 
-          value="3" 
+          value={isLoading ? null : String(data?.formationsInProgress || 0)} 
           icon={BookOpen}
           description="En progression"
+          loading={isLoading}
         />
         <StatCard 
           title="Consultations totales" 
-          value="12" 
+          value={isLoading ? null : String(data?.totalConsultations || 0)} 
           icon={Users}
           description="Depuis votre inscription"
+          loading={isLoading}
         />
         <StatCard 
           title="Dépenses" 
-          value={formatPrice(280000)} 
+          value={isLoading ? null : formatPrice(data?.monthlyExpenses || 0)} 
           icon={CreditCard}
           description="Ce mois"
+          loading={isLoading}
         />
       </div>
 
@@ -54,20 +67,26 @@ function PatientDashboard() {
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <AppointmentItem 
-                professional="Dr. Marie Dupont"
-                specialty="Psychologue clinicienne"
-                date="Demain, 14h00"
-                status="confirmed"
-              />
-              <AppointmentItem 
-                professional="Dr. Jean Martin"
-                specialty="Psychothérapeute"
-                date="Vendredi, 10h30"
-                status="pending"
-              />
-            </div>
+            {isLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            ) : data?.nextAppointments && data.nextAppointments.length > 0 ? (
+              <div className="space-y-4">
+                {data.nextAppointments.slice(0, 3).map((apt) => (
+                  <AppointmentItem 
+                    key={apt.id}
+                    professional={apt.professional_name}
+                    specialty={apt.specialty || "Professionnel"}
+                    date={format(new Date(apt.scheduled_at), "EEEE dd MMM, HH:mm", { locale: fr })}
+                    status={apt.status as 'confirmed' | 'pending'}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">Aucun rendez-vous à venir</p>
+            )}
           </CardContent>
         </Card>
 
@@ -83,17 +102,12 @@ function PatientDashboard() {
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <FormationProgressItem 
-                title="Gestion du stress au quotidien"
-                progress={65}
-                nextLesson="Module 4: Techniques de respiration"
-              />
-              <FormationProgressItem 
-                title="Introduction à la méditation"
-                progress={30}
-                nextLesson="Module 2: Les fondamentaux"
-              />
+            <div className="text-center py-8">
+              <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">Découvrez nos formations</p>
+              <Button className="mt-4" asChild>
+                <Link to="/formations">Explorer les formations</Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -105,33 +119,38 @@ function PatientDashboard() {
 // Student Dashboard
 function StudentDashboard() {
   const { formatPrice } = useCurrency();
+  const { data, isLoading } = useStudentDashboard();
   
   return (
     <DashboardLayout title="Tableau de bord étudiant" description="Gérez vos services et formations">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard 
           title="Services proposés" 
-          value="3" 
+          value={isLoading ? null : String(data?.servicesCount || 0)} 
           icon={Users}
-          description="1 en attente de validation"
+          description={data?.pendingServicesCount ? `${data.pendingServicesCount} en attente` : "Actifs"}
+          loading={isLoading}
         />
         <StatCard 
           title="Formations suivies" 
-          value="5" 
+          value={isLoading ? null : String(data?.formationsFollowed || 0)} 
           icon={BookOpen}
-          description="2 terminées"
+          description={data?.completedFormations ? `${data.completedFormations} terminées` : "En cours"}
+          loading={isLoading}
         />
         <StatCard 
           title="Revenus" 
-          value={formatPrice(200000)} 
+          value={isLoading ? null : formatPrice(data?.monthlyRevenue || 0)} 
           icon={CreditCard}
           description="Ce mois"
+          loading={isLoading}
         />
         <StatCard 
           title="Avis clients" 
-          value="4.8" 
+          value={isLoading ? null : String(data?.averageRating || 0)} 
           icon={Star}
-          description="Sur 12 avis"
+          description={data?.reviewsCount ? `Sur ${data.reviewsCount} avis` : "Aucun avis"}
+          loading={isLoading}
         />
       </div>
 
@@ -143,13 +162,22 @@ function StudentDashboard() {
             <CardDescription>En cours de validation par l'équipe</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <ServiceItem 
-                title="Accompagnement scolaire"
-                status="pending"
-                submittedAt="Il y a 2 jours"
-              />
-            </div>
+            {isLoading ? (
+              <Skeleton className="h-16 w-full" />
+            ) : data?.pendingServices && data.pendingServices.length > 0 ? (
+              <div className="space-y-4">
+                {data.pendingServices.map((service) => (
+                  <ServiceItem 
+                    key={service.id}
+                    title={service.title}
+                    status="pending"
+                    submittedAt={format(new Date(service.created_at), "dd MMM yyyy", { locale: fr })}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">Aucun service en attente</p>
+            )}
             <Button className="w-full mt-4" asChild>
               <Link to="/dashboard/propose-service">Proposer un nouveau service</Link>
             </Button>
@@ -195,35 +223,39 @@ function StudentDashboard() {
 // Professional Dashboard
 function ProfessionalDashboard() {
   const { formatPrice } = useCurrency();
+  const { data, isLoading } = useProfessionalDashboard();
   
   return (
     <DashboardLayout title="Tableau de bord professionnel" description="Gérez votre activité">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard 
           title="Rendez-vous aujourd'hui" 
-          value="4" 
+          value={isLoading ? null : String(data?.todayAppointments || 0)} 
           icon={Calendar}
-          description="2 confirmés, 2 en attente"
+          description={data ? `${data.confirmedToday} confirmés, ${data.pendingToday} en attente` : ""}
+          loading={isLoading}
         />
         <StatCard 
           title="Patients actifs" 
-          value="28" 
+          value={isLoading ? null : String(data?.activePatients || 0)} 
           icon={Users}
-          description="+3 ce mois"
-          trend="+12%"
+          description={data?.newPatientsThisMonth ? `+${data.newPatientsThisMonth} ce mois` : "Total"}
+          trend={data?.newPatientsThisMonth ? `+${data.newPatientsThisMonth}` : undefined}
+          loading={isLoading}
         />
         <StatCard 
           title="Revenus du mois" 
-          value={formatPrice(1530625)} 
+          value={isLoading ? null : formatPrice(data?.monthlyRevenue || 0)} 
           icon={CreditCard}
-          description="+15% vs mois dernier"
-          trend="+15%"
+          description="Ce mois"
+          loading={isLoading}
         />
         <StatCard 
           title="Note moyenne" 
-          value="4.9" 
+          value={isLoading ? null : String(data?.averageRating || 0)} 
           icon={Star}
-          description="Sur 47 avis"
+          description={data?.reviewsCount ? `Sur ${data.reviewsCount} avis` : "Aucun avis"}
+          loading={isLoading}
         />
       </div>
 
@@ -240,32 +272,27 @@ function ProfessionalDashboard() {
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <ProfessionalAppointmentItem 
-                patient="Sophie Martin"
-                time="09:00 - 10:00"
-                type="Première consultation"
-                status="confirmed"
-              />
-              <ProfessionalAppointmentItem 
-                patient="Pierre Durand"
-                time="10:30 - 11:30"
-                type="Suivi thérapeutique"
-                status="confirmed"
-              />
-              <ProfessionalAppointmentItem 
-                patient="Marie Lambert"
-                time="14:00 - 15:00"
-                type="Consultation TCC"
-                status="pending"
-              />
-              <ProfessionalAppointmentItem 
-                patient="Jean Petit"
-                time="16:00 - 17:00"
-                type="Bilan psychologique"
-                status="pending"
-              />
-            </div>
+            {isLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            ) : data?.todaySchedule && data.todaySchedule.length > 0 ? (
+              <div className="space-y-3">
+                {data.todaySchedule.map((apt) => (
+                  <ProfessionalAppointmentItem 
+                    key={apt.id}
+                    patient={apt.patient_name}
+                    time={format(new Date(apt.scheduled_at), "HH:mm", { locale: fr })}
+                    type={apt.type}
+                    status={apt.status as 'confirmed' | 'pending'}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-8">Aucun rendez-vous aujourd'hui</p>
+            )}
           </CardContent>
         </Card>
 
@@ -303,35 +330,39 @@ function ProfessionalDashboard() {
 // Admin Dashboard
 function AdminDashboard() {
   const { formatPrice } = useCurrency();
+  const { data, isLoading } = useAdminDashboard();
   
   return (
     <DashboardLayout title="Administration CIPAM" description="Vue d'ensemble de la plateforme">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard 
           title="Utilisateurs totaux" 
-          value="1,247" 
+          value={isLoading ? null : String(data?.totalUsers || 0)} 
           icon={Users}
-          description="+23 cette semaine"
-          trend="+8%"
+          description={data?.newUsersThisWeek ? `+${data.newUsersThisWeek} cette semaine` : "Total"}
+          trend={data?.newUsersThisWeek ? `+${data.newUsersThisWeek}` : undefined}
+          loading={isLoading}
         />
         <StatCard 
           title="Professionnels actifs" 
-          value="86" 
+          value={isLoading ? null : String(data?.professionalsActive || 0)} 
           icon={Users}
-          description="12 en attente de validation"
+          description={data?.pendingProfessionals ? `${data.pendingProfessionals} en attente` : "Vérifiés"}
+          loading={isLoading}
         />
         <StatCard 
           title="Formations" 
-          value="124" 
+          value={isLoading ? null : String(data?.totalFormations || 0)} 
           icon={BookOpen}
-          description="8 nouvelles ce mois"
+          description={data?.newFormationsThisMonth ? `${data.newFormationsThisMonth} nouvelles ce mois` : "Total"}
+          loading={isLoading}
         />
         <StatCard 
           title="Revenus plateforme" 
-          value={formatPrice(7781250)} 
+          value={isLoading ? null : formatPrice(data?.platformRevenue || 0)} 
           icon={CreditCard}
-          description="+22% vs mois dernier"
-          trend="+22%"
+          description="Ce mois"
+          loading={isLoading}
         />
       </div>
 
@@ -343,30 +374,38 @@ function AdminDashboard() {
             <CardDescription>Éléments nécessitant votre attention</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <AdminActionItem 
-                title="Demandes d'upgrade étudiant → professionnel"
-                count={5}
-                link="/dashboard/upgrade-requests"
-                urgent
-              />
-              <AdminActionItem 
-                title="Services à valider"
-                count={12}
-                link="/dashboard/all-services"
-              />
-              <AdminActionItem 
-                title="Nouvelles formations à approuver"
-                count={3}
-                link="/dashboard/all-formations"
-              />
-              <AdminActionItem 
-                title="Signalements utilisateurs"
-                count={2}
-                link="/dashboard/reports"
-                urgent
-              />
-            </div>
+            {isLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-14 w-full" />
+                <Skeleton className="h-14 w-full" />
+                <Skeleton className="h-14 w-full" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <AdminActionItem 
+                  title="Demandes d'upgrade étudiant → professionnel"
+                  count={data?.pendingUpgradeRequests || 0}
+                  link="/dashboard/upgrade-requests"
+                  urgent={(data?.pendingUpgradeRequests || 0) > 0}
+                />
+                <AdminActionItem 
+                  title="Services à valider"
+                  count={data?.pendingServices || 0}
+                  link="/dashboard/all-services"
+                />
+                <AdminActionItem 
+                  title="Nouvelles formations à approuver"
+                  count={data?.pendingFormations || 0}
+                  link="/dashboard/all-formations"
+                />
+                <AdminActionItem 
+                  title="Signalements utilisateurs"
+                  count={data?.pendingReports || 0}
+                  link="/dashboard/reports"
+                  urgent={(data?.pendingReports || 0) > 0}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -376,24 +415,25 @@ function AdminDashboard() {
             <CardTitle>Activité récente</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4 text-sm">
-              <ActivityItem 
-                text="Nouveau professionnel inscrit"
-                time="Il y a 5 min"
-              />
-              <ActivityItem 
-                text="Formation publiée par Dr. Dupont"
-                time="Il y a 15 min"
-              />
-              <ActivityItem 
-                text={`Paiement reçu - ${formatPrice(93750)}`}
-                time="Il y a 1h"
-              />
-              <ActivityItem 
-                text="Nouveau patient inscrit"
-                time="Il y a 2h"
-              />
-            </div>
+            {isLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : data?.recentActivity && data.recentActivity.length > 0 ? (
+              <div className="space-y-4 text-sm">
+                {data.recentActivity.map((activity, index) => (
+                  <ActivityItem 
+                    key={index}
+                    text={activity.text}
+                    time={activity.time}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">Aucune activité récente</p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -402,12 +442,13 @@ function AdminDashboard() {
 }
 
 // Helper Components
-function StatCard({ title, value, icon: Icon, description, trend }: {
+function StatCard({ title, value, icon: Icon, description, trend, loading }: {
   title: string;
-  value: string;
+  value: string | null;
   icon: React.ComponentType<{ className?: string }>;
   description: string;
   trend?: string;
+  loading?: boolean;
 }) {
   return (
     <motion.div
@@ -427,7 +468,11 @@ function StatCard({ title, value, icon: Icon, description, trend }: {
               </span>
             )}
           </div>
-          <p className="text-2xl font-bold text-foreground">{value}</p>
+          {loading ? (
+            <Skeleton className="h-8 w-16 mb-1" />
+          ) : (
+            <p className="text-2xl font-bold text-foreground">{value}</p>
+          )}
           <p className="text-sm font-medium text-foreground mt-1">{title}</p>
           <p className="text-xs text-muted-foreground mt-1">{description}</p>
         </CardContent>
@@ -465,28 +510,6 @@ function AppointmentItem({ professional, specialty, date, status }: {
   );
 }
 
-function FormationProgressItem({ title, progress, nextLesson }: {
-  title: string;
-  progress: number;
-  nextLesson: string;
-}) {
-  return (
-    <div className="p-3 rounded-lg bg-muted/50">
-      <div className="flex items-center justify-between mb-2">
-        <p className="font-medium text-foreground text-sm">{title}</p>
-        <span className="text-xs font-medium text-primary">{progress}%</span>
-      </div>
-      <div className="h-2 bg-muted rounded-full overflow-hidden mb-2">
-        <div 
-          className="h-full bg-primary rounded-full transition-all"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-      <p className="text-xs text-muted-foreground">Prochain: {nextLesson}</p>
-    </div>
-  );
-}
-
 function ServiceItem({ title, status, submittedAt }: {
   title: string;
   status: 'pending' | 'approved' | 'rejected';
@@ -496,7 +519,7 @@ function ServiceItem({ title, status, submittedAt }: {
     <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
       <div>
         <p className="font-medium text-foreground">{title}</p>
-        <p className="text-xs text-muted-foreground">Soumis {submittedAt}</p>
+        <p className="text-xs text-muted-foreground">Soumis le {submittedAt}</p>
       </div>
       <span className={`text-xs px-2 py-1 rounded-full ${
         status === 'pending' 
@@ -552,7 +575,7 @@ function AdminActionItem({ title, count, link, urgent }: {
       className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
     >
       <div className="flex items-center gap-3">
-        {urgent && <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />}
+        {urgent && count > 0 && <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />}
         <span className="font-medium text-foreground">{title}</span>
       </div>
       <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
