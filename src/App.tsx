@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import { BrandingProvider } from "@/contexts/BrandingContext";
 import { RequirePermission } from "@/components/auth/RequirePermission";
 import Index from "./pages/Index";
 import Professionnels from "./pages/Professionnels";
@@ -73,7 +74,8 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CurrencyProvider>
-            <Routes>
+            <BrandingProvider>
+              <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/professionnels" element={<Professionnels />} />
             <Route path="/professionnels/:id" element={<ProfessionalDetail />} />
@@ -180,7 +182,8 @@ const App = () => (
             
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
-            </Routes>
+              </Routes>
+            </BrandingProvider>
           </CurrencyProvider>
         </AuthProvider>
       </BrowserRouter>

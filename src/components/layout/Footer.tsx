@@ -1,8 +1,14 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, Facebook, Linkedin, Twitter } from "lucide-react";
-import logo from "@/assets/logo-footer.jpg";
+import { useBranding } from "@/contexts/BrandingContext";
+import defaultLogo from "@/assets/logo-footer.jpg";
 
 export function Footer() {
+  const { branding } = useBranding();
+  
+  const footerLogo = branding.footer_logo || defaultLogo;
+  const siteName = branding.site_name || "Allô Psy";
+
   return (
     <footer className="bg-allopsy-navy text-secondary py-16">
       <div className="container mx-auto px-4">
@@ -10,7 +16,7 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="Allô Psy Logo" className="h-16 w-auto rounded-lg bg-white p-1" />
+              <img src={footerLogo} alt={`${siteName} Logo`} className="h-16 w-auto rounded-lg bg-white p-1" />
             </div>
             <p className="text-secondary/80 text-sm leading-relaxed italic">
               "Vous méritez d'être écouté et soutenu, sans jugement"
@@ -85,7 +91,7 @@ export function Footer() {
 
         <div className="border-t border-secondary/10 mt-12 pt-8 text-center text-sm text-secondary/60">
           <p>
-            © {new Date().getFullYear()} ALLÔ PSY. Tous droits réservés.
+            © {new Date().getFullYear()} {siteName.toUpperCase()}. Tous droits réservés.
           </p>
         </div>
       </div>
