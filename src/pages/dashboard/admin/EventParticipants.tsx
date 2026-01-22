@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Users, Download, Ticket, Mail, Phone, MoreHorizontal, CheckCircle, XCircle, Clock, Calendar, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -38,6 +39,7 @@ interface EventWithRegistrations {
 export default function EventParticipants() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { formatPrice } = useCurrency();
 
   // Fetch all registrations grouped by event
   const { data: eventsWithRegistrations, isLoading } = useQuery({
@@ -152,7 +154,7 @@ export default function EventParticipants() {
       `Événement: ${event.title}`,
       `Date: ${format(new Date(event.start_date), "dd/MM/yyyy HH:mm")}`,
       `Lieu: ${event.location || "En ligne"}`,
-      `Prix: ${event.price === 0 ? "Gratuit" : `${event.price} FCFA`}`,
+      `Prix: ${formatPrice(event.price)}`,
       ""
     ];
 
@@ -195,7 +197,7 @@ export default function EventParticipants() {
           event.title,
           format(new Date(event.start_date), "dd/MM/yyyy HH:mm"),
           event.location || "En ligne",
-          event.price === 0 ? "Gratuit" : `${event.price} FCFA`,
+          formatPrice(event.price),
           reg.ticket_number,
           reg.profiles?.full_name || "N/A",
           reg.profiles?.email || "N/A",

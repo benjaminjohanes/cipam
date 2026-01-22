@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Link2, Copy, TrendingUp, Users, DollarSign, Eye, Plus, CheckCircle, Pause, Play } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -17,6 +18,7 @@ export default function MyAffiliations() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { formatPrice, currency } = useCurrency();
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Fetch user's affiliations
@@ -137,9 +139,10 @@ export default function MyAffiliations() {
   const calculateCommission = (formation: any) => {
     if (!formation) return "N/A";
     if (formation.affiliation_type === "percentage") {
-      return `${formation.affiliation_value}% (${Math.round(formation.price * formation.affiliation_value / 100)} FCFA)`;
+      const commissionAmount = Math.round(formation.price * formation.affiliation_value / 100);
+      return `${formation.affiliation_value}% (${formatPrice(commissionAmount)})`;
     }
-    return `${formation.affiliation_value} FCFA`;
+    return formatPrice(formation.affiliation_value);
   };
 
   const totalEarnings = affiliations?.reduce((acc, a) => acc + (a.total_earned || 0), 0) || 0;
@@ -189,7 +192,7 @@ export default function MyAffiliations() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{totalEarnings.toLocaleString()} FCFA</div>
+              <div className="text-2xl font-bold text-primary">{formatPrice(totalEarnings)}</div>
             </CardContent>
           </Card>
         </div>
@@ -255,7 +258,7 @@ export default function MyAffiliations() {
                             </TableCell>
                             <TableCell>
                               <span className="font-medium">
-                                {(affiliation.total_earned || 0).toLocaleString()} FCFA
+                                {formatPrice(affiliation.total_earned || 0)}
                               </span>
                             </TableCell>
                             <TableCell>
@@ -343,12 +346,12 @@ export default function MyAffiliations() {
                           <h4 className="font-semibold mb-2 line-clamp-2">{formation.title}</h4>
                           <div className="flex items-center justify-between mb-3">
                             <span className="text-lg font-bold text-primary">
-                              {formation.price.toLocaleString()} FCFA
+                              {formatPrice(formation.price)}
                             </span>
                             <Badge variant="outline">
                               {formation.affiliation_type === "percentage" 
                                 ? `${formation.affiliation_value}%` 
-                                : `${formation.affiliation_value} FCFA`}
+                                : formatPrice(formation.affiliation_value)}
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground mb-4">

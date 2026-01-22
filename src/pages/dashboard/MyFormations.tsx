@@ -6,6 +6,7 @@ import { BookOpen, Clock, Plus, Edit, Trash2, Eye, Users, Loader2 } from "lucide
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { useFormations } from "@/hooks/useFormations";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
@@ -35,6 +36,7 @@ const getStatusBadge = (status: string) => {
 
 export default function MyFormations() {
   const { formations, loading, deleteFormation } = useFormations(true);
+  const { formatPrice } = useCurrency();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
@@ -46,11 +48,6 @@ export default function MyFormations() {
   const approvedFormations = formations.filter(f => f.status === 'approved');
   const pendingFormations = formations.filter(f => f.status === 'pending');
   const rejectedFormations = formations.filter(f => f.status === 'rejected');
-
-  const formatPrice = (price: number) => {
-    if (price === 0) return "Gratuit";
-    return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
-  };
 
   const renderFormationCard = (formation: typeof formations[0]) => (
     <Card key={formation.id} className="overflow-hidden">
