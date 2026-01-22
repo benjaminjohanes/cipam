@@ -1,72 +1,40 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Award, CheckCircle, XCircle, Clock, Eye, 
-  GraduationCap, Briefcase, FileText, Calendar
+  GraduationCap, Briefcase, Calendar
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
-const upgradeRequests = [
-  {
-    id: 1,
-    studentName: "Pierre Durand",
-    email: "pierre@email.com",
-    specialty: "Psychologie clinique",
-    experience: "3 ans",
-    submittedAt: "2024-01-18",
-    status: "pending",
-    servicesApproved: 4,
-    formationsCompleted: 5,
-    rating: 4.7,
-  },
-  {
-    id: 2,
-    studentName: "Claire Moreau",
-    email: "claire@email.com",
-    specialty: "Coaching personnel",
-    experience: "2 ans",
-    submittedAt: "2024-01-16",
-    status: "pending",
-    servicesApproved: 3,
-    formationsCompleted: 4,
-    rating: 4.9,
-  },
-  {
-    id: 3,
-    studentName: "Lucas Bernard",
-    email: "lucas@email.com",
-    specialty: "Psychothérapie",
-    experience: "5 ans",
-    submittedAt: "2024-01-14",
-    status: "approved",
-    servicesApproved: 6,
-    formationsCompleted: 8,
-    rating: 4.8,
-  },
-];
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { 
+  useUpgradeRequests, 
+  useProcessUpgradeRequest,
+  useUpgradeRequestStats 
+} from "@/hooks/useUpgradeRequests";
 
 export default function UpgradeRequests() {
-  const { toast } = useToast();
+  const { data: requests, isLoading } = useUpgradeRequests();
+  const { data: stats, isLoading: isLoadingStats } = useUpgradeRequestStats();
+  const processRequest = useProcessUpgradeRequest();
 
-  const handleApprove = (id: number, name: string) => {
-    toast({
-      title: "Demande approuvée",
-      description: `${name} a été promu au statut professionnel.`,
+  const handleApprove = (id: string) => {
+    processRequest.mutate({ requestId: id, status: "approved" });
+  };
+
+  const handleReject = (id: string) => {
+    processRequest.mutate({ 
+      requestId: id, 
+      status: "rejected",
+      rejectionReason: "Critères non remplis" 
     });
   };
 
-  const handleReject = (id: number, name: string) => {
-    toast({
-      title: "Demande refusée",
-      description: `La demande de ${name} a été refusée.`,
-      variant: "destructive",
-    });
-  };
-
-  const pendingRequests = upgradeRequests.filter(r => r.status === 'pending');
-  const processedRequests = upgradeRequests.filter(r => r.status !== 'pending');
+  const pendingRequests = requests?.filter(r => r.status === 'pending') || [];
+  const processedRequests = requests?.filter(r => r.status !== 'pending').slice(0, 5) || [];
 
   return (
     <DashboardLayout title="Demandes d'upgrade" description="Validez les passages au statut professionnel">
@@ -78,7 +46,11 @@ export default function UpgradeRequests() {
               <Clock className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{pendingRequests.length}</p>
+              {isLoadingStats ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <p className="text-2xl font-bold">{stats?.pending || 0}</p>
+              )}
               <p className="text-xs text-muted-foreground">En attente</p>
             </div>
           </CardContent>
@@ -89,7 +61,11 @@ export default function UpgradeRequests() {
               <CheckCircle className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">23</p>
+              {isLoadingStats ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <p className="text-2xl font-bold">{stats?.approvedThisMonth || 0}</p>
+              )}
               <p className="text-xs text-muted-foreground">Approuvées ce mois</p>
             </div>
           </CardContent>
@@ -100,7 +76,11 @@ export default function UpgradeRequests() {
               <XCircle className="h-5 w-5 text-red-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">5</p>
+              {isLoadingStats ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <p className="text-2xl font-bold">{stats?.rejectedThisMonth || 0}</p>
+              )}
               <p className="text-xs text-muted-foreground">Refusées ce mois</p>
             </div>
           </CardContent>
@@ -110,45 +90,64 @@ export default function UpgradeRequests() {
       {/* Pending Requests */}
       <div className="space-y-4 mb-8">
         <h2 className="text-lg font-semibold">Demandes en attente</h2>
-        {pendingRequests.length > 0 ? (
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-14 w-14 rounded-full" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-5 w-48" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : pendingRequests.length > 0 ? (
           pendingRequests.map((request) => (
             <Card key={request.id}>
               <CardContent className="p-6">
                 <div className="flex flex-col lg:flex-row lg:items-center gap-6">
                   {/* Student Info */}
                   <div className="flex items-center gap-4 flex-1">
-                    <div className="h-14 w-14 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
-                      <GraduationCap className="h-7 w-7 text-purple-600" />
-                    </div>
+                    <Avatar className="h-14 w-14">
+                      <AvatarImage src={request.user?.avatar_url || undefined} />
+                      <AvatarFallback className="bg-purple-100">
+                        <GraduationCap className="h-7 w-7 text-purple-600" />
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="font-semibold text-lg">{request.studentName}</p>
+                        <p className="font-semibold text-lg">
+                          {request.user?.full_name || "Utilisateur"}
+                        </p>
                         <Badge variant="secondary">
                           <Clock className="h-3 w-3 mr-1" />
                           En attente
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground">{request.email}</p>
+                      <p className="text-sm text-muted-foreground">{request.user?.email}</p>
                       <p className="text-sm text-muted-foreground mt-1">
                         <Briefcase className="h-3 w-3 inline mr-1" />
-                        {request.specialty} • {request.experience} d'expérience
+                        {request.specialty} • {request.experience_years} ans d'expérience
                       </p>
                     </div>
                   </div>
 
-                  {/* Stats */}
+                  {/* Details */}
                   <div className="flex gap-6 text-sm">
                     <div className="text-center">
-                      <p className="text-xl font-bold text-foreground">{request.servicesApproved}</p>
-                      <p className="text-muted-foreground">Services</p>
+                      <p className="text-xl font-bold text-foreground">{request.experience_years}</p>
+                      <p className="text-muted-foreground">Années exp.</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xl font-bold text-foreground">{request.formationsCompleted}</p>
-                      <p className="text-muted-foreground">Formations</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-foreground">{request.rating}</p>
-                      <p className="text-muted-foreground">Note</p>
+                      <Calendar className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(request.created_at), "dd MMM yyyy", { locale: fr })}
+                      </p>
                     </div>
                   </div>
 
@@ -161,20 +160,31 @@ export default function UpgradeRequests() {
                     <Button 
                       variant="destructive" 
                       size="sm"
-                      onClick={() => handleReject(request.id, request.studentName)}
+                      onClick={() => handleReject(request.id)}
+                      disabled={processRequest.isPending}
                     >
                       <XCircle className="h-4 w-4 mr-1" />
                       Refuser
                     </Button>
                     <Button 
                       size="sm"
-                      onClick={() => handleApprove(request.id, request.studentName)}
+                      onClick={() => handleApprove(request.id)}
+                      disabled={processRequest.isPending}
                     >
                       <CheckCircle className="h-4 w-4 mr-1" />
                       Approuver
                     </Button>
                   </div>
                 </div>
+
+                {/* Motivation preview */}
+                {request.motivation && (
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      <span className="font-medium">Motivation:</span> {request.motivation}
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))
@@ -196,16 +206,36 @@ export default function UpgradeRequests() {
           {processedRequests.map((request) => (
             <Card key={request.id} className="opacity-75">
               <CardContent className="p-4 flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                </div>
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={request.user?.avatar_url || undefined} />
+                  <AvatarFallback className={request.status === "approved" ? "bg-green-100" : "bg-red-100"}>
+                    {request.status === "approved" ? (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-red-600" />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="flex-1">
-                  <p className="font-medium">{request.studentName}</p>
+                  <p className="font-medium">{request.user?.full_name || "Utilisateur"}</p>
                   <p className="text-sm text-muted-foreground">{request.specialty}</p>
                 </div>
-                <Badge variant="default" className="bg-green-100 text-green-700">
-                  Approuvé
-                </Badge>
+                <div className="text-right">
+                  <Badge 
+                    variant="default" 
+                    className={request.status === "approved" 
+                      ? "bg-green-100 text-green-700" 
+                      : "bg-red-100 text-red-700"
+                    }
+                  >
+                    {request.status === "approved" ? "Approuvé" : "Refusé"}
+                  </Badge>
+                  {request.processed_at && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {format(new Date(request.processed_at), "dd/MM/yyyy", { locale: fr })}
+                    </p>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}

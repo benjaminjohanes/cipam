@@ -13,6 +13,13 @@ export interface AlternativePaymentSettings {
   instructions: string;
 }
 
+export interface SocialLinks {
+  facebook: string;
+  linkedin: string;
+  twitter: string;
+  instagram: string;
+}
+
 export interface BrandingSettings {
   site_name: string;
   slogan: string;
@@ -24,6 +31,7 @@ export interface BrandingSettings {
   contact_email: string;
   contact_phones: string[];
   contact_address: string;
+  social_links: SocialLinks;
 }
 
 const defaultPaymentSettings: AlternativePaymentSettings = {
@@ -48,6 +56,12 @@ const defaultBrandingSettings: BrandingSettings = {
   contact_email: "cipam.global.contact@gmail.com",
   contact_phones: ["+229 01 52 01 17 77", "+229 01 59 05 40 93"],
   contact_address: "Abomey-Calavi, Benin",
+  social_links: {
+    facebook: "",
+    linkedin: "",
+    twitter: "",
+    instagram: "",
+  },
 };
 
 export const useAlternativePaymentSettings = () => {

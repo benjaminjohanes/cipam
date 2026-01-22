@@ -17,6 +17,12 @@ const defaultBranding: BrandingSettings = {
   contact_email: "cipam.global.contact@gmail.com",
   contact_phones: ["+229 01 52 01 17 77", "+229 01 59 05 40 93"],
   contact_address: "Abomey-Calavi, Benin",
+  social_links: {
+    facebook: "",
+    linkedin: "",
+    twitter: "",
+    instagram: "",
+  },
 };
 
 const BrandingContext = createContext<BrandingContextValue>({

@@ -5,22 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { CheckCircle, Award, FileText, Clock, Star, TrendingUp } from "lucide-react";
-
-const requirements = [
-  { id: 1, text: "Avoir complété au moins 3 formations sur la plateforme", met: true },
-  { id: 2, text: "Avoir proposé au moins 2 services approuvés", met: true },
-  { id: 3, text: "Avoir une note moyenne d'au moins 4/5", met: true },
-  { id: 4, text: "Fournir une copie de vos diplômes", met: false },
-  { id: 5, text: "Avoir au moins 2 ans d'expérience", met: false },
-];
+import { useMyUpgradeRequests, useCreateUpgradeRequest } from "@/hooks/useUpgradeRequests";
+import { CheckCircle, Award, FileText, Clock, Star, TrendingUp, AlertCircle } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 export default function UpgradeRequest() {
-  const { toast } = useToast();
   const { profile } = useAuth();
+  const { data: myRequests, isLoading: isLoadingRequests } = useMyUpgradeRequests();
+  const createRequest = useCreateUpgradeRequest();
+  
   const [formData, setFormData] = useState({
     motivation: "",
     experience: "",
@@ -30,19 +28,84 @@ export default function UpgradeRequest() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Demande envoyée",
-      description: "Votre demande de passage au statut professionnel a été soumise. Nous vous contacterons sous 48h.",
+    
+    if (!formData.specialty || !formData.experience) {
+      return;
+    }
+
+    createRequest.mutate({
+      specialty: formData.specialty,
+      experience_years: parseInt(formData.experience) || 0,
+      diplomas: formData.diploma || undefined,
+      motivation: formData.motivation || undefined,
     });
   };
 
-  const requirementsMet = requirements.filter(r => r.met).length;
-  const totalRequirements = requirements.length;
-  const canApply = requirementsMet >= 3; // At least 3 requirements met
+  // Check if user has a pending request
+  const pendingRequest = myRequests?.find(r => r.status === "pending");
+  const lastRequest = myRequests?.[0];
 
   return (
     <DashboardLayout title="Devenir professionnel" description="Évoluez vers le statut professionnel">
       <div className="max-w-3xl space-y-6">
+        {/* Existing Request Status */}
+        {isLoadingRequests ? (
+          <Card>
+            <CardContent className="p-6">
+              <Skeleton className="h-20 w-full" />
+            </CardContent>
+          </Card>
+        ) : pendingRequest ? (
+          <Card className="border-yellow-200 bg-yellow-50">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg">Demande en cours de traitement</h3>
+                  <p className="text-muted-foreground">
+                    Votre demande du {format(new Date(pendingRequest.created_at), "dd MMMM yyyy", { locale: fr })} est en attente de validation.
+                  </p>
+                  <div className="mt-3 flex items-center gap-2">
+                    <Badge variant="secondary">
+                      <Clock className="h-3 w-3 mr-1" />
+                      En attente
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      Spécialité: {pendingRequest.specialty}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : lastRequest?.status === "rejected" ? (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+                  <AlertCircle className="h-6 w-6 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg">Dernière demande refusée</h3>
+                  <p className="text-muted-foreground">
+                    Votre demande du {format(new Date(lastRequest.created_at), "dd MMMM yyyy", { locale: fr })} a été refusée.
+                  </p>
+                  {lastRequest.rejection_reason && (
+                    <p className="mt-2 text-sm text-red-700">
+                      Raison: {lastRequest.rejection_reason}
+                    </p>
+                  )}
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Vous pouvez soumettre une nouvelle demande ci-dessous.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
+
         {/* Benefits Card */}
         <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
           <CardHeader>
@@ -93,120 +156,112 @@ export default function UpgradeRequest() {
           </CardContent>
         </Card>
 
-        {/* Requirements Checklist */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Critères d'éligibilité</CardTitle>
-            <CardDescription>
-              Vous remplissez {requirementsMet}/{totalRequirements} critères
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {requirements.map((req) => (
-                <div 
-                  key={req.id}
-                  className={`flex items-center gap-3 p-3 rounded-lg ${
-                    req.met ? 'bg-green-50' : 'bg-muted/50'
-                  }`}
-                >
-                  <div className={`h-6 w-6 rounded-full flex items-center justify-center ${
-                    req.met ? 'bg-green-500' : 'bg-muted'
-                  }`}>
-                    {req.met ? (
-                      <CheckCircle className="h-4 w-4 text-white" />
-                    ) : (
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </div>
-                  <span className={req.met ? 'text-foreground' : 'text-muted-foreground'}>
-                    {req.text}
-                  </span>
+        {/* Application Form - Only show if no pending request */}
+        {!pendingRequest && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Formulaire de candidature</CardTitle>
+              <CardDescription>
+                Complétez ce formulaire pour soumettre votre demande
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <Label htmlFor="specialty">Spécialité principale *</Label>
+                  <Select 
+                    value={formData.specialty}
+                    onValueChange={(value) => setFormData({ ...formData, specialty: value })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Sélectionnez votre spécialité" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Psychologie clinique">Psychologie clinique</SelectItem>
+                      <SelectItem value="Psychologie de l'enfant">Psychologie de l'enfant</SelectItem>
+                      <SelectItem value="Neuropsychologie">Neuropsychologie</SelectItem>
+                      <SelectItem value="Psychothérapie">Psychothérapie</SelectItem>
+                      <SelectItem value="Coaching">Coaching</SelectItem>
+                      <SelectItem value="Autre">Autre</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Application Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Formulaire de candidature</CardTitle>
-            <CardDescription>
-              Complétez ce formulaire pour soumettre votre demande
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <Label htmlFor="specialty">Spécialité principale</Label>
-                <Select 
-                  value={formData.specialty}
-                  onValueChange={(value) => setFormData({ ...formData, specialty: value })}
+                <div>
+                  <Label htmlFor="experience">Années d'expérience *</Label>
+                  <Input
+                    id="experience"
+                    type="number"
+                    min="0"
+                    value={formData.experience}
+                    onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+                    placeholder="Ex: 3"
+                    className="mt-1"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="diploma">Diplômes et certifications</Label>
+                  <Textarea
+                    id="diploma"
+                    value={formData.diploma}
+                    onChange={(e) => setFormData({ ...formData, diploma: e.target.value })}
+                    placeholder="Listez vos diplômes, certifications et formations..."
+                    className="mt-1 min-h-[100px]"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="motivation">Lettre de motivation</Label>
+                  <Textarea
+                    id="motivation"
+                    value={formData.motivation}
+                    onChange={(e) => setFormData({ ...formData, motivation: e.target.value })}
+                    placeholder="Expliquez pourquoi vous souhaitez devenir professionnel sur ALLÔ PSY..."
+                    className="mt-1 min-h-[150px]"
+                  />
+                </div>
+
+                <Button 
+                  type="submit" 
+                  disabled={!formData.specialty || !formData.experience || createRequest.isPending}
                 >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Sélectionnez votre spécialité" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="clinical">Psychologie clinique</SelectItem>
-                    <SelectItem value="child">Psychologie de l'enfant</SelectItem>
-                    <SelectItem value="neuro">Neuropsychologie</SelectItem>
-                    <SelectItem value="therapy">Psychothérapie</SelectItem>
-                    <SelectItem value="coaching">Coaching</SelectItem>
-                    <SelectItem value="other">Autre</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="experience">Années d'expérience</Label>
-                <Input
-                  id="experience"
-                  type="number"
-                  min="0"
-                  value={formData.experience}
-                  onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                  placeholder="Ex: 3"
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="diploma">Diplômes et certifications</Label>
-                <Textarea
-                  id="diploma"
-                  value={formData.diploma}
-                  onChange={(e) => setFormData({ ...formData, diploma: e.target.value })}
-                  placeholder="Listez vos diplômes, certifications et formations..."
-                  className="mt-1 min-h-[100px]"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="motivation">Lettre de motivation</Label>
-                <Textarea
-                  id="motivation"
-                  value={formData.motivation}
-                  onChange={(e) => setFormData({ ...formData, motivation: e.target.value })}
-                  placeholder="Expliquez pourquoi vous souhaitez devenir professionnel sur ALLÔ PSY..."
-                  className="mt-1 min-h-[150px]"
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <Button type="submit" disabled={!canApply}>
-                  Soumettre ma candidature
+                  {createRequest.isPending ? "Envoi en cours..." : "Soumettre ma candidature"}
                 </Button>
-                {!canApply && (
-                  <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Vous devez remplir au moins 3 critères
-                  </p>
-                )}
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Request History */}
+        {myRequests && myRequests.length > 0 && !pendingRequest && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Historique des demandes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {myRequests.map((request) => (
+                  <div key={request.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div>
+                      <p className="font-medium">{request.specialty}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(request.created_at), "dd MMMM yyyy", { locale: fr })}
+                      </p>
+                    </div>
+                    <Badge 
+                      variant={request.status === "approved" ? "default" : "destructive"}
+                      className={request.status === "approved" ? "bg-green-100 text-green-700" : ""}
+                    >
+                      {request.status === "approved" ? "Approuvé" : "Refusé"}
+                    </Badge>
+                  </div>
+                ))}
               </div>
-            </form>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );

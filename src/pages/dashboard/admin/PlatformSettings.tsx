@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Settings, Globe, Bell, Shield, Mail, Save, 
   CreditCard, Users, FileText, Key, Eye, EyeOff, Check, AlertCircle, Wallet, Building2, MapPin, Loader2,
-  Palette, Image as ImageIcon, Upload, X, Phone
+  Palette, Image as ImageIcon, Upload, X, Phone, Facebook, Linkedin, Twitter, Instagram
 } from "lucide-react";
 import { toast } from "sonner";
 import { 
@@ -56,6 +56,12 @@ export default function PlatformSettings() {
     contact_email: "cipam.global.contact@gmail.com",
     contact_phones: ["+229 01 52 01 17 77", "+229 01 59 05 40 93"],
     contact_address: "Abomey-Calavi, Benin",
+    social_links: {
+      facebook: "",
+      linkedin: "",
+      twitter: "",
+      instagram: "",
+    },
   });
 
   const [uploading, setUploading] = useState<{ header: boolean; footer: boolean; favicon: boolean }>({
@@ -467,6 +473,77 @@ export default function PlatformSettings() {
                   </div>
                 </div>
 
+                <Separator />
+
+                {/* Social Links */}
+                <div className="space-y-4">
+                  <Label className="text-base font-medium">Réseaux sociaux</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Ajoutez les liens vers vos pages de réseaux sociaux
+                  </p>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="facebookLink" className="text-sm text-muted-foreground">Facebook</Label>
+                      <div className="flex items-center gap-2">
+                        <Facebook className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <Input
+                          id="facebookLink"
+                          value={branding.social_links?.facebook || ""}
+                          onChange={(e) => setBranding(prev => ({ 
+                            ...prev, 
+                            social_links: { ...prev.social_links, facebook: e.target.value } 
+                          }))}
+                          placeholder="https://facebook.com/votrepage"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="linkedinLink" className="text-sm text-muted-foreground">LinkedIn</Label>
+                      <div className="flex items-center gap-2">
+                        <Linkedin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <Input
+                          id="linkedinLink"
+                          value={branding.social_links?.linkedin || ""}
+                          onChange={(e) => setBranding(prev => ({ 
+                            ...prev, 
+                            social_links: { ...prev.social_links, linkedin: e.target.value } 
+                          }))}
+                          placeholder="https://linkedin.com/company/votrepage"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="twitterLink" className="text-sm text-muted-foreground">Twitter / X</Label>
+                      <div className="flex items-center gap-2">
+                        <Twitter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <Input
+                          id="twitterLink"
+                          value={branding.social_links?.twitter || ""}
+                          onChange={(e) => setBranding(prev => ({ 
+                            ...prev, 
+                            social_links: { ...prev.social_links, twitter: e.target.value } 
+                          }))}
+                          placeholder="https://twitter.com/votrecompte"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="instagramLink" className="text-sm text-muted-foreground">Instagram</Label>
+                      <div className="flex items-center gap-2">
+                        <Instagram className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <Input
+                          id="instagramLink"
+                          value={branding.social_links?.instagram || ""}
+                          onChange={(e) => setBranding(prev => ({ 
+                            ...prev, 
+                            social_links: { ...prev.social_links, instagram: e.target.value } 
+                          }))}
+                          placeholder="https://instagram.com/votrecompte"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <Button 
                   onClick={handleSaveBranding} 
                   disabled={updateBranding.isPending}
