@@ -3,7 +3,7 @@ import {
   Home, User, BookOpen, Calendar, FileText, Settings, 
   Users, ShieldCheck, CreditCard, Bell, MessageSquare,
   GraduationCap, Briefcase, ClipboardList, TrendingUp,
-  Building, UserCog, FolderOpen, Award, Tags, Ticket, Link2
+  UserCog, Award, Tags, Ticket, Link2
 } from "lucide-react";
 import {
   Sidebar,
@@ -20,7 +20,9 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminPermissions } from "@/hooks/useAdminPermissions";
 import logo from "@/assets/logo.png";
+import type { AdminPermission } from "@/components/admin/PermissionsDialog";
 
 type AppRole = 'student' | 'professional' | 'patient' | 'admin';
 
@@ -28,14 +30,60 @@ interface MenuItem {
   title: string;
   url: string;
   icon: React.ComponentType<{ className?: string }>;
+  permission?: AdminPermission; // Required permission for admin menu items
 }
 
 interface MenuGroup {
   label: string;
   items: MenuItem[];
+  permissions?: AdminPermission[]; // If any of these permissions, show the group
 }
 
-const menusByRole: Record<AppRole, MenuGroup[]> = {
+// Mapping of admin routes to required permissions
+const adminMenus: MenuGroup[] = [
+  {
+    label: "Administration",
+    items: [
+      { title: "Tableau de bord", url: "/dashboard", icon: Home },
+      { title: "Vue d'ensemble", url: "/dashboard/overview", icon: TrendingUp, permission: "view_stats" },
+    ],
+  },
+  {
+    label: "Gestion des utilisateurs",
+    permissions: ["manage_users"],
+    items: [
+      { title: "Tous les utilisateurs", url: "/dashboard/users", icon: Users, permission: "manage_users" },
+      { title: "Professionnels", url: "/dashboard/professionals", icon: Briefcase, permission: "manage_users" },
+      { title: "Étudiants", url: "/dashboard/students", icon: GraduationCap, permission: "manage_users" },
+      { title: "Demandes d'upgrade", url: "/dashboard/upgrade-requests", icon: Award, permission: "manage_users" },
+    ],
+  },
+  {
+    label: "Contenu",
+    permissions: ["manage_categories", "manage_formations", "manage_services", "manage_events", "manage_articles", "manage_affiliations"],
+    items: [
+      { title: "Catégories", url: "/dashboard/categories", icon: Tags, permission: "manage_categories" },
+      { title: "Formations", url: "/dashboard/all-formations", icon: BookOpen, permission: "manage_formations" },
+      { title: "Services", url: "/dashboard/all-services", icon: ClipboardList, permission: "manage_services" },
+      { title: "Événements", url: "/dashboard/all-events", icon: Ticket, permission: "manage_events" },
+      { title: "Participants", url: "/dashboard/event-participants", icon: Users, permission: "manage_events" },
+      { title: "Articles", url: "/dashboard/all-articles", icon: FileText, permission: "manage_articles" },
+      { title: "Rendez-vous", url: "/dashboard/all-appointments", icon: Calendar, permission: "manage_users" },
+      { title: "Affiliations", url: "/dashboard/all-affiliations", icon: Link2, permission: "manage_affiliations" },
+    ],
+  },
+  {
+    label: "Configuration",
+    permissions: ["manage_team", "manage_settings"],
+    items: [
+      { title: "Équipe admin", url: "/dashboard/team", icon: UserCog, permission: "manage_team" },
+      { title: "Rôles & Permissions", url: "/dashboard/roles", icon: ShieldCheck, permission: "manage_team" },
+      { title: "Paramètres plateforme", url: "/dashboard/platform-settings", icon: Settings, permission: "manage_settings" },
+    ],
+  },
+];
+
+const menusByRole: Record<Exclude<AppRole, 'admin'>, MenuGroup[]> = {
   patient: [
     {
       label: "Général",
@@ -131,55 +179,43 @@ const menusByRole: Record<AppRole, MenuGroup[]> = {
       ]
     }
   ],
-  admin: [
-    {
-      label: "Administration",
-      items: [
-        { title: "Tableau de bord", url: "/dashboard", icon: Home },
-        { title: "Vue d'ensemble", url: "/dashboard/overview", icon: TrendingUp },
-      ]
-    },
-    {
-      label: "Gestion des utilisateurs",
-      items: [
-        { title: "Tous les utilisateurs", url: "/dashboard/users", icon: Users },
-        { title: "Professionnels", url: "/dashboard/professionals", icon: Briefcase },
-        { title: "Étudiants", url: "/dashboard/students", icon: GraduationCap },
-        { title: "Demandes d'upgrade", url: "/dashboard/upgrade-requests", icon: Award },
-      ]
-    },
-    {
-      label: "Contenu",
-      items: [
-        { title: "Catégories", url: "/dashboard/categories", icon: Tags },
-        { title: "Formations", url: "/dashboard/all-formations", icon: BookOpen },
-        { title: "Services", url: "/dashboard/all-services", icon: ClipboardList },
-        { title: "Événements", url: "/dashboard/all-events", icon: Ticket },
-        { title: "Participants", url: "/dashboard/event-participants", icon: Users },
-        { title: "Articles", url: "/dashboard/all-articles", icon: FileText },
-        { title: "Rendez-vous", url: "/dashboard/all-appointments", icon: Calendar },
-        { title: "Affiliations", url: "/dashboard/all-affiliations", icon: Link2 },
-      ]
-    },
-    {
-      label: "Configuration",
-      items: [
-        { title: "Équipe admin", url: "/dashboard/team", icon: UserCog },
-        { title: "Rôles & Permissions", url: "/dashboard/roles", icon: ShieldCheck },
-        { title: "Paramètres plateforme", url: "/dashboard/platform-settings", icon: Settings },
-      ]
-    }
-  ]
 };
 
 export function DashboardSidebar() {
   const { state } = useSidebar();
-  const { role, profile } = useAuth();
+  const { role, profile, user } = useAuth();
   const location = useLocation();
   const collapsed = state === "collapsed";
   
-  const menus = role ? menusByRole[role as AppRole] : menusByRole.patient;
+  // Fetch permissions for admin users
+  const { permissions } = useAdminPermissions(role === 'admin' ? user?.id : undefined);
   
+  // Filter admin menus based on permissions
+  const getFilteredAdminMenus = (): MenuGroup[] => {
+    return adminMenus
+      .map(group => {
+        // Filter items based on permission
+        const filteredItems = group.items.filter(item => {
+          // Items without permission requirement are always shown
+          if (!item.permission) return true;
+          // Check if user has the required permission
+          return permissions.includes(item.permission);
+        });
+        
+        return { ...group, items: filteredItems };
+      })
+      .filter(group => group.items.length > 0); // Remove empty groups
+  };
+  
+  // Get menus based on role
+  const getMenus = (): MenuGroup[] => {
+    if (role === 'admin') {
+      return getFilteredAdminMenus();
+    }
+    return menusByRole[role as Exclude<AppRole, 'admin'>] || menusByRole.patient;
+  };
+  
+  const menus = getMenus();
   const isActive = (path: string) => location.pathname === path;
 
   return (
