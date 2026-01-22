@@ -3,12 +3,16 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShieldCheck, Users, GraduationCap, Stethoscope, UserRound } from "lucide-react";
+import { ShieldCheck, Users, GraduationCap, Stethoscope, UserRound, Settings2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Database } from "@/integrations/supabase/types";
+import { PermissionsDialog, AdminPermission, permissionConfigs } from "@/components/admin/PermissionsDialog";
+import { useAllAdminPermissions, useAdminPermissions } from "@/hooks/useAdminPermissions";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -32,8 +36,15 @@ const roleLabels: Record<AppRole, { label: string; icon: React.ReactNode; color:
 
 const Roles = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<AppRole | "all">("all");
+  const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; name: string; isNew: boolean } | null>(null);
+  const [pendingRoleChange, setPendingRoleChange] = useState<{ userId: string; newRole: AppRole } | null>(null);
+
+  const { data: allPermissions } = useAllAdminPermissions();
+  const { updatePermissions } = useAdminPermissions();
 
   const { data: userRoles, isLoading } = useQuery({
     queryKey: ["admin-user-roles"],
@@ -45,7 +56,6 @@ const Roles = () => {
 
       if (error) throw error;
       
-      // Fetch profiles separately
       const userIds = (data || []).map(r => r.user_id);
       const { data: profiles } = await supabase
         .from("profiles")
@@ -78,6 +88,49 @@ const Roles = () => {
       toast({ title: "Erreur", description: "Impossible de mettre à jour le rôle", variant: "destructive" });
     },
   });
+
+  const handleRoleChange = (userId: string, currentRole: AppRole, newRole: AppRole) => {
+    const userInfo = userRoles?.find(u => u.user_id === userId);
+    const userName = userInfo?.profile?.full_name || "cet utilisateur";
+
+    // Si on passe à admin, ouvrir le dialogue des permissions
+    if (newRole === "admin" && currentRole !== "admin") {
+      setPendingRoleChange({ userId, newRole });
+      setSelectedUser({ id: userId, name: userName, isNew: true });
+      setPermissionsDialogOpen(true);
+    } else {
+      // Si on retire le rôle admin, supprimer les permissions
+      if (currentRole === "admin" && newRole !== "admin") {
+        updatePermissions.mutate({
+          userId,
+          permissions: [],
+          grantedBy: user?.id || "",
+        });
+      }
+      updateRole.mutate({ userId, newRole });
+    }
+  };
+
+  const handlePermissionsSave = async (permissions: AdminPermission[]) => {
+    if (!user) return;
+
+    await updatePermissions.mutateAsync({
+      userId: selectedUser?.id || "",
+      permissions,
+      grantedBy: user.id,
+    });
+
+    // Si c'est une nouvelle promotion admin, appliquer le changement de rôle
+    if (pendingRoleChange) {
+      updateRole.mutate(pendingRoleChange);
+      setPendingRoleChange(null);
+    }
+  };
+
+  const openPermissionsForUser = (userId: string, userName: string) => {
+    setSelectedUser({ id: userId, name: userName, isNew: false });
+    setPermissionsDialogOpen(true);
+  };
 
   const filteredUsers = userRoles?.filter((u) => filter === "all" || u.role === filter);
 
@@ -115,7 +168,7 @@ const Roles = () => {
                   <Users className="h-5 w-5" />
                   Gestion des rôles
                 </CardTitle>
-                <CardDescription>Modifier les rôles des utilisateurs</CardDescription>
+                <CardDescription>Modifier les rôles et permissions des utilisateurs</CardDescription>
               </div>
               <Select value={filter} onValueChange={(v) => setFilter(v as AppRole | "all")}>
                 <SelectTrigger className="w-[180px]">
@@ -142,41 +195,80 @@ const Roles = () => {
                     <TableHead>Utilisateur</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Rôle actuel</TableHead>
-                    <TableHead>Changer le rôle</TableHead>
+                    <TableHead>Permissions</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">
-                        {user.profile?.full_name || "Non renseigné"}
-                      </TableCell>
-                      <TableCell>{user.profile?.email || "N/A"}</TableCell>
-                      <TableCell>
-                        <Badge className={`${roleLabels[user.role].color} text-white`}>
-                          {roleLabels[user.role].icon}
-                          <span className="ml-1">{roleLabels[user.role].label}</span>
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Select
-                          value={user.role}
-                          onValueChange={(v) => updateRole.mutate({ userId: user.user_id, newRole: v as AppRole })}
-                        >
-                          <SelectTrigger className="w-[150px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {(Object.keys(roleLabels) as AppRole[]).map((role) => (
-                              <SelectItem key={role} value={role}>
-                                {roleLabels[role].label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {filteredUsers.map((userRole) => {
+                    const userPerms = allPermissions?.[userRole.user_id] || [];
+                    return (
+                      <TableRow key={userRole.id}>
+                        <TableCell className="font-medium">
+                          {userRole.profile?.full_name || "Non renseigné"}
+                        </TableCell>
+                        <TableCell>{userRole.profile?.email || "N/A"}</TableCell>
+                        <TableCell>
+                          <Badge className={`${roleLabels[userRole.role].color} text-white`}>
+                            {roleLabels[userRole.role].icon}
+                            <span className="ml-1">{roleLabels[userRole.role].label}</span>
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {userRole.role === "admin" && (
+                            <div className="flex flex-wrap gap-1">
+                              {userPerms.length > 0 ? (
+                                userPerms.length <= 3 ? (
+                                  userPerms.map((perm) => (
+                                    <Badge key={perm} variant="outline" className="text-xs">
+                                      {permissionConfigs[perm]?.label || perm}
+                                    </Badge>
+                                  ))
+                                ) : (
+                                  <Badge variant="outline" className="text-xs">
+                                    {userPerms.length} permissions
+                                  </Badge>
+                                )
+                              ) : (
+                                <span className="text-muted-foreground text-sm">Aucune permission</span>
+                              )}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Select
+                              value={userRole.role}
+                              onValueChange={(v) => handleRoleChange(userRole.user_id, userRole.role, v as AppRole)}
+                            >
+                              <SelectTrigger className="w-[150px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(Object.keys(roleLabels) as AppRole[]).map((role) => (
+                                  <SelectItem key={role} value={role}>
+                                    {roleLabels[role].label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {userRole.role === "admin" && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => openPermissionsForUser(
+                                  userRole.user_id,
+                                  userRole.profile?.full_name || "Utilisateur"
+                                )}
+                              >
+                                <Settings2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             ) : (
@@ -185,6 +277,18 @@ const Roles = () => {
           </CardContent>
         </Card>
       </div>
+
+      {selectedUser && (
+        <PermissionsDialog
+          open={permissionsDialogOpen}
+          onOpenChange={setPermissionsDialogOpen}
+          userName={selectedUser.name}
+          userId={selectedUser.id}
+          currentPermissions={allPermissions?.[selectedUser.id] || []}
+          onSave={handlePermissionsSave}
+          isNewAdmin={selectedUser.isNew}
+        />
+      )}
     </DashboardLayout>
   );
 };
