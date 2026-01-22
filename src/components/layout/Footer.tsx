@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, Facebook, Linkedin, Twitter } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Linkedin, Twitter, Instagram } from "lucide-react";
 import { useBranding } from "@/contexts/BrandingContext";
 import defaultLogo from "@/assets/logo-footer.jpg";
 
@@ -12,6 +12,9 @@ export function Footer() {
   const contactEmail = branding.contact_email || "cipam.global.contact@gmail.com";
   const contactPhones = branding.contact_phones?.length ? branding.contact_phones : ["+229 01 52 01 17 77", "+229 01 59 05 40 93"];
   const contactAddress = branding.contact_address || "Abomey-Calavi, Benin";
+  const socialLinks = branding.social_links || { facebook: "", linkedin: "", twitter: "", instagram: "" };
+
+  const hasSocialLinks = socialLinks.facebook || socialLinks.linkedin || socialLinks.twitter || socialLinks.instagram;
 
   return (
     <footer className="bg-allopsy-navy text-secondary py-16">
@@ -80,17 +83,54 @@ export function Footer() {
                 <span>{contactAddress}</span>
               </li>
             </ul>
-            <div className="flex gap-3 mt-4">
-              <a href="#" className="p-2 bg-secondary/10 rounded-full hover:bg-secondary/20 transition-colors">
-                <Facebook className="w-4 h-4" />
-              </a>
-              <a href="#" className="p-2 bg-secondary/10 rounded-full hover:bg-secondary/20 transition-colors">
-                <Linkedin className="w-4 h-4" />
-              </a>
-              <a href="#" className="p-2 bg-secondary/10 rounded-full hover:bg-secondary/20 transition-colors">
-                <Twitter className="w-4 h-4" />
-              </a>
-            </div>
+            {hasSocialLinks && (
+              <div className="flex gap-3 mt-4">
+                {socialLinks.facebook && (
+                  <a 
+                    href={socialLinks.facebook} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-2 bg-secondary/10 rounded-full hover:bg-secondary/20 transition-colors"
+                    aria-label="Facebook"
+                  >
+                    <Facebook className="w-4 h-4" />
+                  </a>
+                )}
+                {socialLinks.linkedin && (
+                  <a 
+                    href={socialLinks.linkedin} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-2 bg-secondary/10 rounded-full hover:bg-secondary/20 transition-colors"
+                    aria-label="LinkedIn"
+                  >
+                    <Linkedin className="w-4 h-4" />
+                  </a>
+                )}
+                {socialLinks.twitter && (
+                  <a 
+                    href={socialLinks.twitter} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-2 bg-secondary/10 rounded-full hover:bg-secondary/20 transition-colors"
+                    aria-label="Twitter"
+                  >
+                    <Twitter className="w-4 h-4" />
+                  </a>
+                )}
+                {socialLinks.instagram && (
+                  <a 
+                    href={socialLinks.instagram} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-2 bg-secondary/10 rounded-full hover:bg-secondary/20 transition-colors"
+                    aria-label="Instagram"
+                  >
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
