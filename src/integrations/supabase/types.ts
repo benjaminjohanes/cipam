@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_permissions: {
+        Row: {
+          created_at: string | null
+          granted_by: string | null
+          id: string
+          permission: Database["public"]["Enums"]["admin_permission"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission: Database["public"]["Enums"]["admin_permission"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission?: Database["public"]["Enums"]["admin_permission"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       affiliate_sales: {
         Row: {
           affiliation_id: string
@@ -829,9 +853,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_permissions: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["admin_permission"][]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_permission: {
+        Args: {
+          _permission: Database["public"]["Enums"]["admin_permission"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -842,6 +877,17 @@ export type Database = {
       }
     }
     Enums: {
+      admin_permission:
+        | "manage_users"
+        | "manage_articles"
+        | "manage_formations"
+        | "manage_events"
+        | "manage_services"
+        | "manage_categories"
+        | "manage_affiliations"
+        | "view_stats"
+        | "manage_settings"
+        | "manage_team"
       app_role: "student" | "professional" | "patient" | "admin"
     }
     CompositeTypes: {
@@ -970,6 +1016,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_permission: [
+        "manage_users",
+        "manage_articles",
+        "manage_formations",
+        "manage_events",
+        "manage_services",
+        "manage_categories",
+        "manage_affiliations",
+        "view_stats",
+        "manage_settings",
+        "manage_team",
+      ],
       app_role: ["student", "professional", "patient", "admin"],
     },
   },
