@@ -11,11 +11,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEventDetail, useUserRegistrationForEvent } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
 import { useMonerooPayment } from "@/hooks/useMonerooPayment";
+import { useAlternativePaymentSettings } from "@/hooks/usePlatformSettings";
+import { AlternativePaymentDialog } from "@/components/events/AlternativePaymentDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
   Calendar, MapPin, Video, Users, Clock, 
-  Ticket, ArrowLeft, CheckCircle, User, Share2, ExternalLink, Loader2
+  Ticket, ArrowLeft, CheckCircle, User, Share2, ExternalLink, Loader2, CreditCard, Building2
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -33,8 +35,10 @@ export default function EventDetail() {
   const { user, profile } = useAuth();
   const { data: event, isLoading } = useEventDetail(id || "");
   const { data: registration, refetch: refetchRegistration } = useUserRegistrationForEvent(id || "");
+  const { data: alternativePaymentSettings } = useAlternativePaymentSettings();
   const { initiatePayment, isProcessing } = useMonerooPayment();
   const [isRegistering, setIsRegistering] = useState(false);
+  const [showAlternativePayment, setShowAlternativePayment] = useState(false);
 
   const handleRegister = async () => {
     if (!user) {
@@ -108,6 +112,48 @@ export default function EventDetail() {
             ticket_number: "",
           });
       }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("Une erreur est survenue");
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  const handleAlternativePayment = async (method: "bank_transfer" | "on_site") => {
+    if (!user || !event) return;
+
+    setIsRegistering(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("event_registrations")
+        .insert({
+          event_id: event.id,
+          user_id: user.id,
+          payment_status: method === "on_site" ? "pending" : "pending",
+          status: "confirmed",
+          ticket_number: "",
+        })
+        .select()
+        .single();
+
+      if (error) {
+        if (error.message.includes("duplicate")) {
+          toast.error("Vous êtes déjà inscrit à cet événement");
+        } else {
+          toast.error("Erreur lors de l'inscription");
+        }
+        return;
+      }
+
+      setShowAlternativePayment(false);
+      toast.success("Réservation confirmée !", {
+        description: method === "bank_transfer" 
+          ? `Ticket: ${data.ticket_number}. N'oubliez pas d'effectuer le virement.`
+          : `Ticket: ${data.ticket_number}. Paiement à effectuer sur place.`
+      });
+      refetchRegistration();
     } catch (error) {
       console.error("Registration error:", error);
       toast.error("Une erreur est survenue");
@@ -328,7 +374,7 @@ export default function EventDetail() {
                   {/* Price */}
                   <div className="text-center">
                     {event.is_free ? (
-                      <div className="text-3xl font-bold text-green-600">Gratuit</div>
+                      <div className="text-3xl font-bold text-emerald-600">Gratuit</div>
                     ) : (
                       <div>
                         <span className="text-3xl font-bold text-foreground">
@@ -355,7 +401,7 @@ export default function EventDetail() {
                   {/* Registration Button */}
                   {isRegistered ? (
                     <div className="space-y-4">
-                      <div className="flex items-center justify-center gap-2 p-4 bg-green-50 text-green-700 rounded-lg">
+                      <div className="flex items-center justify-center gap-2 p-4 bg-emerald-50 text-emerald-700 rounded-lg dark:bg-emerald-900/20 dark:text-emerald-400">
                         <CheckCircle className="h-5 w-5" />
                         <span className="font-medium">Vous êtes inscrit</span>
                       </div>
@@ -373,27 +419,56 @@ export default function EventDetail() {
                       )}
                     </div>
                   ) : (
-                    <Button 
-                      className="w-full" 
-                      size="lg"
-                      onClick={handleRegister}
-                      disabled={isFull || isRegistering || isProcessing}
-                    >
-                      {(isRegistering || isProcessing) ? (
-                        <>
-                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                          {isProcessing ? "Redirection..." : "Inscription..."}
-                        </>
-                      ) : (
-                        <>
-                          <Ticket className="h-5 w-5 mr-2" />
-                          {event.is_free || event.price === 0
-                            ? "S'inscrire gratuitement" 
-                            : `Payer ${event.price.toLocaleString()} FCFA`
-                          }
-                        </>
+                    <div className="space-y-3">
+                      {/* Online Payment Button */}
+                      <Button 
+                        className="w-full" 
+                        size="lg"
+                        onClick={handleRegister}
+                        disabled={isFull || isRegistering || isProcessing}
+                      >
+                        {(isRegistering || isProcessing) ? (
+                          <>
+                            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                            {isProcessing ? "Redirection..." : "Inscription..."}
+                          </>
+                        ) : (
+                          <>
+                            {event.is_free || event.price === 0 ? (
+                              <>
+                                <Ticket className="h-5 w-5 mr-2" />
+                                S'inscrire gratuitement
+                              </>
+                            ) : (
+                              <>
+                                <CreditCard className="h-5 w-5 mr-2" />
+                                Payer en ligne ({event.price.toLocaleString()} FCFA)
+                              </>
+                            )}
+                          </>
+                        )}
+                      </Button>
+
+                      {/* Alternative Payment Button - Only for paid events when enabled */}
+                      {!event.is_free && event.price > 0 && alternativePaymentSettings?.enabled && alternativePaymentSettings.methods.length > 0 && (
+                        <Button 
+                          variant="outline"
+                          className="w-full" 
+                          size="lg"
+                          onClick={() => {
+                            if (!user) {
+                              navigate("/auth?mode=login");
+                              return;
+                            }
+                            setShowAlternativePayment(true);
+                          }}
+                          disabled={isFull || isRegistering || isProcessing}
+                        >
+                          <Building2 className="h-5 w-5 mr-2" />
+                          Autre mode de paiement
+                        </Button>
                       )}
-                    </Button>
+                    </div>
                   )}
 
                   {/* Share */}
@@ -416,6 +491,19 @@ export default function EventDetail() {
       </main>
 
       <Footer />
+
+      {/* Alternative Payment Dialog */}
+      {alternativePaymentSettings && event && (
+        <AlternativePaymentDialog
+          open={showAlternativePayment}
+          onOpenChange={setShowAlternativePayment}
+          settings={alternativePaymentSettings}
+          eventTitle={event.title}
+          amount={event.price}
+          onConfirm={handleAlternativePayment}
+          isProcessing={isRegistering}
+        />
+      )}
     </div>
   );
 }

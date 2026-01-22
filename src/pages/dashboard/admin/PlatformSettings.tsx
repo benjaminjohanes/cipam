@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,13 +8,36 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Settings, Globe, Bell, Shield, Mail, Save, 
-  CreditCard, Users, FileText, Key, Eye, EyeOff, Check, AlertCircle, Wallet
+  CreditCard, Users, FileText, Key, Eye, EyeOff, Check, AlertCircle, Wallet, Building2, MapPin, Loader2
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAlternativePaymentSettings, useUpdateAlternativePaymentSettings, AlternativePaymentSettings } from "@/hooks/usePlatformSettings";
 
 export default function PlatformSettings() {
+  // Alternative payment settings
+  const { data: alternativePaymentSettings, isLoading: isLoadingPaymentSettings } = useAlternativePaymentSettings();
+  const updateAlternativePayment = useUpdateAlternativePaymentSettings();
+  
+  const [altPaymentSettings, setAltPaymentSettings] = useState<AlternativePaymentSettings>({
+    enabled: false,
+    methods: [],
+    bank_details: {
+      bank_name: "",
+      account_number: "",
+      account_name: "",
+    },
+    instructions: "",
+  });
+
+  useEffect(() => {
+    if (alternativePaymentSettings) {
+      setAltPaymentSettings(alternativePaymentSettings);
+    }
+  }, [alternativePaymentSettings]);
+
   const [settings, setSettings] = useState({
     siteName: "ALLÔ PSY",
     siteDescription: "Plateforme de mise en relation usagers-professionnels",
@@ -60,13 +83,25 @@ export default function PlatformSettings() {
       toast.error(`Veuillez entrer une clé ${label}`);
       return;
     }
-    // In a real implementation, this would save to Supabase secrets
     setSavedKeys(prev => ({ ...prev, [keyName]: true }));
     toast.success(`Clé ${label} enregistrée avec succès`);
   };
 
   const toggleShowKey = (keyName: keyof typeof showKeys) => {
     setShowKeys(prev => ({ ...prev, [keyName]: !prev[keyName] }));
+  };
+
+  const handleSaveAlternativePayment = () => {
+    updateAlternativePayment.mutate(altPaymentSettings);
+  };
+
+  const togglePaymentMethod = (method: "bank_transfer" | "on_site") => {
+    setAltPaymentSettings(prev => ({
+      ...prev,
+      methods: prev.methods.includes(method)
+        ? prev.methods.filter(m => m !== method)
+        : [...prev.methods, method]
+    }));
   };
 
   return (
@@ -244,7 +279,154 @@ export default function PlatformSettings() {
           </CardContent>
         </Card>
 
-        {/* Intégrations API */}
+        {/* Paiements alternatifs */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Paiements alternatifs
+            </CardTitle>
+            <CardDescription>
+              Configurez les options de paiement alternatives pour les événements (virement, sur place)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {isLoadingPaymentSettings ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Chargement...
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Activer les paiements alternatifs</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Permet aux utilisateurs de payer par virement ou sur place
+                    </p>
+                  </div>
+                  <Switch
+                    checked={altPaymentSettings.enabled}
+                    onCheckedChange={(checked) => setAltPaymentSettings(prev => ({ ...prev, enabled: checked }))}
+                  />
+                </div>
+
+                {altPaymentSettings.enabled && (
+                  <>
+                    <Separator />
+
+                    <div className="space-y-4">
+                      <Label>Méthodes de paiement autorisées</Label>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center space-x-3">
+                          <Checkbox 
+                            id="bank_transfer"
+                            checked={altPaymentSettings.methods.includes("bank_transfer")}
+                            onCheckedChange={() => togglePaymentMethod("bank_transfer")}
+                          />
+                          <Label htmlFor="bank_transfer" className="flex items-center gap-2 cursor-pointer">
+                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                            Virement bancaire
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Checkbox 
+                            id="on_site"
+                            checked={altPaymentSettings.methods.includes("on_site")}
+                            onCheckedChange={() => togglePaymentMethod("on_site")}
+                          />
+                          <Label htmlFor="on_site" className="flex items-center gap-2 cursor-pointer">
+                            <MapPin className="h-4 w-4 text-muted-foreground" />
+                            Paiement sur place
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {altPaymentSettings.methods.includes("bank_transfer") && (
+                      <>
+                        <Separator />
+                        <div className="space-y-4">
+                          <Label>Informations bancaires</Label>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                              <Label htmlFor="bankName">Nom de la banque</Label>
+                              <Input
+                                id="bankName"
+                                placeholder="Ex: Ecobank"
+                                value={altPaymentSettings.bank_details.bank_name}
+                                onChange={(e) => setAltPaymentSettings(prev => ({
+                                  ...prev,
+                                  bank_details: { ...prev.bank_details, bank_name: e.target.value }
+                                }))}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="accountNumber">Numéro de compte</Label>
+                              <Input
+                                id="accountNumber"
+                                placeholder="Ex: TG1234567890"
+                                value={altPaymentSettings.bank_details.account_number}
+                                onChange={(e) => setAltPaymentSettings(prev => ({
+                                  ...prev,
+                                  bank_details: { ...prev.bank_details, account_number: e.target.value }
+                                }))}
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="accountName">Nom du titulaire</Label>
+                            <Input
+                              id="accountName"
+                              placeholder="Ex: CIPAM SARL"
+                              value={altPaymentSettings.bank_details.account_name}
+                              onChange={(e) => setAltPaymentSettings(prev => ({
+                                ...prev,
+                                bank_details: { ...prev.bank_details, account_name: e.target.value }
+                              }))}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <Label htmlFor="instructions">Instructions pour les utilisateurs</Label>
+                      <Textarea
+                        id="instructions"
+                        placeholder="Ex: Veuillez effectuer le virement et envoyer la preuve de paiement par email à..."
+                        value={altPaymentSettings.instructions}
+                        onChange={(e) => setAltPaymentSettings(prev => ({ ...prev, instructions: e.target.value }))}
+                        rows={3}
+                      />
+                    </div>
+                  </>
+                )}
+
+                <Button 
+                  onClick={handleSaveAlternativePayment} 
+                  disabled={updateAlternativePayment.isPending}
+                  className="w-full sm:w-auto"
+                >
+                  {updateAlternativePayment.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Enregistrement...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Enregistrer les paramètres de paiement
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
