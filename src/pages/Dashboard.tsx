@@ -333,7 +333,7 @@ function AdminDashboard() {
   const { data, isLoading } = useAdminDashboard();
   
   return (
-    <DashboardLayout title="Administration CIPAM" description="Vue d'ensemble de la plateforme">
+    <DashboardLayout title="Administration Allô Psy" description="Vue d'ensemble de la plateforme">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard 
           title="Utilisateurs totaux" 

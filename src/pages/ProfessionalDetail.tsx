@@ -91,18 +91,18 @@ const ProfessionalDetail = () => {
       } : undefined,
       "worksFor": {
         "@type": "Organization",
-        "name": "CIPAM",
-        "url": "https://cipam.lovable.app"
+        "name": "Allô Psy",
+        "url": "https://allopsy.lovable.app"
       },
       "memberOf": {
         "@type": "Organization",
-        "name": "CIPAM - Centre de Psychologie et de Bien-être"
+        "name": "Allô Psy - Centre de Psychologie et de Bien-être"
       },
       "knowsAbout": professional.specialty || undefined,
       "hasCredential": professional.is_verified ? {
         "@type": "EducationalOccupationalCredential",
         "credentialCategory": "Certification professionnelle",
-        "name": "Membre certifié CIPAM"
+        "name": "Membre certifié Allô Psy"
       } : undefined
     };
 

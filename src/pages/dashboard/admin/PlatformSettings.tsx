@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,15 +11,28 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Settings, Globe, Bell, Shield, Mail, Save, 
-  CreditCard, Users, FileText, Key, Eye, EyeOff, Check, AlertCircle, Wallet, Building2, MapPin, Loader2
+  CreditCard, Users, FileText, Key, Eye, EyeOff, Check, AlertCircle, Wallet, Building2, MapPin, Loader2,
+  Palette, Image as ImageIcon, Upload, X
 } from "lucide-react";
 import { toast } from "sonner";
-import { useAlternativePaymentSettings, useUpdateAlternativePaymentSettings, AlternativePaymentSettings } from "@/hooks/usePlatformSettings";
+import { 
+  useAlternativePaymentSettings, 
+  useUpdateAlternativePaymentSettings, 
+  useBrandingSettings,
+  useUpdateBrandingSettings,
+  AlternativePaymentSettings,
+  BrandingSettings
+} from "@/hooks/usePlatformSettings";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function PlatformSettings() {
   // Alternative payment settings
   const { data: alternativePaymentSettings, isLoading: isLoadingPaymentSettings } = useAlternativePaymentSettings();
   const updateAlternativePayment = useUpdateAlternativePaymentSettings();
+  
+  // Branding settings
+  const { data: brandingSettings, isLoading: isLoadingBranding } = useBrandingSettings();
+  const updateBranding = useUpdateBrandingSettings();
   
   const [altPaymentSettings, setAltPaymentSettings] = useState<AlternativePaymentSettings>({
     enabled: false,
@@ -32,16 +45,41 @@ export default function PlatformSettings() {
     instructions: "",
   });
 
+  const [branding, setBranding] = useState<BrandingSettings>({
+    site_name: "Allô Psy",
+    header_logo: "",
+    footer_logo: "",
+    favicon: "",
+    primary_color: "215 55% 25%",
+    accent_color: "135 45% 50%",
+  });
+
+  const [uploading, setUploading] = useState<{ header: boolean; footer: boolean; favicon: boolean }>({
+    header: false,
+    footer: false,
+    favicon: false,
+  });
+
+  const headerLogoRef = useRef<HTMLInputElement>(null);
+  const footerLogoRef = useRef<HTMLInputElement>(null);
+  const faviconRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (alternativePaymentSettings) {
       setAltPaymentSettings(alternativePaymentSettings);
     }
   }, [alternativePaymentSettings]);
 
+  useEffect(() => {
+    if (brandingSettings) {
+      setBranding(brandingSettings);
+    }
+  }, [brandingSettings]);
+
   const [settings, setSettings] = useState({
-    siteName: "ALLÔ PSY",
+    siteName: "Allô Psy",
     siteDescription: "Plateforme de mise en relation usagers-professionnels",
-    contactEmail: "contact@allopsy.com",
+    contactEmail: "cipam.global.contact@gmail.com",
     supportEmail: "support@allopsy.com",
     maintenanceMode: false,
     allowRegistration: true,
@@ -104,9 +142,261 @@ export default function PlatformSettings() {
     }));
   };
 
+  const handleImageUpload = async (
+    file: File, 
+    type: "header" | "footer" | "favicon"
+  ) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/x-icon", "image/svg+xml"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Type de fichier non supporté. Utilisez JPG, PNG, WebP, GIF, ICO ou SVG");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Fichier trop volumineux (max 5MB)");
+      return;
+    }
+
+    setUploading(prev => ({ ...prev, [type]: true }));
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${type}-logo-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("branding")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("branding")
+        .getPublicUrl(fileName);
+
+      const fieldMap = {
+        header: "header_logo",
+        footer: "footer_logo",
+        favicon: "favicon",
+      } as const;
+
+      setBranding(prev => ({ ...prev, [fieldMap[type]]: publicUrl }));
+      toast.success("Image téléchargée");
+    } catch (error: unknown) {
+      console.error("Upload error:", error);
+      toast.error("Erreur lors du téléchargement");
+    } finally {
+      setUploading(prev => ({ ...prev, [type]: false }));
+    }
+  };
+
+  const handleSaveBranding = () => {
+    updateBranding.mutate(branding);
+  };
+
+  const ImageUploadField = ({ 
+    label, 
+    value, 
+    type, 
+    inputRef,
+    description
+  }: { 
+    label: string; 
+    value: string; 
+    type: "header" | "footer" | "favicon";
+    inputRef: React.RefObject<HTMLInputElement>;
+    description: string;
+  }) => (
+    <div className="space-y-3">
+      <div>
+        <Label>{label}</Label>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif,image/x-icon,image/svg+xml"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleImageUpload(file, type);
+          e.target.value = "";
+        }}
+      />
+      {value ? (
+        <div className="flex items-center gap-4">
+          <div className="relative group">
+            <img 
+              src={value} 
+              alt={label} 
+              className="h-16 w-auto max-w-32 object-contain border rounded-lg bg-muted p-2" 
+            />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => {
+                const fieldMap = { header: "header_logo", footer: "footer_logo", favicon: "favicon" } as const;
+                setBranding(prev => ({ ...prev, [fieldMap[type]]: "" }));
+              }}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading[type]}
+          >
+            {uploading[type] ? <Loader2 className="h-4 w-4 animate-spin" /> : "Changer"}
+          </Button>
+        </div>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading[type]}
+        >
+          {uploading[type] ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Upload className="h-4 w-4 mr-2" />
+          )}
+          Télécharger
+        </Button>
+      )}
+    </div>
+  );
+
   return (
     <DashboardLayout title="Paramètres plateforme" description="Configuration globale de la plateforme">
       <div className="space-y-6">
+        {/* Branding & Apparence */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Palette className="h-5 w-5" />
+              Branding & Apparence
+            </CardTitle>
+            <CardDescription>
+              Personnalisez l'identité visuelle de la plateforme (logos, couleurs)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {isLoadingBranding ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Chargement...
+              </div>
+            ) : (
+              <>
+                {/* Site Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="brandSiteName">Nom du site</Label>
+                  <Input
+                    id="brandSiteName"
+                    value={branding.site_name}
+                    onChange={(e) => setBranding(prev => ({ ...prev, site_name: e.target.value }))}
+                    placeholder="Allô Psy"
+                  />
+                </div>
+
+                <Separator />
+
+                {/* Logos */}
+                <div className="grid gap-6 md:grid-cols-3">
+                  <ImageUploadField
+                    label="Logo Header"
+                    value={branding.header_logo}
+                    type="header"
+                    inputRef={headerLogoRef}
+                    description="Logo affiché dans l'en-tête"
+                  />
+                  <ImageUploadField
+                    label="Logo Footer"
+                    value={branding.footer_logo}
+                    type="footer"
+                    inputRef={footerLogoRef}
+                    description="Logo affiché dans le pied de page"
+                  />
+                  <ImageUploadField
+                    label="Favicon"
+                    value={branding.favicon}
+                    type="favicon"
+                    inputRef={faviconRef}
+                    description="Icône du navigateur (16x16 ou 32x32)"
+                  />
+                </div>
+
+                <Separator />
+
+                {/* Colors */}
+                <div className="space-y-4">
+                  <Label>Couleurs de la plateforme</Label>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="primaryColor" className="text-sm text-muted-foreground">Couleur primaire (HSL)</Label>
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="h-10 w-10 rounded-lg border flex-shrink-0"
+                          style={{ backgroundColor: `hsl(${branding.primary_color})` }}
+                        />
+                        <Input
+                          id="primaryColor"
+                          value={branding.primary_color}
+                          onChange={(e) => setBranding(prev => ({ ...prev, primary_color: e.target.value }))}
+                          placeholder="215 55% 25%"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Format: H S% L% (ex: 215 55% 25%)</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="accentColor" className="text-sm text-muted-foreground">Couleur d'accent (HSL)</Label>
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="h-10 w-10 rounded-lg border flex-shrink-0"
+                          style={{ backgroundColor: `hsl(${branding.accent_color})` }}
+                        />
+                        <Input
+                          id="accentColor"
+                          value={branding.accent_color}
+                          onChange={(e) => setBranding(prev => ({ ...prev, accent_color: e.target.value }))}
+                          placeholder="135 45% 50%"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Format: H S% L% (ex: 135 45% 50%)</p>
+                    </div>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleSaveBranding} 
+                  disabled={updateBranding.isPending}
+                  className="w-full sm:w-auto"
+                >
+                  {updateBranding.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Enregistrement...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Enregistrer le branding
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Informations générales */}
         <Card>
           <CardHeader>
@@ -378,7 +668,7 @@ export default function PlatformSettings() {
                             <Label htmlFor="accountName">Nom du titulaire</Label>
                             <Input
                               id="accountName"
-                              placeholder="Ex: CIPAM SARL"
+                              placeholder="Ex: Allô Psy SARL"
                               value={altPaymentSettings.bank_details.account_name}
                               onChange={(e) => setAltPaymentSettings(prev => ({
                                 ...prev,

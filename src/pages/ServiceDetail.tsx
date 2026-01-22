@@ -145,8 +145,8 @@ const ServiceDetail = () => {
   useEffect(() => {
     if (service) {
       // Titre SEO optimisé (max 60 caractères)
-      const seoTitle = `${service.title}${service.provider?.full_name ? ` - ${service.provider.full_name}` : ''} | CIPAM`;
-      document.title = seoTitle.length > 60 ? `${service.title} | CIPAM` : seoTitle;
+      const seoTitle = `${service.title}${service.provider?.full_name ? ` - ${service.provider.full_name}` : ''} | Allô Psy`;
+      document.title = seoTitle.length > 60 ? `${service.title} | Allô Psy` : seoTitle;
 
       // Meta description (max 160 caractères)
       const baseDescription = service.description || `Découvrez ${service.title} proposé par nos professionnels qualifiés.`;
@@ -257,7 +257,7 @@ const ServiceDetail = () => {
 
     // Cleanup: restaurer le titre et supprimer le JSON-LD au démontage
     return () => {
-      document.title = 'CIPAM - Centre de Psychologie et de Bien-être';
+      document.title = 'Allô Psy - Centre de Psychologie et de Bien-être';
       const existingScript = document.querySelector('script[data-schema="service"]');
       if (existingScript) existingScript.remove();
     };

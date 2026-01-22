@@ -81,15 +81,15 @@ export default function EventDetail() {
       }
 
       // For paid events, initiate payment
-      const nameParts = (profile?.full_name || "Client CIPAM").split(" ");
+      const nameParts = (profile?.full_name || "Client Allô Psy").split(" ");
       const firstName = nameParts[0] || "Client";
-      const lastName = nameParts.slice(1).join(" ") || "CIPAM";
+      const lastName = nameParts.slice(1).join(" ") || "Allô Psy";
 
       const result = await initiatePayment({
         amount: event.price,
         description: `Inscription: ${event.title}`,
         customer: {
-          email: profile?.email || user.email || "client@cipam.app",
+          email: profile?.email || user.email || "client@allopsy.app",
           first_name: firstName,
           last_name: lastName,
         },
