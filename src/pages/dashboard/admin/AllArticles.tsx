@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Trash2, CheckCircle, XCircle, Plus } from "lucide-react";
+import { FileText, Trash2, CheckCircle, XCircle, Plus, Pencil, RotateCcw } from "lucide-react";
 import { useArticles } from "@/hooks/useArticles";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -65,12 +65,21 @@ const AllArticles = () => {
                       {format(new Date(article.created_at), "dd MMM yyyy", { locale: fr })}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                        <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/dashboard/edit-article/${article.id}`)}
+                          title="Modifier"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                         {article.status === "draft" && (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => updateArticleStatus.mutate({ id: article.id, status: "published" })}
+                            title="Publier"
                           >
                             <CheckCircle className="h-4 w-4" />
                           </Button>
@@ -80,14 +89,26 @@ const AllArticles = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => updateArticleStatus.mutate({ id: article.id, status: "archived" })}
+                            title="Archiver"
                           >
                             <XCircle className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {article.status === "archived" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateArticleStatus.mutate({ id: article.id, status: "published" })}
+                            title="Republier"
+                          >
+                            <RotateCcw className="h-4 w-4" />
                           </Button>
                         )}
                         <Button
                           size="sm"
                           variant="destructive"
                           onClick={() => deleteArticle.mutate(article.id)}
+                          title="Supprimer"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
