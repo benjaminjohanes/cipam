@@ -8,10 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { ImageUpload } from "@/components/upload/ImageUpload";
-import { FileText, Save, Send, ArrowLeft, Loader2 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { FileText, Save, Send, ArrowLeft, Loader2, CalendarIcon, Clock } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 const EditArticle = () => {
   const navigate = useNavigate();
@@ -24,6 +29,8 @@ const EditArticle = () => {
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
+  const [scheduledTime, setScheduledTime] = useState("09:00");
 
   const { data: article, isLoading: articleLoading } = useQuery({
     queryKey: ["article", id],
@@ -43,6 +50,7 @@ const EditArticle = () => {
         image_url: string | null;
         category_id: string | null;
         status: string;
+        scheduled_at: string | null;
       };
     },
     enabled: !!id,
@@ -68,12 +76,25 @@ const EditArticle = () => {
       setContent(article.content || "");
       setImageUrl(article.image_url || "");
       setCategoryId(article.category_id || "");
+      if (article.scheduled_at) {
+        const scheduled = new Date(article.scheduled_at);
+        setScheduledDate(scheduled);
+        setScheduledTime(format(scheduled, "HH:mm"));
+      }
     }
   }, [article]);
 
   const updateArticle = useMutation({
-    mutationFn: async (status: "draft" | "published") => {
+    mutationFn: async (status: "draft" | "published" | "scheduled") => {
       if (!id) throw new Error("ID manquant");
+      
+      let scheduledAt: string | null = null;
+      if (status === "scheduled" && scheduledDate) {
+        const [hours, minutes] = scheduledTime.split(":").map(Number);
+        const scheduled = new Date(scheduledDate);
+        scheduled.setHours(hours, minutes, 0, 0);
+        scheduledAt = scheduled.toISOString();
+      }
       
       const articleData: Record<string, unknown> = {
         title,
@@ -81,8 +102,9 @@ const EditArticle = () => {
         content,
         image_url: imageUrl || null,
         category_id: categoryId || null,
-        status,
+        status: status === "scheduled" ? "scheduled" : status,
         updated_at: new Date().toISOString(),
+        scheduled_at: scheduledAt,
       };
 
       if (status === "published" && article?.status !== "published") {
@@ -99,9 +121,12 @@ const EditArticle = () => {
     onSuccess: (_, status) => {
       queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
       queryClient.invalidateQueries({ queryKey: ["article", id] });
-      toast({ 
-        title: status === "published" ? "Article publié" : "Modifications enregistrées",
-      });
+      const messages = {
+        published: "Article publié",
+        draft: "Modifications enregistrées",
+        scheduled: `Publication planifiée pour le ${scheduledDate ? format(scheduledDate, "dd MMMM yyyy", { locale: fr }) : ""} à ${scheduledTime}`,
+      };
+      toast({ title: messages[status] });
       navigate("/dashboard/all-articles");
     },
     onError: () => {
@@ -209,21 +234,78 @@ const EditArticle = () => {
               />
             </div>
 
-            <div className="flex gap-3 justify-end">
+            <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+              <Label className="flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                Planifier la publication (optionnel)
+              </Label>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "justify-start text-left font-normal",
+                        !scheduledDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {scheduledDate ? format(scheduledDate, "PPP", { locale: fr }) : "Choisir une date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={scheduledDate}
+                      onSelect={setScheduledDate}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="time"
+                    value={scheduledTime}
+                    onChange={(e) => setScheduledTime(e.target.value)}
+                    className="w-32"
+                  />
+                </div>
+              </div>
+              {scheduledDate && (
+                <p className="text-sm text-muted-foreground">
+                  L'article sera automatiquement publié le {format(scheduledDate, "dd MMMM yyyy", { locale: fr })} à {scheduledTime}
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-3 justify-end flex-wrap">
               <Button
                 variant="outline"
                 onClick={() => updateArticle.mutate("draft")}
                 disabled={!isValid || updateArticle.isPending}
               >
                 <Save className="h-4 w-4 mr-2" />
-                Enregistrer en brouillon
+                Brouillon
               </Button>
+              {scheduledDate && (
+                <Button
+                  variant="secondary"
+                  onClick={() => updateArticle.mutate("scheduled")}
+                  disabled={!isValid || updateArticle.isPending}
+                >
+                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  Planifier
+                </Button>
+              )}
               <Button
                 onClick={() => updateArticle.mutate("published")}
                 disabled={!isValid || updateArticle.isPending}
               >
                 <Send className="h-4 w-4 mr-2" />
-                Publier
+                Publier maintenant
               </Button>
             </div>
           </CardContent>
