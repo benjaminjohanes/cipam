@@ -15,11 +15,15 @@ export interface AlternativePaymentSettings {
 
 export interface BrandingSettings {
   site_name: string;
+  slogan: string;
   header_logo: string;
   footer_logo: string;
   favicon: string;
   primary_color: string;
   accent_color: string;
+  contact_email: string;
+  contact_phones: string[];
+  contact_address: string;
 }
 
 const defaultPaymentSettings: AlternativePaymentSettings = {
@@ -35,11 +39,15 @@ const defaultPaymentSettings: AlternativePaymentSettings = {
 
 const defaultBrandingSettings: BrandingSettings = {
   site_name: "Allô Psy",
+  slogan: "Vous méritez d'être écouté et soutenu, sans jugement",
   header_logo: "",
   footer_logo: "",
   favicon: "",
   primary_color: "215 55% 25%",
   accent_color: "135 45% 50%",
+  contact_email: "cipam.global.contact@gmail.com",
+  contact_phones: ["+229 01 52 01 17 77", "+229 01 59 05 40 93"],
+  contact_address: "Abomey-Calavi, Benin",
 };
 
 export const useAlternativePaymentSettings = () => {

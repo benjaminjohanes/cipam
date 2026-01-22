@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Settings, Globe, Bell, Shield, Mail, Save, 
   CreditCard, Users, FileText, Key, Eye, EyeOff, Check, AlertCircle, Wallet, Building2, MapPin, Loader2,
-  Palette, Image as ImageIcon, Upload, X
+  Palette, Image as ImageIcon, Upload, X, Phone
 } from "lucide-react";
 import { toast } from "sonner";
 import { 
@@ -47,11 +47,15 @@ export default function PlatformSettings() {
 
   const [branding, setBranding] = useState<BrandingSettings>({
     site_name: "Allô Psy",
+    slogan: "Vous méritez d'être écouté et soutenu, sans jugement",
     header_logo: "",
     footer_logo: "",
     favicon: "",
     primary_color: "215 55% 25%",
     accent_color: "135 45% 50%",
+    contact_email: "cipam.global.contact@gmail.com",
+    contact_phones: ["+229 01 52 01 17 77", "+229 01 59 05 40 93"],
+    contact_address: "Abomey-Calavi, Benin",
   });
 
   const [uploading, setUploading] = useState<{ header: boolean; footer: boolean; favicon: boolean }>({
@@ -296,15 +300,103 @@ export default function PlatformSettings() {
               </div>
             ) : (
               <>
-                {/* Site Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="brandSiteName">Nom du site</Label>
-                  <Input
-                    id="brandSiteName"
-                    value={branding.site_name}
-                    onChange={(e) => setBranding(prev => ({ ...prev, site_name: e.target.value }))}
-                    placeholder="Allô Psy"
-                  />
+                {/* Site Name & Slogan */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="brandSiteName">Nom du site</Label>
+                    <Input
+                      id="brandSiteName"
+                      value={branding.site_name}
+                      onChange={(e) => setBranding(prev => ({ ...prev, site_name: e.target.value }))}
+                      placeholder="Allô Psy"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="brandSlogan">Slogan</Label>
+                    <Input
+                      id="brandSlogan"
+                      value={branding.slogan}
+                      onChange={(e) => setBranding(prev => ({ ...prev, slogan: e.target.value }))}
+                      placeholder="Vous méritez d'être écouté et soutenu, sans jugement"
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Contact Information */}
+                <div className="space-y-4">
+                  <Label className="text-base font-medium">Informations de contact</Label>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="contactEmail" className="text-sm text-muted-foreground">Email de contact</Label>
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <Input
+                          id="contactEmail"
+                          type="email"
+                          value={branding.contact_email}
+                          onChange={(e) => setBranding(prev => ({ ...prev, contact_email: e.target.value }))}
+                          placeholder="contact@allopsy.com"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="contactAddress" className="text-sm text-muted-foreground">Adresse</Label>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <Input
+                          id="contactAddress"
+                          value={branding.contact_address}
+                          onChange={(e) => setBranding(prev => ({ ...prev, contact_address: e.target.value }))}
+                          placeholder="Abomey-Calavi, Benin"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">Numéros de téléphone</Label>
+                    <div className="space-y-2">
+                      {(branding.contact_phones || []).map((phone, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <Input
+                            value={phone}
+                            onChange={(e) => {
+                              const newPhones = [...(branding.contact_phones || [])];
+                              newPhones[index] = e.target.value;
+                              setBranding(prev => ({ ...prev, contact_phones: newPhones }));
+                            }}
+                            placeholder="+229 00 00 00 00 00"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              const newPhones = (branding.contact_phones || []).filter((_, i) => i !== index);
+                              setBranding(prev => ({ ...prev, contact_phones: newPhones }));
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setBranding(prev => ({ 
+                            ...prev, 
+                            contact_phones: [...(prev.contact_phones || []), ""] 
+                          }));
+                        }}
+                      >
+                        + Ajouter un numéro
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 <Separator />
