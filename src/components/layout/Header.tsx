@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, User, BookOpen, Users, Calendar, FileText, LogOut, LayoutDashboard, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useBranding } from "@/contexts/BrandingContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import logo from "@/assets/logo.png";
+import defaultLogo from "@/assets/logo.png";
 import CurrencyToggle from "@/components/CurrencyToggle";
 
 const navItems = [
@@ -33,7 +34,11 @@ const roleLabels: Record<string, string> = {
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, profile, role, signOut } = useAuth();
+  const { branding } = useBranding();
   const navigate = useNavigate();
+
+  const headerLogo = branding.header_logo || defaultLogo;
+  const siteName = branding.site_name || "Allô Psy";
 
   const handleSignOut = async () => {
     await signOut();
@@ -46,7 +51,7 @@ export function Header() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <img src={logo} alt="Allô Psy Logo" className="h-14 w-auto" />
+            <img src={headerLogo} alt={`${siteName} Logo`} className="h-14 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
