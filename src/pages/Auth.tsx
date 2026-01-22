@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import cipamLogo from '@/assets/cipam_logo.jpg';
+import alloLogo from '@/assets/logo.png';
 
 type AppRole = 'student' | 'professional' | 'patient' | 'admin';
 
@@ -188,9 +188,9 @@ export default function Auth() {
             transition={{ duration: 0.5 }}
           >
             <div className="flex items-center gap-3 mb-8">
-              <img src={cipamLogo} alt="ALLÔ PSY" className="h-12 w-12 rounded-lg object-cover" />
+              <img src={alloLogo} alt="Allô Psy" className="h-12 w-12 rounded-lg object-cover" />
               <div>
-                <h1 className="text-2xl font-bold text-foreground">ALLÔ PSY</h1>
+                <h1 className="text-2xl font-bold text-foreground">Allô Psy</h1>
                 <p className="text-sm text-muted-foreground">La Psychologie dans la Pratique</p>
               </div>
             </div>

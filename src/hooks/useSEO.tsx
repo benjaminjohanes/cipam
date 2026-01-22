@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const SITE_URL = 'https://cipam.lovable.app';
-const SITE_NAME = 'ALLÔ PSY';
-const DEFAULT_DESCRIPTION = 'ALLÔ PSY - Votre plateforme de bien-être mental. Consultations en ligne, formations professionnelles et accompagnement psychologique personnalisé.';
+const SITE_URL = 'https://allopsy.lovable.app';
+const SITE_NAME = 'Allô Psy';
+const DEFAULT_DESCRIPTION = 'Allô Psy - Votre plateforme de bien-être mental. Consultations en ligne, formations professionnelles et accompagnement psychologique personnalisé.';
 const DEFAULT_IMAGE = `${SITE_URL}/favicon.jpg`;
 
 interface SEOConfig {
@@ -22,7 +22,7 @@ interface SEOConfig {
 const routeSEOConfig: Record<string, SEOConfig> = {
   '/': {
     title: 'Accueil',
-    description: 'ALLÔ PSY - Votre plateforme de bien-être mental. Trouvez des professionnels qualifiés, des formations et des services de psychologie en ligne.',
+    description: 'Allô Psy - Votre plateforme de bien-être mental. Trouvez des professionnels qualifiés, des formations et des services de psychologie en ligne.',
     keywords: ['psychologie', 'bien-être', 'santé mentale', 'consultation en ligne', 'thérapie'],
   },
   '/services': {
@@ -53,17 +53,17 @@ const routeSEOConfig: Record<string, SEOConfig> = {
   },
   '/faq': {
     title: 'FAQ',
-    description: 'Questions fréquentes sur nos services, les consultations en ligne et notre plateforme ALLÔ PSY.',
+    description: 'Questions fréquentes sur nos services, les consultations en ligne et notre plateforme Allô Psy.',
     keywords: ['FAQ', 'questions fréquentes', 'aide'],
   },
   '/auth': {
     title: 'Connexion',
-    description: 'Connectez-vous ou créez votre compte ALLÔ PSY pour accéder à nos services de bien-être mental.',
+    description: 'Connectez-vous ou créez votre compte Allô Psy pour accéder à nos services de bien-être mental.',
     noIndex: true,
   },
   '/dashboard': {
     title: 'Tableau de bord',
-    description: 'Gérez votre compte, vos rendez-vous et vos formations sur ALLÔ PSY.',
+    description: 'Gérez votre compte, vos rendez-vous et vos formations sur Allô Psy.',
     noIndex: true,
   },
 };

@@ -76,8 +76,8 @@ const FormationDetail = () => {
       "url": window.location.href,
       "provider": {
         "@type": "Organization",
-        "name": "CIPAM",
-        "url": "https://cipam.lovable.app"
+        "name": "Allô Psy",
+        "url": "https://allopsy.lovable.app"
       },
       "instructor": author ? {
         "@type": "Person",

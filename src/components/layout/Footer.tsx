@@ -10,7 +10,7 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="ALLÔ PSY Logo" className="h-16 w-auto rounded-lg bg-white p-1" />
+              <img src={logo} alt="Allô Psy Logo" className="h-16 w-auto rounded-lg bg-white p-1" />
             </div>
             <p className="text-secondary/80 text-sm leading-relaxed italic">
               "Vous méritez d'être écouté et soutenu, sans jugement"
