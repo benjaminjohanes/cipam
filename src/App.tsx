@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import { RequirePermission } from "@/components/auth/RequirePermission";
 import Index from "./pages/Index";
 import Professionnels from "./pages/Professionnels";
 import ProfessionalDetail from "./pages/ProfessionalDetail";
@@ -60,6 +61,7 @@ import AllEvents from "./pages/dashboard/admin/AllEvents";
 import EventParticipants from "./pages/dashboard/admin/EventParticipants";
 import AllAffiliations from "./pages/dashboard/admin/AllAffiliations";
 import NotFound from "./pages/NotFound";
+import Forbidden from "./pages/Forbidden";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +87,7 @@ const App = () => (
             <Route path="/faq" element={<FAQ />} />
             <Route path="/evenements" element={<Events />} />
             <Route path="/evenements/:id" element={<EventDetail />} />
+            <Route path="/forbidden" element={<Forbidden />} />
             
             {/* Dashboard Routes - Common */}
             <Route path="/dashboard" element={<Dashboard />} />
@@ -116,26 +119,64 @@ const App = () => (
             <Route path="/dashboard/messages" element={<Messages />} />
             <Route path="/dashboard/my-affiliations" element={<MyAffiliations />} />
             
-            {/* Admin Routes */}
-            <Route path="/dashboard/overview" element={<Overview />} />
-            <Route path="/dashboard/users" element={<AdminUsers />} />
-            <Route path="/dashboard/professionals" element={<Professionals />} />
-            <Route path="/dashboard/students" element={<Students />} />
-            <Route path="/dashboard/upgrade-requests" element={<AdminUpgradeRequests />} />
-            <Route path="/dashboard/categories" element={<Categories />} />
-            <Route path="/dashboard/all-formations" element={<AllFormations />} />
-            <Route path="/dashboard/all-services" element={<AllServices />} />
-            <Route path="/dashboard/all-articles" element={<AllArticles />} />
-            <Route path="/dashboard/create-article" element={<CreateArticle />} />
-            <Route path="/dashboard/edit-article/:id" element={<EditArticle />} />
-            <Route path="/dashboard/all-appointments" element={<AllAppointments />} />
-            <Route path="/dashboard/all-events" element={<AllEvents />} />
-            <Route path="/dashboard/event-participants" element={<EventParticipants />} />
-            <Route path="/dashboard/all-affiliations" element={<AllAffiliations />} />
-            <Route path="/dashboard/team" element={<Team />} />
-            <Route path="/dashboard/roles" element={<Roles />} />
-            <Route path="/dashboard/platform-settings" element={<PlatformSettings />} />
-            <Route path="/dashboard/reports" element={<Reports />} />
+            {/* Admin Routes - Protected by permissions */}
+            <Route path="/dashboard/overview" element={
+              <RequirePermission permission="view_stats"><Overview /></RequirePermission>
+            } />
+            <Route path="/dashboard/users" element={
+              <RequirePermission permission="manage_users"><AdminUsers /></RequirePermission>
+            } />
+            <Route path="/dashboard/professionals" element={
+              <RequirePermission permission="manage_users"><Professionals /></RequirePermission>
+            } />
+            <Route path="/dashboard/students" element={
+              <RequirePermission permission="manage_users"><Students /></RequirePermission>
+            } />
+            <Route path="/dashboard/upgrade-requests" element={
+              <RequirePermission permission="manage_users"><AdminUpgradeRequests /></RequirePermission>
+            } />
+            <Route path="/dashboard/categories" element={
+              <RequirePermission permission="manage_categories"><Categories /></RequirePermission>
+            } />
+            <Route path="/dashboard/all-formations" element={
+              <RequirePermission permission="manage_formations"><AllFormations /></RequirePermission>
+            } />
+            <Route path="/dashboard/all-services" element={
+              <RequirePermission permission="manage_services"><AllServices /></RequirePermission>
+            } />
+            <Route path="/dashboard/all-articles" element={
+              <RequirePermission permission="manage_articles"><AllArticles /></RequirePermission>
+            } />
+            <Route path="/dashboard/create-article" element={
+              <RequirePermission permission="manage_articles"><CreateArticle /></RequirePermission>
+            } />
+            <Route path="/dashboard/edit-article/:id" element={
+              <RequirePermission permission="manage_articles"><EditArticle /></RequirePermission>
+            } />
+            <Route path="/dashboard/all-appointments" element={
+              <RequirePermission permission="manage_users"><AllAppointments /></RequirePermission>
+            } />
+            <Route path="/dashboard/all-events" element={
+              <RequirePermission permission="manage_events"><AllEvents /></RequirePermission>
+            } />
+            <Route path="/dashboard/event-participants" element={
+              <RequirePermission permission="manage_events"><EventParticipants /></RequirePermission>
+            } />
+            <Route path="/dashboard/all-affiliations" element={
+              <RequirePermission permission="manage_affiliations"><AllAffiliations /></RequirePermission>
+            } />
+            <Route path="/dashboard/team" element={
+              <RequirePermission permission="manage_team"><Team /></RequirePermission>
+            } />
+            <Route path="/dashboard/roles" element={
+              <RequirePermission permission="manage_team"><Roles /></RequirePermission>
+            } />
+            <Route path="/dashboard/platform-settings" element={
+              <RequirePermission permission="manage_settings"><PlatformSettings /></RequirePermission>
+            } />
+            <Route path="/dashboard/reports" element={
+              <RequirePermission permission="view_stats"><Reports /></RequirePermission>
+            } />
             
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
