@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import defaultLogo from "@/assets/logo.png";
 import CurrencyToggle from "@/components/CurrencyToggle";
+import GoogleTranslate from "@/components/GoogleTranslate";
 
 const navItems = [
   { label: "Accueil", href: "/" },
@@ -69,6 +70,7 @@ export function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
+            <GoogleTranslate />
             <CurrencyToggle />
             {user ? (
               <DropdownMenu>
@@ -149,6 +151,10 @@ export function Header() {
               <div className="px-4 py-2 flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Devise</span>
                 <CurrencyToggle />
+              </div>
+              <div className="px-4 py-2 flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Langue</span>
+                <GoogleTranslate />
               </div>
               <div className="pt-4 flex flex-col gap-2">
                 {user ? (
