@@ -61,6 +61,7 @@ import EditArticle from "./pages/dashboard/admin/EditArticle";
 import AllEvents from "./pages/dashboard/admin/AllEvents";
 import EventParticipants from "./pages/dashboard/admin/EventParticipants";
 import AllAffiliations from "./pages/dashboard/admin/AllAffiliations";
+import Finance from "./pages/dashboard/admin/Finance";
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
 
@@ -178,6 +179,9 @@ const App = () => (
             } />
             <Route path="/dashboard/reports" element={
               <RequirePermission permission="view_stats"><Reports /></RequirePermission>
+            } />
+            <Route path="/dashboard/finance" element={
+              <RequirePermission permission="view_stats"><Finance /></RequirePermission>
             } />
             
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
