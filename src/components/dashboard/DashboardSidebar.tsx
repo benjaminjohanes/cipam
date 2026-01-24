@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   Home, User, BookOpen, Calendar, FileText, Settings, 
   Users, ShieldCheck, CreditCard, Bell, MessageSquare,
-  GraduationCap, Briefcase, ClipboardList, TrendingUp,
+  GraduationCap, Briefcase, ClipboardList, TrendingUp, Wallet,
   UserCog, Award, Tags, Ticket, Link2
 } from "lucide-react";
 import {
@@ -46,6 +46,7 @@ const adminMenus: MenuGroup[] = [
     items: [
       { title: "Tableau de bord", url: "/dashboard", icon: Home },
       { title: "Vue d'ensemble", url: "/dashboard/overview", icon: TrendingUp, permission: "view_stats" },
+      { title: "Finance", url: "/dashboard/finance", icon: Wallet, permission: "view_stats" },
     ],
   },
   {
