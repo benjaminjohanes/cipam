@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, User, BookOpen, Users, Calendar, FileText, LogOut, LayoutDashboard, Ticket } from "lucide-react";
+import { Menu, X, User, BookOpen, Users, Calendar, FileText, LogOut, LayoutDashboard, Ticket, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useBranding } from "@/contexts/BrandingContext";
@@ -15,6 +15,7 @@ import {
 import defaultLogo from "@/assets/logo.png";
 import CurrencyToggle from "@/components/CurrencyToggle";
 import LanguageSelector from "@/components/LanguageSelector";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 const navItems = [
   { label: "Accueil", href: "/" },
@@ -72,6 +73,7 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-3">
             <LanguageSelector />
             <CurrencyToggle />
+            {user && <NotificationBell />}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
