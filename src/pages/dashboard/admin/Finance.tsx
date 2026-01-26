@@ -53,6 +53,7 @@ import {
 } from "recharts";
 import { useFinanceData, Transaction } from "@/hooks/useFinanceData";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import CurrencyToggle from "@/components/CurrencyToggle";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -173,19 +174,22 @@ export default function Finance() {
   return (
     <DashboardLayout title="Finance" description="Vue d'ensemble de la comptabilité et des transactions">
       <div className="space-y-6">
-        {/* Period Selector */}
-        <div className="flex items-center justify-between">
-          <Select value={period.toString()} onValueChange={(v) => setPeriod(Number(v))}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Période" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">7 derniers jours</SelectItem>
-              <SelectItem value="30">30 derniers jours</SelectItem>
-              <SelectItem value="90">90 derniers jours</SelectItem>
-              <SelectItem value="365">Cette année</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Period Selector & Currency Toggle */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <Select value={period.toString()} onValueChange={(v) => setPeriod(Number(v))}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Période" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 derniers jours</SelectItem>
+                <SelectItem value="30">30 derniers jours</SelectItem>
+                <SelectItem value="90">90 derniers jours</SelectItem>
+                <SelectItem value="365">Cette année</SelectItem>
+              </SelectContent>
+            </Select>
+            <CurrencyToggle />
+          </div>
           <Button variant="outline" onClick={exportToCSV} disabled={!filteredTransactions.length}>
             <Download className="h-4 w-4 mr-2" />
             Exporter CSV
