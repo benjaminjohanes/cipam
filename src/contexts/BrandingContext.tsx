@@ -103,12 +103,31 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
     ogImage.content = currentBranding.favicon;
   }, [currentBranding.favicon]);
 
-  // Update site title
+  // Update site title and meta tags dynamically
   useEffect(() => {
     if (currentBranding.site_name) {
-      const titleParts = document.title.split(" | ");
+      // Update document title
+      const currentTitle = document.title;
+      const titleParts = currentTitle.split(" - ");
       if (titleParts.length > 1) {
-        document.title = `${titleParts[0]} | ${currentBranding.site_name}`;
+        document.title = `${currentBranding.site_name.toUpperCase()} - ${titleParts.slice(1).join(" - ")}`;
+      } else if (currentTitle.includes("ALLÔ PSY") || currentTitle.includes("ALLO PSY") || currentTitle.includes("Allô Psy")) {
+        document.title = currentTitle.replace(/ALLÔ PSY|ALLO PSY|Allô Psy/gi, currentBranding.site_name.toUpperCase());
+      }
+
+      // Update OG and Twitter meta tags
+      const ogTitle = document.querySelector("meta[property='og:title']");
+      const twitterTitle = document.querySelector("meta[name='twitter:title']");
+      const ogSiteName = document.querySelector("meta[property='og:site_name']");
+
+      if (ogTitle) {
+        ogTitle.setAttribute("content", `${currentBranding.site_name.toUpperCase()} - Votre plateforme de bien-être mental`);
+      }
+      if (twitterTitle) {
+        twitterTitle.setAttribute("content", `${currentBranding.site_name.toUpperCase()} - Votre plateforme de bien-être mental`);
+      }
+      if (ogSiteName) {
+        ogSiteName.setAttribute("content", currentBranding.site_name.toUpperCase());
       }
     }
   }, [currentBranding.site_name]);

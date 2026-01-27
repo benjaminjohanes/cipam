@@ -3,7 +3,8 @@ import { ArrowRight, Play, Star, Users, BookOpen, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
-import logo from "@/assets/logo.jpeg";
+import { useBranding } from "@/contexts/BrandingContext";
+import defaultLogo from "@/assets/logo.jpeg";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -28,6 +29,7 @@ const scaleIn = {
 
 export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const { branding } = useBranding();
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"]
@@ -36,6 +38,9 @@ export function HeroSection() {
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const contentOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.3]);
 
+  const siteName = branding.site_name || "Allô Psy";
+  const slogan = branding.slogan || "Vous méritez d'être écouté et soutenu, sans jugement";
+  const heroLogo = branding.header_logo || defaultLogo;
   return (
     <section ref={sectionRef} className="relative min-h-screen flex items-center pt-20 overflow-hidden">
       {/* Background with parallax */}
@@ -78,7 +83,11 @@ export function HeroSection() {
               transition={{ duration: 0.6 }}
               className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight"
             >
-              Vous méritez d'être <span className="text-gradient">écouté et soutenu</span>, sans jugement
+              {slogan.includes("écouté et soutenu") ? (
+                <>Vous méritez d'être <span className="text-gradient">écouté et soutenu</span>, sans jugement</>
+              ) : (
+                slogan
+              )}
             </motion.h1>
 
             <motion.p 
@@ -86,7 +95,7 @@ export function HeroSection() {
               transition={{ duration: 0.6 }}
               className="text-lg text-muted-foreground leading-relaxed max-w-xl"
             >
-              ALLÔ PSY réunit les meilleurs professionnels de la psychologie pour vous accompagner 
+              {siteName.toUpperCase()} réunit les meilleurs professionnels de la psychologie pour vous accompagner 
               dans votre parcours vers l'équilibre et l'épanouissement personnel.
             </motion.p>
 
@@ -165,7 +174,7 @@ export function HeroSection() {
                 animate={{ rotate: [0, 2, -2, 0] }}
                 transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
               >
-                <img src={logo} alt="ALLÔ PSY" className="w-full h-full object-contain p-4" />
+                <img src={heroLogo} alt={siteName} className="w-full h-full object-contain p-4" />
               </motion.div>
 
               {/* Floating cards */}
