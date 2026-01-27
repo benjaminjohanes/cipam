@@ -1,5 +1,5 @@
 # CIPAM - Robots.txt
-# https://cipam.lovable.app
+# https://cipam.fatjo.app
 
 User-agent: Googlebot
 Allow: /

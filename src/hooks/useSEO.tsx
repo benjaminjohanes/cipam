@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const SITE_URL = 'https://allopsy.lovable.app';
+const SITE_URL = 'https://allopsy.fatjo.app';
 const SITE_NAME = 'Allô Psy';
 const DEFAULT_DESCRIPTION = 'Allô Psy - Votre plateforme de bien-être mental. Consultations en ligne, formations professionnelles et accompagnement psychologique personnalisé.';
 const DEFAULT_IMAGE = `${SITE_URL}/favicon.jpg`;

@@ -92,7 +92,7 @@ const ProfessionalDetail = () => {
       "worksFor": {
         "@type": "Organization",
         "name": "Allô Psy",
-        "url": "https://allopsy.lovable.app"
+        "url": "https://allopsy.fatjo.app"
       },
       "memberOf": {
         "@type": "Organization",
