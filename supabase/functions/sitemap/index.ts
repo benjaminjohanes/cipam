@@ -6,7 +6,7 @@ const corsHeaders = {
   'Content-Type': 'application/xml',
 }
 
-const SITE_URL = 'https://cipam.lovable.app'
+const SITE_URL = 'https://cipam.fatjo.app'
 
 // Helper pour formater la date
 const formatDate = (date: string | null): string => {
