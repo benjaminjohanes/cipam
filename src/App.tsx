@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { BrandingProvider } from "@/contexts/BrandingContext";
 import { RequirePermission } from "@/components/auth/RequirePermission";
+import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import Professionnels from "./pages/Professionnels";
 import ProfessionalDetail from "./pages/ProfessionalDetail";
@@ -69,129 +70,131 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <CurrencyProvider>
-            <BrandingProvider>
-              <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/professionnels" element={<Professionnels />} />
-            <Route path="/professionnels/:id" element={<ProfessionalDetail />} />
-            <Route path="/formations" element={<Formations />} />
-            <Route path="/formations/:id" element={<FormationDetail />} />
-            <Route path="/articles" element={<Articles />} />
-            <Route path="/articles/:id" element={<ArticleDetail />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/services/:id" element={<ServiceDetail />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/evenements" element={<Events />} />
-            <Route path="/evenements/:id" element={<EventDetail />} />
-            <Route path="/forbidden" element={<Forbidden />} />
-            
-            {/* Dashboard Routes - Common */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/profile" element={<Profile />} />
-            <Route path="/dashboard/settings" element={<Settings />} />
-            <Route path="/dashboard/appointments" element={<Appointments />} />
-            <Route path="/dashboard/my-formations" element={<MyFormations />} />
-            <Route path="/dashboard/notifications" element={<Notifications />} />
-            <Route path="/dashboard/my-events" element={<MyEventRegistrations />} />
-            
-            {/* Dashboard Routes - Patient */}
-            <Route path="/dashboard/find-professional" element={<FindProfessional />} />
-            <Route path="/dashboard/payments" element={<Payments />} />
-            
-            {/* Dashboard Routes - Student */}
-            <Route path="/dashboard/propose-service" element={<ProposeService />} />
-            <Route path="/dashboard/my-services" element={<MyServices />} />
-            <Route path="/dashboard/pending-services" element={<PendingServices />} />
-            <Route path="/dashboard/formations-catalog" element={<FormationsCatalog />} />
-            <Route path="/dashboard/upgrade-request" element={<UpgradeRequest />} />
-            
-            {/* Dashboard Routes - Professional */}
-            <Route path="/dashboard/availability" element={<Availability />} />
-            <Route path="/dashboard/patients" element={<Patients />} />
-            <Route path="/dashboard/stats" element={<Stats />} />
-            <Route path="/dashboard/create-formation" element={<CreateFormation />} />
-            <Route path="/dashboard/edit-formation/:id" element={<EditFormation />} />
-            <Route path="/dashboard/earnings" element={<Earnings />} />
-            <Route path="/dashboard/messages" element={<Messages />} />
-            <Route path="/dashboard/my-affiliations" element={<MyAffiliations />} />
-            
-            {/* Admin Routes - Protected by permissions */}
-            <Route path="/dashboard/overview" element={
-              <RequirePermission permission="view_stats"><Overview /></RequirePermission>
-            } />
-            <Route path="/dashboard/users" element={
-              <RequirePermission permission="manage_users"><AdminUsers /></RequirePermission>
-            } />
-            <Route path="/dashboard/professionals" element={
-              <RequirePermission permission="manage_users"><Professionals /></RequirePermission>
-            } />
-            <Route path="/dashboard/students" element={
-              <RequirePermission permission="manage_users"><Students /></RequirePermission>
-            } />
-            <Route path="/dashboard/upgrade-requests" element={
-              <RequirePermission permission="manage_users"><AdminUpgradeRequests /></RequirePermission>
-            } />
-            <Route path="/dashboard/categories" element={
-              <RequirePermission permission="manage_categories"><Categories /></RequirePermission>
-            } />
-            <Route path="/dashboard/all-formations" element={
-              <RequirePermission permission="manage_formations"><AllFormations /></RequirePermission>
-            } />
-            <Route path="/dashboard/all-services" element={
-              <RequirePermission permission="manage_services"><AllServices /></RequirePermission>
-            } />
-            <Route path="/dashboard/all-articles" element={
-              <RequirePermission permission="manage_articles"><AllArticles /></RequirePermission>
-            } />
-            <Route path="/dashboard/create-article" element={
-              <RequirePermission permission="manage_articles"><CreateArticle /></RequirePermission>
-            } />
-            <Route path="/dashboard/edit-article/:id" element={
-              <RequirePermission permission="manage_articles"><EditArticle /></RequirePermission>
-            } />
-            <Route path="/dashboard/all-appointments" element={
-              <RequirePermission permission="manage_users"><AllAppointments /></RequirePermission>
-            } />
-            <Route path="/dashboard/all-events" element={
-              <RequirePermission permission="manage_events"><AllEvents /></RequirePermission>
-            } />
-            <Route path="/dashboard/event-participants" element={
-              <RequirePermission permission="manage_events"><EventParticipants /></RequirePermission>
-            } />
-            <Route path="/dashboard/all-affiliations" element={
-              <RequirePermission permission="manage_affiliations"><AllAffiliations /></RequirePermission>
-            } />
-            <Route path="/dashboard/team" element={
-              <RequirePermission permission="manage_team"><Team /></RequirePermission>
-            } />
-            <Route path="/dashboard/roles" element={
-              <RequirePermission permission="manage_team"><Roles /></RequirePermission>
-            } />
-            <Route path="/dashboard/platform-settings" element={
-              <RequirePermission permission="manage_settings"><PlatformSettings /></RequirePermission>
-            } />
-            <Route path="/dashboard/reports" element={
-              <RequirePermission permission="view_stats"><Reports /></RequirePermission>
-            } />
-            <Route path="/dashboard/finance" element={
-              <RequirePermission permission="view_stats"><Finance /></RequirePermission>
-            } />
-            
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrandingProvider>
-          </CurrencyProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <CurrencyProvider>
+              <BrandingProvider>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/professionnels" element={<Professionnels />} />
+                  <Route path="/professionnels/:id" element={<ProfessionalDetail />} />
+                  <Route path="/formations" element={<Formations />} />
+                  <Route path="/formations/:id" element={<FormationDetail />} />
+                  <Route path="/articles" element={<Articles />} />
+                  <Route path="/articles/:id" element={<ArticleDetail />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/services/:id" element={<ServiceDetail />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/evenements" element={<Events />} />
+                  <Route path="/evenements/:id" element={<EventDetail />} />
+                  <Route path="/forbidden" element={<Forbidden />} />
+                  
+                  {/* Dashboard Routes - Common */}
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/dashboard/profile" element={<Profile />} />
+                  <Route path="/dashboard/settings" element={<Settings />} />
+                  <Route path="/dashboard/appointments" element={<Appointments />} />
+                  <Route path="/dashboard/my-formations" element={<MyFormations />} />
+                  <Route path="/dashboard/notifications" element={<Notifications />} />
+                  <Route path="/dashboard/my-events" element={<MyEventRegistrations />} />
+                  
+                  {/* Dashboard Routes - Patient */}
+                  <Route path="/dashboard/find-professional" element={<FindProfessional />} />
+                  <Route path="/dashboard/payments" element={<Payments />} />
+                  
+                  {/* Dashboard Routes - Student */}
+                  <Route path="/dashboard/propose-service" element={<ProposeService />} />
+                  <Route path="/dashboard/my-services" element={<MyServices />} />
+                  <Route path="/dashboard/pending-services" element={<PendingServices />} />
+                  <Route path="/dashboard/formations-catalog" element={<FormationsCatalog />} />
+                  <Route path="/dashboard/upgrade-request" element={<UpgradeRequest />} />
+                  
+                  {/* Dashboard Routes - Professional */}
+                  <Route path="/dashboard/availability" element={<Availability />} />
+                  <Route path="/dashboard/patients" element={<Patients />} />
+                  <Route path="/dashboard/stats" element={<Stats />} />
+                  <Route path="/dashboard/create-formation" element={<CreateFormation />} />
+                  <Route path="/dashboard/edit-formation/:id" element={<EditFormation />} />
+                  <Route path="/dashboard/earnings" element={<Earnings />} />
+                  <Route path="/dashboard/messages" element={<Messages />} />
+                  <Route path="/dashboard/my-affiliations" element={<MyAffiliations />} />
+                  
+                  {/* Admin Routes - Protected by permissions */}
+                  <Route path="/dashboard/overview" element={
+                    <RequirePermission permission="view_stats"><Overview /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/users" element={
+                    <RequirePermission permission="manage_users"><AdminUsers /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/professionals" element={
+                    <RequirePermission permission="manage_users"><Professionals /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/students" element={
+                    <RequirePermission permission="manage_users"><Students /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/upgrade-requests" element={
+                    <RequirePermission permission="manage_users"><AdminUpgradeRequests /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/categories" element={
+                    <RequirePermission permission="manage_categories"><Categories /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/all-formations" element={
+                    <RequirePermission permission="manage_formations"><AllFormations /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/all-services" element={
+                    <RequirePermission permission="manage_services"><AllServices /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/all-articles" element={
+                    <RequirePermission permission="manage_articles"><AllArticles /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/create-article" element={
+                    <RequirePermission permission="manage_articles"><CreateArticle /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/edit-article/:id" element={
+                    <RequirePermission permission="manage_articles"><EditArticle /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/all-appointments" element={
+                    <RequirePermission permission="manage_users"><AllAppointments /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/all-events" element={
+                    <RequirePermission permission="manage_events"><AllEvents /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/event-participants" element={
+                    <RequirePermission permission="manage_events"><EventParticipants /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/all-affiliations" element={
+                    <RequirePermission permission="manage_affiliations"><AllAffiliations /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/team" element={
+                    <RequirePermission permission="manage_team"><Team /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/roles" element={
+                    <RequirePermission permission="manage_team"><Roles /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/platform-settings" element={
+                    <RequirePermission permission="manage_settings"><PlatformSettings /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/reports" element={
+                    <RequirePermission permission="view_stats"><Reports /></RequirePermission>
+                  } />
+                  <Route path="/dashboard/finance" element={
+                    <RequirePermission permission="view_stats"><Finance /></RequirePermission>
+                  } />
+                  
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrandingProvider>
+            </CurrencyProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

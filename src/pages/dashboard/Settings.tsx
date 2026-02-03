@@ -7,8 +7,10 @@ import { Bell, Mail, Shield, Moon, Globe, DollarSign } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Currency } from "@/lib/currency";
+import { useTheme } from "next-themes";
 
 export default function Settings() {
+  const { theme, setTheme } = useTheme();
   const { currency, setCurrency } = useCurrency();
 
   return (
@@ -131,7 +133,10 @@ export default function Settings() {
                 <Label>Mode sombre</Label>
                 <p className="text-sm text-muted-foreground">Activer le thème sombre</p>
               </div>
-              <Switch />
+              <Switch 
+                checked={theme === "dark"}
+                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+              />
             </div>
           </CardContent>
         </Card>
